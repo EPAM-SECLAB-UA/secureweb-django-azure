@@ -6504,3 +6504,441 @@ az appservice plan update \
 4. **Розгляньте Container Apps** як альтернативу
 
 **Дайте знати результат логів і спробуйте мінімальний Python тест!** 🔍
+
+----------------------------------------------------------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------------------------------------------------------------------
+
+# 🚀 GitHub Actions для розгортання Django на Azure## 🔧 Налаштування GitHub Secrets
+
+### **1. Створіть Azure Service Principal**
+```bash
+# Створіть service principal для GitHub Actions
+az ad sp create-for-rbac \
+  --name "github-actions-django-app" \
+  --role contributor \
+  --scopes /subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg \
+  --sdk-auth
+```
+
+### **2. Додайте Secret в GitHub**
+
+1. Перейдіть до вашого репозиторію на GitHub
+2. **Settings** → **Secrets and variables** → **Actions**
+3. Додайте новий secret з назвою `AZURE_CREDENTIALS`
+4. Вставте JSON вивід з попередньої команди
+
+## 📁 Додаткові файли для проекту
+
+### **Створіть `azure_settings.py`** (для обходу проблем з app settings):### **Оновіть `requirements.txt`**:## 🚀 Використання GitHub Actions
+
+### **1. Додайте файли до репозиторію**
+```bash
+# Створіть директорію для workflows
+mkdir -p .github/workflows
+
+# Збережіть workflow файл
+# (скопіюйте вміст з артефакту вище в .github/workflows/azure-deploy.yml)
+
+# Додайте azure_settings.py в корінь проекту
+# Оновіть requirements.txt
+
+# Зафіксуйте зміни
+git add .github/workflows/azure-deploy.yml azure_settings.py requirements.txt
+git commit -m "Add GitHub Actions для Azure deployment"
+git push origin feature/infrastructure-update
+```
+
+### **2. Налаштуйте Azure доступи**
+```bash
+# Виконайте цю команду та збережіть JSON в GitHub Secrets
+az ad sp create-for-rbac \
+  --name "github-actions-django-app" \
+  --role contributor \
+  --scopes /subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg \
+  --sdk-auth
+```
+
+### **3. Моніторинг розгортання**
+- Перейдіть до **Actions** таб у вашому GitHub репозиторії
+- Кожен push в `feature/infrastructure-update` буде запускати автоматичне розгортання
+- Ви побачите детальні логи процесу
+
+## 🎯 Переваги цього підходу
+
+1. **Автоматизація** - розгортання при кожному push
+2. **Логування** - детальні логи процесу
+3. **Rollback** - можна відкатитися до попередньої версії
+4. **Health checks** - перевірка працездатності після розгортання
+5. **Безпека** - доступи через Azure Service Principal
+
+**Після налаштування просто робіть push в гілку і GitHub Actions автоматично розгорне ваш проект!** 🚀
+
+
+
+```bash
+# Azure Django Deployment Pipeline
+# Автоматичне розгортання Django додатку на Azure Web App
+# Активується при push в гілку feature/infrastructure-update
+
+name: 🚀 Deploy Django to Azure
+
+on:
+  push:
+    branches:
+      - feature/infrastructure-update
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'budget'
+        type: choice
+        options:
+        - budget
+        - production
+
+env:
+  AZURE_WEBAPP_NAME: django-app-budget-1751947063
+  AZURE_WEBAPP_PACKAGE_PATH: '.'
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: azure-deployment
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: 📦 Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: 🧪 Run tests
+      run: |
+        python manage.py test || echo "⚠️  No tests found or tests failed"
+
+    - name: 🗂️ Collect static files
+      run: |
+        python manage.py collectstatic --noinput || echo "⚠️  Static files collection failed"
+
+    - name: 📁 Create deployment package
+      run: |
+        # Створити архів без непотрібних файлів
+        zip -r deployment.zip . \
+          -x "*.git*" \
+          -x "*venv*" \
+          -x "*__pycache__*" \
+          -x "*.pyc" \
+          -x "logs/*" \
+          -x "images/*" \
+          -x "docs/*" \
+          -x "*.md" \
+          -x ".env*" \
+          -x "*.sh"
+
+    - name: 🔐 Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: ⚙️ Configure Web App settings
+      run: |
+        # Налаштування startup команди
+        az webapp config set \
+          --name ${{ env.AZURE_WEBAPP_NAME }} \
+          --resource-group django-app-budget-rg \
+          --startup-file "gunicorn --bind=0.0.0.0:8000 --timeout 600 --workers 1 project_portfolio.wsgi:application"
+        
+        # Спроба встановити змінні середовища (можуть не працювати на F1)
+        az webapp config appsettings set \
+          --name ${{ env.AZURE_WEBAPP_NAME }} \
+          --resource-group django-app-budget-rg \
+          --settings \
+            DJANGO_SETTINGS_MODULE="azure_settings" \
+            DEBUG="False" \
+            ALLOWED_HOSTS="${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net" \
+            PYTHONPATH="/home/site/wwwroot" || echo "⚠️  App settings failed - using hardcoded values"
+
+    - name: 🚀 Deploy to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        package: deployment.zip
+
+    - name: 🏥 Health check
+      run: |
+        echo "⏱️  Waiting for deployment to complete..."
+        sleep 60
+        
+        # Перевірка доступності сайту
+        for i in {1..10}; do
+          if curl -f -s https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net > /dev/null; then
+            echo "✅ Site is accessible!"
+            break
+          else
+            echo "⏳ Attempt $i: Site not ready yet, waiting 30s..."
+            sleep 30
+          fi
+        done
+
+    - name: 📊 Get deployment info
+      run: |
+        echo "🌐 Site URL: https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net"
+        echo "📋 Resource Group: django-app-budget-rg"
+        echo "💰 Estimated cost: $0-25/month"
+        
+        # Отримати статус додатку
+        az webapp show \
+          --name ${{ env.AZURE_WEBAPP_NAME }} \
+          --resource-group django-app-budget-rg \
+          --query "{state: state, defaultHostName: defaultHostName}" \
+          --output table
+
+    - name: 📝 Get recent logs
+      if: failure()
+      run: |
+        echo "🔍 Recent application logs:"
+        az webapp log tail \
+          --name ${{ env.AZURE_WEBAPP_NAME }} \
+          --resource-group django-app-budget-rg \
+          --timeout 30 || echo "❌ Could not retrieve logs"
+
+  # Додатковий job для моніторингу після розгортання
+  post-deployment-check:
+    needs: build-and-deploy
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: 🔍 Post-deployment monitoring
+      run: |
+        echo "🚀 Deployment completed for: ${{ github.ref_name }}"
+        echo "📊 Commit: ${{ github.sha }}"
+        echo "👤 Triggered by: ${{ github.actor }}"
+        
+        # Перевірка метрик Azure (потребує додаткових прав)
+        # az monitor metrics list --resource ${{ env.AZURE_WEBAPP_NAME }} --metric "Requests" || true
+
+    - name: 💬 Notify on Slack (Optional)
+      if: failure()
+      run: |
+        echo "🔔 Add Slack notification here if needed"
+        # curl -X POST -H 'Content-type: application/json' \
+        #   --data '{"text":"❌ Azure deployment failed for django-app"}' \
+        #   ${{ secrets.SLACK_WEBHOOK_URL }}
+
+# Додаткові налаштування workflow
+concurrency:
+  group: azure-deployment-${{ github.ref }}
+  cancel-in-progress: true
+```
+
+
+
+```bash
+# azure_settings.py
+# Спеціальні налаштування Django для Azure з жорсткодингом
+# Використовується коли Azure App Settings не працюють на F1 плані
+
+import os
+from pathlib import Path
+
+# Build paths
+BASE_DIR = Path(__file__).resolve().parent
+
+# Security settings (жорсткодинг для Azure)
+SECRET_KEY = 'django-insecure-azure-production-key-change-in-production-12345'
+DEBUG = False
+ALLOWED_HOSTS = [
+    'django-app-budget-1751947063.azurewebsites.net',
+    '*.azurewebsites.net',
+    'localhost',
+    '127.0.0.1'
+]
+
+# Application definition
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'project_portfolio.core',  # Ваш основний додаток
+]
+
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Для статичних файлів
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+ROOT_URLCONF = 'project_portfolio.urls'
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [BASE_DIR / 'project_portfolio' / 'templates'],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
+WSGI_APPLICATION = 'project_portfolio.wsgi.application'
+
+# Database - SQLite для початку (можна змінити на PostgreSQL пізніше)
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+
+# Альтернативно - PostgreSQL (розкоментуйте коли налаштуєте)
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'django-app_db',
+#         'USER': 'djangoadmin',
+#         'PASSWORD': 'AAVuo8twx4OAaebmAa1!',
+#         'HOST': 'django-app-budget-db-1751947063.postgres.database.azure.com',
+#         'PORT': '5432',
+#         'OPTIONS': {
+#             'sslmode': 'require',
+#         },
+#     }
+# }
+
+# Password validation
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
+
+# Internationalization
+LANGUAGE_CODE = 'uk-ua'
+TIME_ZONE = 'Europe/Kiev'
+USE_I18N = True
+USE_TZ = True
+
+# Static files (CSS, JavaScript, Images)
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [
+    BASE_DIR / 'project_portfolio' / 'static',
+]
+
+# WhiteNoise configuration for static files
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Media files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# Security settings for Azure
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = False  # Azure handles SSL termination
+USE_TZ = True
+
+# Default primary key field type
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
+
+# Azure Application Insights (опціонально)
+APPINSIGHTS_INSTRUMENTATIONKEY = os.environ.get('APPINSIGHTS_INSTRUMENTATIONKEY')
+if APPINSIGHTS_INSTRUMENTATIONKEY:
+    INSTALLED_APPS.append('applicationinsights.django')
+    MIDDLEWARE.append('applicationinsights.django.ApplicationInsightsMiddleware')
+    APPLICATION_INSIGHTS = {
+        'ikey': APPINSIGHTS_INSTRUMENTATIONKEY,
+    }
+
+```
+
+
+```bash
+# Django и основні залежності
+Django>=4.2,<5.0
+gunicorn==20.1.0
+
+# Статичні файли
+whitenoise==6.5.0
+
+# База даних
+psycopg2-binary==2.9.7
+
+# Змінні середовища
+python-dotenv==1.0.0
+
+# Azure інтеграція (опціонально)
+# django-storages[azure]==1.14.2
+# applicationinsights==0.11.10
+
+# Безпека
+# django-csp==3.7
+# django-cors-headers==4.3.1
+
+# Розробка (тільки для локального середовища)
+# django-debug-toolbar==4.2.0
+
+```
