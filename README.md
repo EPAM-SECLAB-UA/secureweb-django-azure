@@ -1,4 +1,4 @@
-# Portfolio ♥️ Django
+# Portfolio Django
 
 
 ## installing dependancies
