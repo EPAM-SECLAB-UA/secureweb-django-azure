@@ -4634,3 +4634,167 @@ Please check the runtime logs for more info: https://django-app-budget-175194706
 
 @VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $
 ```
+
+# 🚨 Та сама проблема повторюється!
+
+Потрібно **спочатку виправити конфігурацію**, а потім розгортати. Давайте зробимо це крок за кроком.
+
+## 🛠️ Негайні дії
+
+### **1. Припиніть і виправте startup команду**
+```bash
+# Зупиніть додаток
+az webapp stop --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+
+# Виправте startup команду
+az webapp config set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --startup-file "gunicorn --bind=0.0.0.0:8000 --timeout 600 --workers 1 project_portfolio.wsgi:application"
+```
+
+### **2. Налаштуйте базові змінні середовища**
+```bash
+az webapp config appsettings set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --settings \
+    DJANGO_SETTINGS_MODULE="project_portfolio.settings" \
+    PYTHONPATH="/home/site/wwwroot" \
+    DEBUG="False" \
+    ALLOWED_HOSTS="django-app-budget-1751947063.azurewebsites.net" \
+    SECRET_KEY="django-insecure-temp-key-for-testing-12345"
+```
+
+### **3. Перевірте, що команди виконались**
+```bash
+# Перевірте startup команду
+az webapp config show --name django-app-budget-1751947063 --resource-group django-app-budget-rg --query appCommandLine
+
+# Перевірте змінні
+az webapp config appsettings list --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+```
+
+## 📝 Створіть мінімальний тестовий проект
+
+### **1. Створіть простий test.py**
+```bash
+cat > test.py << 'EOF'
+from django.conf import settings
+from django.http import HttpResponse
+from django.urls import path
+from django.core.wsgi import get_wsgi_application
+import os
+
+# Мінімальна конфігурація Django
+settings.configure(
+    DEBUG=False,
+    SECRET_KEY='test-key-123',
+    ALLOWED_HOSTS=['*'],
+    ROOT_URLCONF=__name__,
+    INSTALLED_APPS=[],
+    MIDDLEWARE=[],
+)
+
+def hello(request):
+    return HttpResponse(f"""
+    <h1>Hello Azure!</h1>
+    <p>Django працює!</p>
+    <p>Python Path: {os.getcwd()}</p>
+    <p>Files: {os.listdir('.')}</p>
+    """)
+
+urlpatterns = [path('', hello)]
+application = get_wsgi_application()
+EOF
+```
+
+### **2. Створіть мінімальний requirements.txt**
+```bash
+cat > test_requirements.txt << 'EOF'
+Django>=4.2,<5.0
+gunicorn
+EOF
+```
+
+### **3. Створіть тестовий архів**
+```bash
+zip test_minimal.zip test.py test_requirements.txt
+```
+
+### **4. Змініть startup на тестовий**
+```bash
+az webapp config set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --startup-file "pip install -r test_requirements.txt && gunicorn --bind=0.0.0.0:8000 --timeout 600 test:application"
+```
+
+### **5. Розгорніть тестовий додаток**
+```bash
+az webapp deploy \
+  --resource-group django-app-budget-rg \
+  --name django-app-budget-1751947063 \
+  --src-path test_minimal.zip \
+  --type zip
+```
+
+### **6. Запустіть додаток**
+```bash
+az webapp start --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+```
+
+### **7. Моніторьте логи**
+```bash
+az webapp log tail --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+```
+
+## 🔍 Альтернативна діагностика
+
+Якщо тест не спрацює, перевірте:
+
+### **1. Поточну конфігурацію Python**
+```bash
+az webapp config show --name django-app-budget-1751947063 --resource-group django-app-budget-rg --query linuxFxVersion
+```
+
+### **2. Встановіть Python версію явно**
+```bash
+az webapp config set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --linux-fx-version "PYTHON|3.11"
+```
+
+### **3. Перевірте App Service Plan**
+```bash
+az appservice plan show --name django-app-budget-plan --resource-group django-app-budget-rg
+```
+
+## 📊 Поетапна перевірка
+
+1. **Спочатку тестовий додаток** - щоб переконатись, що Azure працює
+2. **Потім ваш project_portfolio** - коли тест пройде
+3. **Додати базу даних** - в кінці
+
+### **Після успішного тесту поверніться до основного проекту:**
+```bash
+# Виправте startup для вашого проекту
+az webapp config set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --startup-file "gunicorn --bind=0.0.0.0:8000 --timeout 600 --workers 1 project_portfolio.wsgi:application"
+
+# Розгорніть ваш код
+az webapp deploy \
+  --resource-group django-app-budget-rg \
+  --name django-app-budget-1751947063 \
+  --src-path app.zip \
+  --type zip
+```
+
+**Ключове**: спочатку налаштування, потім розгортання! 🎯
+
+
+
+
