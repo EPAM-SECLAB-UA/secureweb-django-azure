@@ -6972,7 +6972,330 @@ az webapp config set \
 Дайте знати, що ви бачите на сайті, і можемо переходити до наступного етапу! 🎯
 
 
-![]()
+![](https://github.com/EPAM-SECLAB-UA/secureweb-django-azure/blob/feature/infrastructure-update/images/Error_403.png)
+
+
+# 🚨 Error 403 - Web App зупинений!
+
+**Проблема**: Хоча розгортання було успішним, додаток зараз зупинений і не приймає запити.
+
+## 🔍 Діагностика
+
+### **1. Перевірте статус додатку**
+```bash
+az webapp show --name django-app-budget-1751947063 --resource-group django-app-budget-rg --query "{state: state, availabilityState: availabilityState}"
+```
+
+
+```bash
+@VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $ az webapp show --name django-app-budget-1751947063 --resource-group django-app-budget-rg --query "{state: state, availabilityState: availabilityState}"
+{
+  "availabilityState": "Normal",
+  "state": "QuotaExceeded"
+}
+@VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $ 
+```
+
+# 🚨 Знайшли проблему! QuotaExceeded
+
+**Статус**: `"state": "QuotaExceeded"` - **CPU ліміт F1 плану вичерпаний!**
+
+F1 план має ліміт **60 хвилин CPU на день**, і ви його досягли.
+
+## 🛠️ Рішення - Upgrade до B1 плану
+
+### **1. Upgrade до Basic B1 плану**
+```bash
+az appservice plan update \
+  --name django-app-budget-plan \
+  --resource-group django-app-budget-rg \
+  --sku B1
+```
+
+### **2. Запустіть додаток після upgrade**
+```bash
+az webapp start --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+```
+
+### **3. Перевірте новий статус**
+```bash
+az webapp show --name django-app-budget-1751947063 --resource-group django-app-budget-rg --query "{state: state, availabilityState: availabilityState, sku: sku}"
+```
+
+## 💰 Вартість зміни
+
+**B1 Basic план**:
+- 💵 **Вартість**: ~$13/місяць (замість безкоштовного)
+- ⚡ **CPU**: Необмежений час
+- 🧠 **RAM**: 1.75GB (замість 1GB)
+- 💾 **Storage**: 10GB
+- ✅ **Always On**: Доступний (немає cold start)
+- 🔄 **Auto-scaling**: До 3 інстансів
+
+## 📊 Переваги B1 над F1
+
+| Функція | F1 Free | B1 Basic |
+|---------|---------|----------|
+| CPU час | 60 хв/день | Необмежений |
+| RAM | 1GB | 1.75GB |
+| Always On | ❌ | ✅ |
+| SSL сертифікати | ❌ | ✅ |
+| Custom domains | ❌ | ✅ |
+| Backup | ❌ | ✅ |
+
+## 🎯 Альтернативи
+
+### **Опція 1: Почекати до завтра**
+F1 квота оновлюється щодня о 00:00 UTC, але це не практично для розробки.
+
+### **Опція 2: Azure Container Instances**
+```bash
+# Створіть контейнер (приблизно та ж вартість)
+az container create \
+  --resource-group django-app-budget-rg \
+  --name django-container \
+  --image python:3.11 \
+  --cpu 1 \
+  --memory 1
+```
+
+### **Опція 3: Повернутися до F1 пізніше**
+```bash
+# Після тестування можна повернути F1
+az appservice plan update \
+  --name django-app-budget-plan \
+  --resource-group django-app-budget-rg \
+  --sku F1
+```
+
+## 📋 Рекомендований план дій
+
+1. **Upgrade до B1** для завершення тестування
+2. **Протестувати повний функціонал**
+3. **Налаштувати production optimizations**
+4. **Вирішити пізніше** - залишити B1 або оптимізувати для F1
+
+## 💡 Висновок
+
+**F1 план** підходить для:
+- ✅ Легкі статичні сайти
+- ✅ Landing pages
+- ✅ Дуже рідко використовувані додатки
+
+**B1 план** потрібен для:
+- ✅ Django додатків з активною розробкою
+- ✅ Production навантаження
+- ✅ Додатків з базою даних
+- ✅ Стабільної роботи без квот
+
+**Виконайте upgrade до B1 і продовжуйте розробку!** 🚀
+
+```bash
+az appservice plan update --name django-app-budget-plan --resource-group django-app-budget-rg --sku B1
+```
+
+```bash
+@VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $ az appservice plan update --name django-app-budget-plan --resource-group django-app-budget-rg --sku B1
+No available instances to satisfy this request. App Service is attempting to increase capacity. Please retry your request later. If urgent, this can be mitigated by deploying this to a new resource group.
+```
+
+# 🚨 Azure Capacity Problem!
+
+**Проблема**: "No available instances" - Azure не має доступних B1 інстансів у регіоні West Europe зараз.
+
+## 🛠️ Швидкі рішення
+
+### **Рішення 1: Спробуйте інший регіон**
+```bash
+# Створіть новий resource group в іншому регіоні
+az group create --name django-app-backup-rg --location "East US"
+
+# Створіть новий App Service Plan у East US
+az appservice plan create \
+  --name django-app-backup-plan \
+  --resource-group django-app-backup-rg \
+  --sku B1 \
+  --is-linux \
+  --location "East US"
+
+# Створіть новий Web App
+az webapp create \
+  --resource-group django-app-backup-rg \
+  --plan django-app-backup-plan \
+  --name django-app-backup-$(date +%s) \
+  --runtime "PYTHON|3.11" \
+  --deployment-local-git
+```
+
+### **Рішення 2: Спробуйте інші SKU в тому ж регіоні**
+```bash
+# Спробуйте S1 Standard (трохи дорожче ~$73/міс)
+az appservice plan update \
+  --name django-app-budget-plan \
+  --resource-group django-app-budget-rg \
+  --sku S1
+
+# Або P1V2 Premium (~$73/міс)
+az appservice plan update \
+  --name django-app-budget-plan \
+  --resource-group django-app-budget-rg \
+  --sku P1V2
+```
+
+### **Рішення 3: Container Instances як альтернатива**
+```bash
+# Створіть Container Instance (дешевше ніж B1)
+az container create \
+  --resource-group django-app-budget-rg \
+  --name django-container-app \
+  --image python:3.11-slim \
+  --cpu 1 \
+  --memory 1.5 \
+  --ports 8000 \
+  --dns-name-label django-app-container-$(date +%s) \
+  --location "West Europe"
+```
+
+## ⏰ Рішення 4: Почекати та повторити спробу
+
+```bash
+# Спробуйте через кілька хвилин
+echo "Очікування 5 хвилин перед повторною спробою..."
+sleep 300
+
+az appservice plan update \
+  --name django-app-budget-plan \
+  --resource-group django-app-budget-rg \
+  --sku B1
+```
+
+## 🌍 Доступні регіони для B1
+
+Спробуйте ці регіони:
+- `"East US"`
+- `"East US 2"`
+- `"Central US"`
+- `"North Europe"`
+- `"UK South"`
+
+### **Швидка перевірка доступності**
+```bash
+# Перевірте доступність B1 в різних регіонах
+az appservice list-locations --sku B1
+```
+
+## 💰 Порівняння вартості
+
+| Plan | Вартість/міс | CPU | RAM | Storage |
+|------|-------------|-----|-----|---------|
+| F1 | $0 | 60хв/день | 1GB | 1GB |
+| B1 | ~$13 | Необмежений | 1.75GB | 10GB |
+| S1 | ~$73 | Необмежений | 1.75GB | 50GB |
+| Container | ~$15 | 1 vCPU | 1.5GB | Налаштовується |
+
+## 🎯 Рекомендований план дій
+
+### **Короткостроково (сьогодні):**
+1. **Спробуйте East US регіон** з новим resource group
+2. **Або почекайте 30-60 хвилин** і повторіть B1 upgrade
+
+### **Довгостроково:**
+1. **Container Apps** - сучасніша альтернатива
+2. **Розгляньте інші cloud providers** (AWS, GCP) для порівняння
+
+## 🚀 Швидкий тест в East US
+
+```bash
+# Швидко створіть тестовий ресурс в East US
+az group create --name test-rg --location "East US"
+az appservice plan create --name test-plan --resource-group test-rg --sku B1 --is-linux --location "East US"
+```
+
+**Виберіть один з варіантів і продовжуйте!** Azure capacity issues трапляються, особливо з популярними SKU. 🔄
+
+
+### **2. Перегляньте логи для виявлення проблеми**
+```bash
+az webapp log tail --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+```
+
+## 🛠️ Швидке виправлення
+
+### **1. Запустіть додаток**
+```bash
+az webapp start --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+```
+
+### **2. Перезапустіть для надійності**
+```bash
+az webapp restart --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+```
+
+### **3. Дочекайтесь запуску (1-2 хвилини)**
+```bash
+sleep 60
+curl -I https://django-app-budget-1751947063.azurewebsites.net
+```
+
+## 🔧 Можливі причини зупинки
+
+1. **F1 план обмеження** - CPU ліміт 60 хв/день вичерпаний
+2. **Startup скрипт failed** після початкового успіху
+3. **Memory overflow** на F1 плані (1GB RAM)
+4. **Auto-sleep** через відсутність Always On
+
+## 📊 Перевірка ресурсів
+
+### **Перевірте використання CPU**
+```bash
+az monitor metrics list \
+  --resource django-app-budget-1751947063 \
+  --metric "CpuTime" \
+  --interval PT1H
+```
+
+### **Якщо CPU ліміт вичерпаний - upgrade план**
+```bash
+# Тимчасово upgrade до B1 для тестування
+az appservice plan update \
+  --name django-app-budget-plan \
+  --resource-group django-app-budget-rg \
+  --sku B1
+
+# Після тестування можна повернути F1
+```
+
+## 🚀 Альтернативне рішення
+
+### **Якщо проблеми продовжуються - простіший startup**
+```bash
+# Використайте більш простий startup без додаткових команд
+az webapp config set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --startup-file "python3 simple_server.py"
+
+# Розгорніть простий HTTP сервер
+zip simple_fallback.zip simple_server.py
+az webapp deploy \
+  --resource-group django-app-budget-rg \
+  --name django-app-budget-1751947063 \
+  --src-path simple_fallback.zip \
+  --type zip
+```
+
+## 📋 План дій
+
+1. **Запустіть додаток** і перевірте статус
+2. **Перегляньте логи** для виявлення причини зупинки
+3. **Якщо CPU ліміт** - розгляньте upgrade до B1
+4. **Якщо проблема з кодом** - поверніться до простого сервера
+
+**Спочатку запустіть додаток і дайте знати результат логів!** 🔍
+
+Головне - ми знаємо, що Azure працює, просто потрібно вирішити проблему з зупинкою.
+
+
 
 
 
