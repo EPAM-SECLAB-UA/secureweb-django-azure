@@ -4568,3 +4568,69 @@ curl -I https://django-app-budget-1751947063.azurewebsites.net
 
 **Після цих змін додаток має запуститись успішно!** 🚀
 
+
+
+
+
+```bash
+@VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $ az webapp deployment source config-zip \
+>   --resource-group django-app-budget-rg \
+>   --name django-app-budget-1751947063 \
+>   --src app.zip
+This command has been deprecated and will be removed in a future release. Use 'az webapp deploy' instead.
+Getting scm site credentials for zip deployment
+Starting zip deployment. This operation can take a while to complete ...
+Warming up Kudu before deployment.
+Warmed up Kudu instance successfully.
+Deployment endpoint responded with status code 202
+Polling the status of async deployment. Start Time: 2025-07-08 05:53:02.310606+00:00 UTC
+Status: Received build request... Time: 0(s)
+Status: Build successful. Time: 16(s)
+Status: Starting the site... Time: 31(s)
+Status: Starting the site... Time: 47(s)
+Status: Starting the site... Time: 62(s)
+Status: Starting the site... Time: 77(s)
+Status: Starting the site... Time: 93(s)
+Status: Starting the site... Time: 108(s)
+Status: Starting the site... Time: 124(s)
+Status: Starting the site... Time: 139(s)
+Status: Starting the site... Time: 154(s)
+Status: Starting the site... Time: 170(s)
+Status: Starting the site... Time: 185(s)
+Status: Starting the site... Time: 200(s)
+Status: Starting the site... Time: 216(s)
+Status: Starting the site... Time: 231(s)
+Status: Starting the site... Time: 246(s)
+Status: Starting the site... Time: 262(s)
+Status: Starting the site... Time: 277(s)
+Status: Starting the site... Time: 292(s)
+Status: Starting the site... Time: 307(s)
+Status: Starting the site... Time: 323(s)
+Status: Starting the site... Time: 338(s)
+Status: Starting the site... Time: 353(s)
+Status: Starting the site... Time: 369(s)
+Status: Starting the site... Time: 384(s)
+Status: Starting the site... Time: 399(s)
+Status: Starting the site... Time: 415(s)
+Status: Starting the site... Time: 432(s)
+Status: Starting the site... Time: 447(s)
+Status: Starting the site... Time: 463(s)
+Status: Starting the site... Time: 478(s)
+Status: Starting the site... Time: 493(s)
+Status: Starting the site... Time: 508(s)
+Status: Starting the site... Time: 524(s)
+Status: Starting the site... Time: 539(s)
+Status: Starting the site... Time: 555(s)
+Status: Starting the site... Time: 570(s)
+Status: Starting the site... Time: 585(s)
+Status: Starting the site... Time: 600(s)
+Status: Starting the site... Time: 616(s)
+Status: Starting the site... Time: 631(s)
+Status: Site failed to start. Time: 646(s)
+Deployment failed because the site failed to start within 10 mins.
+InprogressInstances: 0, SuccessfulInstances: 0, FailedInstances: 1
+Error: Deployment for site 'django-app-budget-1751947063' with DeploymentId '6befeb05-c506-4d08-9856-fb87dae9731c' failed because the worker proccess failed to start within the allotted time.
+Please check the runtime logs for more info: https://django-app-budget-1751947063.scm.azurewebsites.net/api/logs/docker
+
+@VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $
+```
