@@ -1,9 +1,7 @@
 
 
 
-Відмінне питання! Для Django + PostgreSQL в Azure є кілька стратегій. Розповім про найкращі підходи для різних сценаріїв:## 🎯 **Коротка відповідь:**
-
-**Для EPAM SECLAB UA проекту рекомендую: Azure App Service + Azure Database for PostgreSQL Flexible Server**
+**Для EPAM SECLAB UA проекту обрано Azure App Service + Azure Database for PostgreSQL Flexible Server**
 
 ---
 
