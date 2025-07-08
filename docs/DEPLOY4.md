@@ -3801,3 +3801,522 @@ false
 4. **Share** як приклад професійного DevOps скрипту
 
 **Вітаю з успішним завершенням cleanup операції! Це справжня DevOps майстерність!** 🎉🏆
+
+
+
+-------------------------------------------------------------------------------------------------------------
+
+# 🚀 Подальші кроки для Django проекту в Azure
+
+## 🔥 Пріоритетні кроки (перші 1-2 дні)
+
+### **1. Підготовка коду для розгортання**
+```bash
+# Створити production-ready структуру
+mkdir -p static/ media/ templates/
+touch requirements.txt
+touch Procfile  # або startup.sh
+```
+
+### **2. Налаштування Django settings**
+```python
+# settings/production.py
+import os
+from .base import *
+
+DEBUG = False
+ALLOWED_HOSTS = ['django-app-budget-1751947063.azurewebsites.net']
+
+# Database from Azure Key Vault
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'django-app_db',
+        'USER': 'djangoadmin',
+        'PASSWORD': os.getenv('DB_PASSWORD'),  # з Key Vault
+        'HOST': 'django-app-budget-db-1751947063.postgres.database.azure.com',
+        'PORT': '5432',
+    }
+}
+
+# Azure Storage для статики
+DEFAULT_FILE_STORAGE = 'storages.backends.azure_storage.AzureStorage'
+STATICFILES_STORAGE = 'storages.backends.azure_storage.AzureStorage'
+```
+
+### **3. Розгортання коду**
+```bash
+# Створити zip архів
+zip -r app.zip . -x "*.git*" "*venv*" "*.pyc"
+
+# Розгорнути в Azure
+az webapp deployment source config-zip \
+  --resource-group django-app-budget-rg \
+  --name django-app-budget-1751947063 \
+  --src app.zip
+```
+
+## ⚡ Критичні налаштування (1 тиждень)
+
+### **4. База даних та міграції**
+```bash
+# Підключитися до Azure PostgreSQL
+az postgres flexible-server connect \
+  --name django-app-budget-db-1751947063 \
+  --username djangoadmin
+
+# Виконати міграції через SSH або локально
+python manage.py makemigrations
+python manage.py migrate
+python manage.py collectstatic
+python manage.py createsuperuser
+```
+
+### **5. Моніторинг та алерти**
+```bash
+# Налаштувати алерти CPU (критично для F1!)
+az monitor metrics alert create \
+  --name "High CPU Usage" \
+  --resource-group django-app-budget-rg \
+  --condition "avg Percentage CPU > 80"
+```
+
+### **6. Логування та діагностика**
+```bash
+# Увімкнути детальне логування
+az webapp log config \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --application-logging filesystem \
+  --detailed-error-messages true
+```
+
+## 🛡️ Безпека та оптимізація (2-3 тижні)
+
+### **7. Покращення безпеки бази даних**
+```bash
+# Обмежити доступ до DB тільки з Web App
+az postgres flexible-server firewall-rule delete \
+  --name AllowAzureServices \
+  --resource-group django-app-budget-rg \
+  --server-name django-app-budget-db-1751947063
+
+# Додати конкретні IP Web App
+az postgres flexible-server firewall-rule create \
+  --name AllowWebApp \
+  --start-ip-address 51.124.59.99 \
+  --end-ip-address 51.124.60.249
+```
+
+### **8. Environment Variables через Key Vault**
+```bash
+# Додати змінні середовища з посиланнями на Key Vault
+az webapp config appsettings set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --settings \
+    SECRET_KEY="@Microsoft.KeyVault(VaultName=djapp-kv-47063;SecretName=django-secret-key)" \
+    DATABASE_PASSWORD="@Microsoft.KeyVault(VaultName=djapp-kv-47063;SecretName=database-password)"
+```
+
+### **9. Backup стратегія**
+```bash
+# Налаштувати автоматичні бекапи PostgreSQL
+az postgres flexible-server parameter set \
+  --name backup_retention_days \
+  --value 7 \
+  --server-name django-app-budget-db-1751947063
+```
+
+## 📈 Масштабування та покращення (1-2 місяці)
+
+### **10. Performance моніторинг**
+- Встановити Django Debug Toolbar для dev
+- Налаштувати Application Insights для production
+- Створити dashboard в Azure Portal
+
+### **11. CI/CD Pipeline**
+```yaml
+# .github/workflows/deploy.yml
+name: Deploy to Azure
+on:
+  push:
+    branches: [main]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v2
+```
+
+### **12. Upgrade план при необхідності**
+```bash
+# Якщо CPU ліміт перевищується
+az appservice plan update \
+  --name django-app-budget-plan \
+  --resource-group django-app-budget-rg \
+  --sku B1  # ~$13/місяць додатково
+```
+
+## 🎯 Довгострокові цілі (3+ місяці)
+
+### **13. Production environment**
+- Створити окремий resource group для production
+- Налаштувати staging слоти
+- Додати CDN для статичних файлів
+
+### **14. Моніторинг та аналітика**
+- Google Analytics або Azure Application Insights
+- Error tracking (Sentry)
+- Performance monitoring
+
+### **15. Масштабування архітектури**
+- Azure Container Apps для мікросервісів
+- Redis для кешування
+- Azure Front Door для глобального розподілу
+
+## ⚠️ Критичні точки уваги
+
+### **CPU моніторинг (F1 план)**
+```bash
+# Щоденна перевірка використання
+az monitor metrics list \
+  --resource django-app-budget-1751947063 \
+  --metric "Percentage CPU"
+```
+
+### **Database connections**
+- B1ms підтримує до 50 підключень
+- Налаштувати connection pooling
+
+### **Storage ліміти**
+- F1: 1GB файлів
+- Статичні файли в Azure Storage (безлімітно)
+
+## 📋 Чек-лист на найближчі дні
+
+- [ ] Налаштувати requirements.txt з потрібними пакетами
+- [ ] Створити production settings
+- [ ] Розгорнути перший код
+- [ ] Перевірити підключення до бази даних
+- [ ] Виконати міграції
+- [ ] Налаштувати алерти CPU
+- [ ] Створити superuser
+- [ ] Протестувати HTTPS роботу
+
+**Головне**: починайте з простого розгортання, потім поступово покращуйте. Azure дає гарну можливість масштабувати по мірі зростання проекту! 🚀
+
+
+
+
+
+
+
+
+```bash
+@VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $ zip -r app.zip . -x "*.git*" "*venv*" "*.pyc"
+  adding: project_portfolio/ (stored 0%)
+  adding: project_portfolio/static/ (stored 0%)
+  adding: project_portfolio/static/main.css (deflated 47%)
+  adding: project_portfolio/wsgi.py (deflated 32%)
+  adding: project_portfolio/urls.py (deflated 56%)
+  adding: project_portfolio/templates/ (stored 0%)
+  adding: project_portfolio/templates/index.html (deflated 82%)
+  adding: project_portfolio/settings.py (deflated 63%)
+  adding: project_portfolio/asgi.py (deflated 33%)
+  adding: project_portfolio/core/ (stored 0%)
+  adding: project_portfolio/core/views.py (deflated 27%)
+  adding: project_portfolio/core/__pycache__/ (stored 0%)
+  adding: project_portfolio/__pycache__/ (stored 0%)
+  adding: project_portfolio/__init__.py (stored 0%)
+  adding: logs/ (stored 0%)
+  adding: logs/azure-deploy-20250708-035742.log (deflated 80%)
+  adding: logs/azure-deploy-20250708-035259.log (deflated 55%)
+  adding: manage.py (deflated 43%)
+  adding: budget-azure-deploy.sh (deflated 71%)
+  adding: requirements.txt (deflated 8%)
+  adding: budget_settings.py (deflated 54%)
+  adding: budget-infrastructure-summary.txt (deflated 44%)
+  adding: generate_secret_key.py (deflated 29%)
+  adding: .env.example (deflated 22%)
+  adding: .env (deflated 22%)
+  adding: cleanup_infrastructure.sh (deflated 74%)
+  adding: db.sqlite3 (deflated 97%)
+  adding: startup.sh (deflated 27%)
+  adding: README.md (deflated 64%)
+  adding: .env.budget (deflated 29%)
+  adding: cleanup_budget_infrastructure.sh (deflated 43%)
+  adding: docs/ (stored 0%)
+  adding: docs/TASKS.md (deflated 66%)
+  adding: docs/DEVELOPMENT.md (deflated 67%)
+  adding: docs/ACTIONS.md (deflated 54%)
+  adding: docs/DOCS.md (deflated 66%)
+  adding: docs/docs.md (deflated 71%)
+  adding: docs/DEPLOY4.md (deflated 75%)
+  adding: docs/cost-management.md (deflated 70%)
+  adding: images/ (stored 0%)
+  adding: images/github-issue.png (deflated 11%)
+  adding: images/management-tools-for-postgresql-1.png (deflated 10%)
+  adding: images/list.md (stored 0%)
+  adding: images/Github_billing_10.png (deflated 14%)
+  adding: images/GitHub_billing_20.png (deflated 10%)
+  adding: images/github-issue-1.png (deflated 15%)
+  adding: images/django-app-production-1751428831.azurewebsites.net.png (deflated 19%)
+  adding: images/GitHub_billing_21.png (deflated 10%)
+  adding: deploy-with-logs.sh (deflated 64%)
+  adding: .devcontainer/ (stored 0%)
+  adding: .devcontainer/devcontainer.json (deflated 56%)
+  adding: .devcontainer/icon.svg (deflated 38%)
+@VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $ az webapp deployment source config-zip \
+>   --resource-group django-app-budget-rg \
+>   --name django-app-budget-1751947063 \
+>   --src app.zip
+This command has been deprecated and will be removed in a future release. Use 'az webapp deploy' instead.
+Getting scm site credentials for zip deployment
+Starting zip deployment. This operation can take a while to complete ...
+Warming up Kudu before deployment.
+Deployment endpoint responded with status code 202
+Polling the status of async deployment. Start Time: 2025-07-08 04:41:52.103072+00:00 UTC
+Status: Building the app... Time: 0(s)
+Status: Build successful. Time: 17(s)
+Status: Starting the site... Time: 32(s)
+Status: Starting the site... Time: 47(s)
+Status: Starting the site... Time: 63(s)
+Status: Starting the site... Time: 78(s)
+Status: Starting the site... Time: 94(s)
+Status: Starting the site... Time: 109(s)
+Status: Starting the site... Time: 124(s)
+Status: Starting the site... Time: 140(s)
+Status: Starting the site... Time: 155(s)
+Status: Starting the site... Time: 170(s)
+Status: Starting the site... Time: 187(s)
+Status: Starting the site... Time: 202(s)
+Status: Starting the site... Time: 217(s)
+Status: Starting the site... Time: 233(s)
+Status: Starting the site... Time: 248(s)
+Status: Starting the site... Time: 263(s)
+Status: Starting the site... Time: 279(s)
+Status: Starting the site... Time: 294(s)
+Status: Starting the site... Time: 309(s)
+Status: Starting the site... Time: 325(s)
+Status: Starting the site... Time: 340(s)
+Status: Starting the site... Time: 355(s)
+Status: Starting the site... Time: 371(s)
+Status: Starting the site... Time: 386(s)
+Status: Starting the site... Time: 401(s)
+Status: Starting the site... Time: 416(s)
+Status: Starting the site... Time: 432(s)
+Status: Starting the site... Time: 447(s)
+Status: Starting the site... Time: 463(s)
+Status: Starting the site... Time: 478(s)
+Status: Starting the site... Time: 494(s)
+Status: Starting the site... Time: 509(s)
+Status: Starting the site... Time: 524(s)
+Status: Starting the site... Time: 540(s)
+Status: Starting the site... Time: 555(s)
+Status: Starting the site... Time: 570(s)
+Status: Starting the site... Time: 585(s)
+Status: Starting the site... Time: 601(s)
+Status: Starting the site... Time: 616(s)
+Status: Site failed to start. Time: 631(s)
+Deployment failed because the site failed to start within 10 mins.
+InprogressInstances: 0, SuccessfulInstances: 0, FailedInstances: 1
+Error: Deployment for site 'django-app-budget-1751947063' with DeploymentId '751516ff-8099-4c6b-ad18-f6fd137afada' failed because the worker proccess failed to start within the allotted time.
+Please check the runtime logs for more info: https://django-app-budget-1751947063.scm.azurewebsites.net/api/logs/docker
+
+```
+
+# 🚨 Аналіз проблеми розгортання
+
+## Проблема визначена
+Сайт **не зміг запуститись протягом 10 хвилин** - це класична проблема конфігурації Django на Azure.
+
+## 🔍 Діагностика
+
+### **1. Перевірте логи негайно**
+```bash
+# Детальні логи помилок
+az webapp log tail --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+
+# Логи Docker/runtime
+curl https://django-app-budget-1751947063.scm.azurewebsites.net/api/logs/docker
+```
+
+### **2. Перевірте поточні налаштування**
+```bash
+az webapp config appsettings list --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+```
+
+## 🛠️ Швидке виправлення
+
+### **Крок 1: Налаштуйте змінні середовища**
+```bash
+az webapp config appsettings set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --settings \
+    DJANGO_SETTINGS_MODULE="project_portfolio.settings" \
+    PYTHONPATH="/home/site/wwwroot" \
+    DEBUG="False" \
+    ALLOWED_HOSTS="django-app-budget-1751947063.azurewebsites.net" \
+    SECRET_KEY="@Microsoft.KeyVault(VaultName=djapp-kv-47063;SecretName=django-secret-key)" \
+    DATABASE_URL="postgresql://djangoadmin:AAVuo8twx4OAaebmAa1!@django-app-budget-db-1751947063.postgres.database.azure.com/django-app_db?sslmode=require"
+```
+
+### **Крок 2: Оновіть startup команду**
+```bash
+az webapp config set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --startup-file "gunicorn --bind=0.0.0.0 --timeout 600 --workers 1 project_portfolio.wsgi:application"
+```
+
+### **Крок 3: Перевірте requirements.txt**
+Створіть або оновіть `requirements.txt`:
+```txt
+Django>=4.2,<5.0
+psycopg2-binary
+gunicorn
+whitenoise
+django-storages[azure]
+python-dotenv
+```
+
+### **Крок 4: Оновіть settings.py**
+Додайте до `project_portfolio/settings.py`:
+```python
+import os
+from pathlib import Path
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-key')
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
+
+# Database
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'django-app_db',
+        'USER': 'djangoadmin',
+        'PASSWORD': os.getenv('DATABASE_PASSWORD', 'AAVuo8twx4OAaebmAa1!'),
+        'HOST': 'django-app-budget-db-1751947063.postgres.database.azure.com',
+        'PORT': '5432',
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
+    }
+}
+
+# Static files (CSS, JavaScript, Images)
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Whitenoise for static files
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Add this
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+```
+
+## 🚀 Тестове розгортання
+
+### **1. Створіть мінімальний тест**
+```bash
+# Створіть test_app.zip з мінімальною конфігурацією
+cat > test_wsgi.py << 'EOF'
+import os
+from django.core.wsgi import get_wsgi_application
+from django.conf import settings
+from django.http import HttpResponse
+from django.urls import path
+
+settings.configure(
+    DEBUG=False,
+    SECRET_KEY='test-key',
+    ALLOWED_HOSTS=['*'],
+    ROOT_URLCONF=__name__,
+    INSTALLED_APPS=[],
+)
+
+def hello(request):
+    return HttpResponse("Hello Azure! Django is working!")
+
+urlpatterns = [path('', hello)]
+application = get_wsgi_application()
+EOF
+
+# Розгорніть тест
+echo "gunicorn" > test_requirements.txt
+zip test_app.zip test_wsgi.py test_requirements.txt
+```
+
+### **2. Використайте нову команду Azure**
+```bash
+az webapp deploy \
+  --resource-group django-app-budget-rg \
+  --name django-app-budget-1751947063 \
+  --src-path test_app.zip \
+  --type zip
+```
+
+### **3. Налаштуйте startup для тесту**
+```bash
+az webapp config set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --startup-file "gunicorn --bind=0.0.0.0 --timeout 600 test_wsgi:application"
+```
+
+## 📋 Перевірочний список проблем
+
+- [ ] **Змінні середовища** налаштовані
+- [ ] **PYTHONPATH** встановлений
+- [ ] **Startup команда** правильна
+- [ ] **requirements.txt** містить усі залежності
+- [ ] **PostgreSQL** доступна
+- [ ] **Static files** налаштовані
+
+## 🔧 Альтернативний підхід
+
+Якщо проблеми продовжуються, спробуйте:
+
+### **1. Container Registry підхід**
+```bash
+# Створіть Dockerfile
+cat > Dockerfile << 'EOF'
+FROM python:3.11
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY . .
+EXPOSE 8000
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "project_portfolio.wsgi:application"]
+EOF
+```
+
+### **2. Перезапустіть Web App**
+```bash
+az webapp restart --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+```
+
+**Надішліть вивід логів з команди `az webapp log tail` - це допоможе точно визначити проблему!** 🔍
+
+
+
+
+
