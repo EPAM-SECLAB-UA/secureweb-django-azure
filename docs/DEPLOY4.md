@@ -1785,6 +1785,1383 @@ Next Steps:
 ```
 
 
+# Azure Django Infrastructure Deployment Log
+
+
+```bash
+
+================================================================================
+Azure Django Infrastructure Deployment Log
+================================================================================
+Date: Tue Jul  8 03:57:42 UTC 2025
+User: codespace
+Working Directory: /workspaces/portfolio-django-azure
+Git Branch: feature/infrastructure-update
+Git Commit: 1f45d19
+Azure Account: vitalii_shevchuk3@epam.com
+Azure Subscription: Pay-As-You-Go-Student02
+Script: budget-azure-deploy.sh
+================================================================================
+
+
+[0;34m============================================[0m
+[0;34m💰 БЮДЖЕТНА AZURE INFRASTRUCTURE[0m
+[0;34m============================================[0m
+[0;36mОрієнтовна вартість: 0-25/місяць[0m
+
+📊 Конфігурація:
+  🚀 App Service: F1 (безкоштовно)
+  🗄️  Database: Standard_B1ms Burstable (~-12)
+  💾 Storage: Standard_LRS (~-5)
+  🔐 Key Vault: ~
+  📈 App Insights: безкоштовно (до 5GB)
+
+💰 ЗАГАЛЬНА ВАРТІСТЬ: ~0-18/місяць
+
+[0;32m[2025-07-08 03:57:43][0m Початок створення БЮДЖЕТНОЇ інфраструктури для Django додатку...
+[0;32m[2025-07-08 03:57:43][0m Проект: django-app
+[0;32m[2025-07-08 03:57:43][0m Середовище: budget
+[0;32m[2025-07-08 03:57:43][0m Регіон: West Europe
+[0;32m[2025-07-08 03:57:43][0m Перевірка залежностей...
+[0;32m[2025-07-08 03:57:43][0m ✅ Всі залежності встановлені
+[0;36m[INFO][0m 🔄 КРОК 1/11: Створення Resource Group
+[0;32m[2025-07-08 03:57:43][0m Створення Resource Group: django-app-budget-rg
+{
+  "id": "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg",
+  "location": "westeurope",
+  "managedBy": null,
+  "name": "django-app-budget-rg",
+  "properties": {
+    "provisioningState": "Succeeded"
+  },
+  "tags": {
+    "CostProfile": "Budget",
+    "CreatedBy": "AzureCLI",
+    "Environment": "budget",
+    "Project": "django-app"
+  },
+  "type": "Microsoft.Resources/resourceGroups"
+}
+[0;36m[INFO][0m 🔄 КРОК 2/11: Створення Storage Account (бюджетна конфігурація)
+[0;32m[2025-07-08 03:57:46][0m Створення Storage Account: djapp1947063
+{
+  "accessTier": "Hot",
+  "accountMigrationInProgress": null,
+  "allowBlobPublicAccess": false,
+  "allowCrossTenantReplication": false,
+  "allowSharedKeyAccess": null,
+  "allowedCopyScope": null,
+  "azureFilesIdentityBasedAuthentication": null,
+  "blobRestoreStatus": null,
+  "creationTime": "2025-07-08T03:57:48.879437+00:00",
+  "customDomain": null,
+  "defaultToOAuthAuthentication": null,
+  "dnsEndpointType": null,
+  "enableExtendedGroups": null,
+  "enableHttpsTrafficOnly": true,
+  "enableNfsV3": null,
+  "encryption": {
+    "encryptionIdentity": null,
+    "keySource": "Microsoft.Storage",
+    "keyVaultProperties": null,
+    "requireInfrastructureEncryption": null,
+    "services": {
+      "blob": {
+        "enabled": true,
+        "keyType": "Account",
+        "lastEnabledTime": "2025-07-08T03:57:49.051312+00:00"
+      },
+      "file": {
+        "enabled": true,
+        "keyType": "Account",
+        "lastEnabledTime": "2025-07-08T03:57:49.051312+00:00"
+      },
+      "queue": null,
+      "table": null
+    }
+  },
+  "extendedLocation": null,
+  "failoverInProgress": null,
+  "geoReplicationStats": null,
+  "id": "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg/providers/Microsoft.Storage/storageAccounts/djapp1947063",
+  "identity": null,
+  "immutableStorageWithVersioning": null,
+  "isHnsEnabled": null,
+  "isLocalUserEnabled": null,
+  "isSftpEnabled": null,
+  "isSkuConversionBlocked": null,
+  "keyCreationTime": {
+    "key1": "2025-07-08T03:57:49.051312+00:00",
+    "key2": "2025-07-08T03:57:49.051312+00:00"
+  },
+  "keyPolicy": null,
+  "kind": "StorageV2",
+  "largeFileSharesState": null,
+  "lastGeoFailoverTime": null,
+  "location": "westeurope",
+  "minimumTlsVersion": "TLS1_0",
+  "name": "djapp1947063",
+  "networkRuleSet": {
+    "bypass": "AzureServices",
+    "defaultAction": "Allow",
+    "ipRules": [],
+    "ipv6Rules": [],
+    "resourceAccessRules": null,
+    "virtualNetworkRules": []
+  },
+  "primaryEndpoints": {
+    "blob": "https://djapp1947063.blob.core.windows.net/",
+    "dfs": "https://djapp1947063.dfs.core.windows.net/",
+    "file": "https://djapp1947063.file.core.windows.net/",
+    "internetEndpoints": null,
+    "microsoftEndpoints": null,
+    "queue": "https://djapp1947063.queue.core.windows.net/",
+    "table": "https://djapp1947063.table.core.windows.net/",
+    "web": "https://djapp1947063.z6.web.core.windows.net/"
+  },
+  "primaryLocation": "westeurope",
+  "privateEndpointConnections": [],
+  "provisioningState": "Succeeded",
+  "publicNetworkAccess": null,
+  "resourceGroup": "django-app-budget-rg",
+  "routingPreference": null,
+  "sasPolicy": null,
+  "secondaryEndpoints": null,
+  "secondaryLocation": null,
+  "sku": {
+    "name": "Standard_LRS",
+    "tier": "Standard"
+  },
+  "statusOfPrimary": "available",
+  "statusOfSecondary": null,
+  "storageAccountSkuConversionStatus": null,
+  "tags": {
+    "CostProfile": "Budget",
+    "CreatedBy": "AzureCLI",
+    "Environment": "budget",
+    "Project": "django-app"
+  },
+  "type": "Microsoft.Storage/storageAccounts"
+}
+[0;32m[2025-07-08 03:58:08][0m Створення контейнерів для статичних файлів
+{
+  "created": false
+}
+{
+  "created": false
+}
+[0;36m[INFO][0m 🔄 КРОК 3/11: Створення PostgreSQL Database (бюджетна конфігурація)
+[0;32m[2025-07-08 03:58:11][0m Створення PostgreSQL сервера: django-app-budget-db-1751947063
+[1;33m[WARNING][0m Використовується найдешевший SKU: Standard_B1ms в Burstable tier
+WARNING: The default value of '--version' will be changed to '17' from '16' in next breaking change release(2.73.0) scheduled for May 2025.
+WARNING: The default value of '--create-default-database' will be changed to 'Disabled' from 'Enabled' in next breaking change release(2.73.0) scheduled for May 2025.
+WARNING: Update default value of "--sku-name" in next breaking change release(2.73.0) scheduled for May 2025. The default value will be changed from "Standard_D2s_v3" to a supported sku based on regional capabilities.
+WARNING: Checking the existence of the resource group 'django-app-budget-rg'...
+WARNING: Resource group 'django-app-budget-rg' exists ? : True 
+WARNING: The default value for the PostgreSQL server major version will be updating to 17 in the near future.
+WARNING: Creating PostgreSQL Server 'django-app-budget-db-1751947063' in group 'django-app-budget-rg'...
+WARNING: Your server 'django-app-budget-db-1751947063' is using sku 'Standard_B1ms' (Paid Tier). Please refer to https://aka.ms/postgres-pricing for pricing details
+WARNING: Configuring server firewall rule, 'azure-access', to accept connections from all Azure resources...
+WARNING: Creating PostgreSQL database 'flexibleserverdb'...
+WARNING: Make a note of your password. If you forget, you would have to reset your password with "az postgres flexible-server update -n django-app-budget-db-1751947063 -g django-app-budget-rg -p <new-password>".
+WARNING: Try using 'az postgres flexible-server connect' command to test out connection.
+{
+  "connectionString": "postgresql://djangoadmin:AAVuo8twx4OAaebmAa1!@django-app-budget-db-1751947063.postgres.database.azure.com/flexibleserverdb?sslmode=require",
+  "databaseName": "flexibleserverdb",
+  "firewallName": "AllowAllAzureServicesAndResourcesWithinAzureIps_2025-7-8_4-3-18",
+  "host": "django-app-budget-db-1751947063.postgres.database.azure.com",
+  "id": "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg/providers/Microsoft.DBforPostgreSQL/flexibleServers/django-app-budget-db-1751947063",
+  "location": "West Europe",
+  "password": "AAVuo8twx4OAaebmAa1!",
+  "resourceGroup": "django-app-budget-rg",
+  "skuname": "Standard_B1ms",
+  "username": "djangoadmin",
+  "version": "14"
+}
+[0;36m[INFO][0m 🔄 КРОК 4/11: Створення бази даних
+[0;32m[2025-07-08 04:04:32][0m Створення бази даних: django-app_db
+WARNING: Creating database with utf8 charset and en_US.utf8 collation
+{
+  "charset": "UTF8",
+  "collation": "en_US.utf8",
+  "id": "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg/providers/Microsoft.DBforPostgreSQL/flexibleServers/django-app-budget-db-1751947063/databases/django-app_db",
+  "name": "django-app_db",
+  "resourceGroup": "django-app-budget-rg",
+  "systemData": null,
+  "type": "Microsoft.DBforPostgreSQL/flexibleServers/databases"
+}
+[0;36m[INFO][0m 🔄 КРОК 5/11: Налаштування firewall правил
+[0;32m[2025-07-08 04:04:49][0m Налаштування firewall правил для бази даних
+{
+  "endIpAddress": "0.0.0.0",
+  "id": "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg/providers/Microsoft.DBforPostgreSQL/flexibleServers/django-app-budget-db-1751947063/firewallRules/AllowAzureServices",
+  "name": "AllowAzureServices",
+  "resourceGroup": "django-app-budget-rg",
+  "startIpAddress": "0.0.0.0",
+  "systemData": null,
+  "type": "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules"
+}
+[0;36m[INFO][0m 🔄 КРОК 6/11: Створення Key Vault
+[0;32m[2025-07-08 04:05:51][0m Створення Key Vault: djapp-kv-47063
+{
+  "id": "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg/providers/Microsoft.KeyVault/vaults/djapp-kv-47063",
+  "location": "westeurope",
+  "name": "djapp-kv-47063",
+  "properties": {
+    "accessPolicies": [
+      {
+        "applicationId": null,
+        "objectId": "2b519bbb-fa41-470c-9279-95f55f66c3b9",
+        "permissions": {
+          "certificates": [
+            "all"
+          ],
+          "keys": [
+            "all"
+          ],
+          "secrets": [
+            "all"
+          ],
+          "storage": [
+            "all"
+          ]
+        },
+        "tenantId": "3a7a2d8e-5083-4ef2-809c-3a88f18e0ef8"
+      }
+    ],
+    "createMode": null,
+    "enablePurgeProtection": null,
+    "enableRbacAuthorization": false,
+    "enableSoftDelete": true,
+    "enabledForDeployment": false,
+    "enabledForDiskEncryption": null,
+    "enabledForTemplateDeployment": null,
+    "hsmPoolResourceId": null,
+    "networkAcls": null,
+    "privateEndpointConnections": null,
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "sku": {
+      "family": "A",
+      "name": "standard"
+    },
+    "softDeleteRetentionInDays": 90,
+    "tenantId": "3a7a2d8e-5083-4ef2-809c-3a88f18e0ef8",
+    "vaultUri": "https://djapp-kv-47063.vault.azure.net/"
+  },
+  "resourceGroup": "django-app-budget-rg",
+  "systemData": {
+    "createdAt": "2025-07-08T04:05:54.155000+00:00",
+    "createdBy": "vitalii_shevchuk3@epam.com",
+    "createdByType": "User",
+    "lastModifiedAt": "2025-07-08T04:05:54.155000+00:00",
+    "lastModifiedBy": "vitalii_shevchuk3@epam.com",
+    "lastModifiedByType": "User"
+  },
+  "tags": {
+    "CostProfile": "Budget",
+    "CreatedBy": "AzureCLI",
+    "Environment": "budget",
+    "Project": "django-app"
+  },
+  "type": "Microsoft.KeyVault/vaults"
+}
+[0;32m[2025-07-08 04:06:27][0m Налаштування прав доступу до Key Vault
+{
+  "id": "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg/providers/Microsoft.KeyVault/vaults/djapp-kv-47063",
+  "location": "westeurope",
+  "name": "djapp-kv-47063",
+  "properties": {
+    "accessPolicies": [
+      {
+        "applicationId": null,
+        "objectId": "2b519bbb-fa41-470c-9279-95f55f66c3b9",
+        "permissions": {
+          "certificates": [
+            "all"
+          ],
+          "keys": [
+            "all"
+          ],
+          "secrets": [
+            "get",
+            "set",
+            "delete",
+            "list"
+          ],
+          "storage": [
+            "all"
+          ]
+        },
+        "tenantId": "3a7a2d8e-5083-4ef2-809c-3a88f18e0ef8"
+      }
+    ],
+    "createMode": null,
+    "enablePurgeProtection": null,
+    "enableRbacAuthorization": false,
+    "enableSoftDelete": true,
+    "enabledForDeployment": false,
+    "enabledForDiskEncryption": null,
+    "enabledForTemplateDeployment": null,
+    "hsmPoolResourceId": null,
+    "networkAcls": null,
+    "privateEndpointConnections": null,
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "sku": {
+      "family": "A",
+      "name": "standard"
+    },
+    "softDeleteRetentionInDays": 90,
+    "tenantId": "3a7a2d8e-5083-4ef2-809c-3a88f18e0ef8",
+    "vaultUri": "https://djapp-kv-47063.vault.azure.net/"
+  },
+  "resourceGroup": "django-app-budget-rg",
+  "systemData": {
+    "createdAt": "2025-07-08T04:05:54.155000+00:00",
+    "createdBy": "vitalii_shevchuk3@epam.com",
+    "createdByType": "User",
+    "lastModifiedAt": "2025-07-08T04:06:29.009000+00:00",
+    "lastModifiedBy": "vitalii_shevchuk3@epam.com",
+    "lastModifiedByType": "User"
+  },
+  "tags": {
+    "CostProfile": "Budget",
+    "CreatedBy": "AzureCLI",
+    "Environment": "budget",
+    "Project": "django-app"
+  },
+  "type": "Microsoft.KeyVault/vaults"
+}
+[0;36m[INFO][0m 🔄 КРОК 7/11: Додавання секретів до Key Vault
+[0;32m[2025-07-08 04:06:28][0m Генерація та додавання секретів
+[0;32m[2025-07-08 04:06:29][0m ✅ Django secret key додано
+[0;32m[2025-07-08 04:06:31][0m ✅ Database password додано
+[0;32m[2025-07-08 04:06:32][0m ✅ Storage account key додано
+[0;36m[INFO][0m 🔄 КРОК 8/11: Створення Application Insights
+[0;32m[2025-07-08 04:06:32][0m Створення Application Insights: django-app-budget-insights
+WARNING: Preview version of extension is disabled by default for extension installation, enabled for modules without stable versions. 
+WARNING: Please run 'az config set extension.dynamic_install_allow_preview=true or false' to config it specifically. 
+The command requires the extension application-insights. Do you want to install it now? The command will continue to run after the extension is installed. (Y/n): WARNING: Run 'az config set extension.use_dynamic_install=yes_without_prompt' to allow installing extensions without prompt.
+WARNING: Extension 'application-insights' has a later preview version to install, add `--allow-preview True` to try preview version.
+{
+  "appId": "d86296c5-f59d-48da-a7c6-e33018e8a256",
+  "applicationId": "django-app-budget-insights",
+  "applicationType": "web",
+  "connectionString": "InstrumentationKey=e0853c99-32b0-4013-88bd-d4cf3d6f8026;IngestionEndpoint=https://westeurope-5.in.applicationinsights.azure.com/;LiveEndpoint=https://westeurope.livediagnostics.monitor.azure.com/;ApplicationId=d86296c5-f59d-48da-a7c6-e33018e8a256",
+  "creationDate": "2025-07-08T04:12:54.466896+00:00",
+  "disableIpMasking": null,
+  "etag": "\"3f00f258-0000-0200-0000-686c9ad00000\"",
+  "flowType": "Bluefield",
+  "hockeyAppId": null,
+  "hockeyAppToken": null,
+  "id": "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg/providers/microsoft.insights/components/django-app-budget-insights",
+  "immediatePurgeDataOn30Days": null,
+  "ingestionMode": "LogAnalytics",
+  "instrumentationKey": "e0853c99-32b0-4013-88bd-d4cf3d6f8026",
+  "kind": "web",
+  "location": "westeurope",
+  "name": "django-app-budget-insights",
+  "privateLinkScopedResources": null,
+  "provisioningState": "Succeeded",
+  "publicNetworkAccessForIngestion": "Enabled",
+  "publicNetworkAccessForQuery": "Enabled",
+  "requestSource": "rest",
+  "resourceGroup": "django-app-budget-rg",
+  "retentionInDays": 90,
+  "samplingPercentage": null,
+  "tags": {
+    "CostProfile": "Budget",
+    "CreatedBy": "AzureCLI",
+    "Environment": "budget",
+    "Project": "django-app"
+  },
+  "tenantId": "f7dc8823-4f06-4346-9de0-badbe6273a54",
+  "type": "microsoft.insights/components"
+}
+[0;36m[INFO][0m 🔄 КРОК 9/11: Створення App Service Plan (БЕЗКОШТОВНИЙ F1)
+[0;32m[2025-07-08 04:13:06][0m Створення App Service Plan: django-app-budget-plan
+[1;33m[WARNING][0m Використовується безкоштовний план F1 з обмеженнями!
+{
+  "elasticScaleEnabled": false,
+  "extendedLocation": null,
+  "freeOfferExpirationTime": null,
+  "geoRegion": "West Europe",
+  "hostingEnvironmentProfile": null,
+  "hyperV": false,
+  "id": "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg/providers/Microsoft.Web/serverfarms/django-app-budget-plan",
+  "isSpot": false,
+  "isXenon": false,
+  "kind": "linux",
+  "kubeEnvironmentProfile": null,
+  "location": "westeurope",
+  "maximumElasticWorkerCount": 1,
+  "maximumNumberOfWorkers": 0,
+  "name": "django-app-budget-plan",
+  "numberOfSites": 0,
+  "numberOfWorkers": 1,
+  "perSiteScaling": false,
+  "provisioningState": "Succeeded",
+  "reserved": true,
+  "resourceGroup": "django-app-budget-rg",
+  "sku": {
+    "capabilities": null,
+    "capacity": 1,
+    "family": "U",
+    "locations": null,
+    "name": "U13",
+    "size": "U13",
+    "skuCapacity": null,
+    "tier": "LinuxFree"
+  },
+  "spotExpirationTime": null,
+  "status": "Ready",
+  "subscription": "f7dc8823-4f06-4346-9de0-badbe6273a54",
+  "tags": {
+    "CostProfile": "Budget",
+    "CreatedBy": "AzureCLI",
+    "Environment": "budget",
+    "Project": "django-app"
+  },
+  "targetWorkerCount": 0,
+  "targetWorkerSizeId": 0,
+  "type": "Microsoft.Web/serverfarms",
+  "workerTierName": null,
+  "zoneRedundant": false
+}
+[0;36m[INFO][0m 🔄 КРОК 10/11: Створення Web App
+[0;32m[2025-07-08 04:13:14][0m Створення Web App: django-app-budget-1751947063
+{
+  "availabilityState": "Normal",
+  "clientAffinityEnabled": true,
+  "clientCertEnabled": false,
+  "clientCertExclusionPaths": null,
+  "clientCertMode": "Required",
+  "cloningInfo": null,
+  "containerSize": 0,
+  "customDomainVerificationId": "277D8A1B15CA68EB12A5F295764EA158E61A2A3D155C88E7660BB300D2D92D51",
+  "dailyMemoryTimeQuota": 0,
+  "daprConfig": null,
+  "defaultHostName": "django-app-budget-1751947063.azurewebsites.net",
+  "enabled": true,
+  "enabledHostNames": [
+    "django-app-budget-1751947063.azurewebsites.net",
+    "django-app-budget-1751947063.scm.azurewebsites.net"
+  ],
+  "endToEndEncryptionEnabled": false,
+  "extendedLocation": null,
+  "ftpPublishingUrl": "ftps://waws-prod-am2-601.ftp.azurewebsites.windows.net/site/wwwroot",
+  "hostNameSslStates": [
+    {
+      "certificateResourceId": null,
+      "hostType": "Standard",
+      "ipBasedSslResult": null,
+      "ipBasedSslState": "NotConfigured",
+      "name": "django-app-budget-1751947063.azurewebsites.net",
+      "sslState": "Disabled",
+      "thumbprint": null,
+      "toUpdate": null,
+      "toUpdateIpBasedSsl": null,
+      "virtualIPv6": null,
+      "virtualIp": null
+    },
+    {
+      "certificateResourceId": null,
+      "hostType": "Repository",
+      "ipBasedSslResult": null,
+      "ipBasedSslState": "NotConfigured",
+      "name": "django-app-budget-1751947063.scm.azurewebsites.net",
+      "sslState": "Disabled",
+      "thumbprint": null,
+      "toUpdate": null,
+      "toUpdateIpBasedSsl": null,
+      "virtualIPv6": null,
+      "virtualIp": null
+    }
+  ],
+  "hostNames": [
+    "django-app-budget-1751947063.azurewebsites.net"
+  ],
+  "hostNamesDisabled": false,
+  "hostingEnvironmentProfile": null,
+  "httpsOnly": false,
+  "hyperV": false,
+  "id": "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg/providers/Microsoft.Web/sites/django-app-budget-1751947063",
+  "identity": null,
+  "inProgressOperationId": null,
+  "isDefaultContainer": null,
+  "isXenon": false,
+  "keyVaultReferenceIdentity": "SystemAssigned",
+  "kind": "app,linux",
+  "lastModifiedTimeUtc": "2025-07-08T04:13:18.980000",
+  "location": "West Europe",
+  "managedEnvironmentId": null,
+  "maxNumberOfWorkers": null,
+  "name": "django-app-budget-1751947063",
+  "outboundIpAddresses": "51.124.59.99,51.124.59.175,51.124.59.252,51.124.60.129,51.124.60.243,51.124.60.249,20.105.224.17",
+  "possibleOutboundIpAddresses": "51.124.59.99,51.124.59.175,51.124.59.252,51.124.60.129,51.124.60.243,51.124.60.249,51.124.61.31,51.124.61.49,51.124.61.56,51.124.61.142,51.124.61.184,51.124.61.192,51.105.209.160,51.105.210.136,51.105.210.122,51.124.56.53,51.124.61.162,51.105.210.2,51.124.61.169,51.105.209.155,51.124.57.83,51.124.62.101,51.124.57.229,51.124.58.97,20.105.224.17",
+  "publicNetworkAccess": null,
+  "redundancyMode": "None",
+  "repositorySiteName": "django-app-budget-1751947063",
+  "reserved": true,
+  "resourceConfig": null,
+  "resourceGroup": "django-app-budget-rg",
+  "scmSiteAlsoStopped": false,
+  "serverFarmId": "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg/providers/Microsoft.Web/serverfarms/django-app-budget-plan",
+  "siteConfig": {
+    "acrUseManagedIdentityCreds": false,
+    "acrUserManagedIdentityId": null,
+    "alwaysOn": false,
+    "antivirusScanEnabled": null,
+    "apiDefinition": null,
+    "apiManagementConfig": null,
+    "appCommandLine": null,
+    "appSettings": null,
+    "autoHealEnabled": null,
+    "autoHealRules": null,
+    "autoSwapSlotName": null,
+    "azureMonitorLogCategories": null,
+    "azureStorageAccounts": null,
+    "clusteringEnabled": false,
+    "connectionStrings": null,
+    "cors": null,
+    "customAppPoolIdentityAdminState": null,
+    "customAppPoolIdentityTenantState": null,
+    "defaultDocuments": null,
+    "detailedErrorLoggingEnabled": null,
+    "documentRoot": null,
+    "elasticWebAppScaleLimit": 0,
+    "experiments": null,
+    "fileChangeAuditEnabled": null,
+    "ftpsState": null,
+    "functionAppScaleLimit": null,
+    "functionsRuntimeScaleMonitoringEnabled": null,
+    "handlerMappings": null,
+    "healthCheckPath": null,
+    "http20Enabled": false,
+    "http20ProxyFlag": null,
+    "httpLoggingEnabled": null,
+    "ipSecurityRestrictions": [
+      {
+        "action": "Allow",
+        "description": "Allow all access",
+        "headers": null,
+        "ipAddress": "Any",
+        "name": "Allow all",
+        "priority": 2147483647,
+        "subnetMask": null,
+        "subnetTrafficTag": null,
+        "tag": null,
+        "vnetSubnetResourceId": null,
+        "vnetTrafficTag": null
+      }
+    ],
+    "ipSecurityRestrictionsDefaultAction": null,
+    "javaContainer": null,
+    "javaContainerVersion": null,
+    "javaVersion": null,
+    "keyVaultReferenceIdentity": null,
+    "limits": null,
+    "linuxFxVersion": "",
+    "loadBalancing": null,
+    "localMySqlEnabled": null,
+    "logsDirectorySizeLimit": null,
+    "machineKey": null,
+    "managedPipelineMode": null,
+    "managedServiceIdentityId": null,
+    "metadata": null,
+    "minTlsCipherSuite": null,
+    "minTlsVersion": null,
+    "minimumElasticInstanceCount": 0,
+    "netFrameworkVersion": null,
+    "nodeVersion": null,
+    "numberOfWorkers": 1,
+    "phpVersion": null,
+    "powerShellVersion": null,
+    "preWarmedInstanceCount": null,
+    "publicNetworkAccess": null,
+    "publishingPassword": null,
+    "publishingUsername": null,
+    "push": null,
+    "pythonVersion": null,
+    "remoteDebuggingEnabled": null,
+    "remoteDebuggingVersion": null,
+    "requestTracingEnabled": null,
+    "requestTracingExpirationTime": null,
+    "routingRules": null,
+    "runtimeADUser": null,
+    "runtimeADUserPassword": null,
+    "sandboxType": null,
+    "scmIpSecurityRestrictions": [
+      {
+        "action": "Allow",
+        "description": "Allow all access",
+        "headers": null,
+        "ipAddress": "Any",
+        "name": "Allow all",
+        "priority": 2147483647,
+        "subnetMask": null,
+        "subnetTrafficTag": null,
+        "tag": null,
+        "vnetSubnetResourceId": null,
+        "vnetTrafficTag": null
+      }
+    ],
+    "scmIpSecurityRestrictionsDefaultAction": null,
+    "scmIpSecurityRestrictionsUseMain": null,
+    "scmMinTlsCipherSuite": null,
+    "scmMinTlsVersion": null,
+    "scmSupportedTlsCipherSuites": null,
+    "scmType": null,
+    "sitePort": null,
+    "sitePrivateLinkHostEnabled": null,
+    "storageType": null,
+    "supportedTlsCipherSuites": null,
+    "tracingOptions": null,
+    "use32BitWorkerProcess": null,
+    "virtualApplications": null,
+    "vnetName": null,
+    "vnetPrivatePortsCount": null,
+    "vnetRouteAllEnabled": null,
+    "webSocketsEnabled": null,
+    "websiteTimeZone": null,
+    "winAuthAdminState": null,
+    "winAuthTenantState": null,
+    "windowsConfiguredStacks": null,
+    "windowsFxVersion": null,
+    "xManagedServiceIdentityId": null
+  },
+  "slotSwapStatus": null,
+  "state": "Running",
+  "storageAccountRequired": false,
+  "suspendedTill": null,
+  "tags": {
+    "CostProfile": "Budget",
+    "CreatedBy": "AzureCLI",
+    "Environment": "budget",
+    "Project": "django-app"
+  },
+  "targetSwapSlot": null,
+  "trafficManagerHostNames": null,
+  "type": "Microsoft.Web/sites",
+  "usageState": "Normal",
+  "virtualNetworkSubnetId": null,
+  "vnetContentShareEnabled": false,
+  "vnetImagePullEnabled": false,
+  "vnetRouteAllEnabled": false,
+  "workloadProfileName": null
+}
+[0;36m[INFO][0m 🔄 КРОК 11/11: Налаштування додатку
+[0;32m[2025-07-08 04:13:40][0m Налаштування змінних середовища
+[
+  {
+    "name": "DJANGO_SETTINGS_MODULE",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "DATABASE_URL",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "AZURE_STORAGE_ACCOUNT_NAME",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "AZURE_STORAGE_CONTAINER_STATIC",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "AZURE_STORAGE_CONTAINER_MEDIA",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "DEBUG",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "ALLOWED_HOSTS",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "DJANGO_LOG_LEVEL",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "PYTHONPATH",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "SECRET_KEY",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "AZURE_STORAGE_ACCOUNT_KEY",
+    "slotSetting": false,
+    "value": null
+  }
+]
+[0;32m[2025-07-08 04:13:42][0m Налаштування бюджетної конфігурації App Service
+{
+  "acrUseManagedIdentityCreds": false,
+  "acrUserManagedIdentityId": null,
+  "alwaysOn": false,
+  "apiDefinition": null,
+  "apiManagementConfig": null,
+  "appCommandLine": "gunicorn --bind=0.0.0.0 --timeout 300 --workers 1 config.wsgi",
+  "appSettings": null,
+  "autoHealEnabled": false,
+  "autoHealRules": null,
+  "autoSwapSlotName": null,
+  "azureStorageAccounts": {},
+  "connectionStrings": null,
+  "cors": null,
+  "defaultDocuments": [
+    "Default.htm",
+    "Default.html",
+    "Default.asp",
+    "index.htm",
+    "index.html",
+    "iisstart.htm",
+    "default.aspx",
+    "index.php",
+    "hostingstart.html"
+  ],
+  "detailedErrorLoggingEnabled": false,
+  "documentRoot": null,
+  "elasticWebAppScaleLimit": 0,
+  "experiments": {
+    "rampUpRules": []
+  },
+  "ftpsState": "FtpsOnly",
+  "functionAppScaleLimit": null,
+  "functionsRuntimeScaleMonitoringEnabled": false,
+  "handlerMappings": null,
+  "healthCheckPath": null,
+  "http20Enabled": true,
+  "httpLoggingEnabled": false,
+  "id": "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg/providers/Microsoft.Web/sites/django-app-budget-1751947063",
+  "ipSecurityRestrictions": [
+    {
+      "action": "Allow",
+      "description": "Allow all access",
+      "headers": null,
+      "ipAddress": "Any",
+      "name": "Allow all",
+      "priority": 2147483647,
+      "subnetMask": null,
+      "subnetTrafficTag": null,
+      "tag": null,
+      "vnetSubnetResourceId": null,
+      "vnetTrafficTag": null
+    }
+  ],
+  "ipSecurityRestrictionsDefaultAction": null,
+  "javaContainer": null,
+  "javaContainerVersion": null,
+  "javaVersion": null,
+  "keyVaultReferenceIdentity": null,
+  "kind": null,
+  "limits": null,
+  "linuxFxVersion": "PYTHON|3.11",
+  "loadBalancing": "LeastRequests",
+  "localMySqlEnabled": false,
+  "location": "West Europe",
+  "logsDirectorySizeLimit": 35,
+  "machineKey": null,
+  "managedPipelineMode": "Integrated",
+  "managedServiceIdentityId": null,
+  "metadata": null,
+  "minTlsCipherSuite": null,
+  "minTlsVersion": "1.2",
+  "minimumElasticInstanceCount": 1,
+  "name": "django-app-budget-1751947063",
+  "netFrameworkVersion": "v4.0",
+  "nodeVersion": "",
+  "numberOfWorkers": 1,
+  "phpVersion": "",
+  "powerShellVersion": "",
+  "preWarmedInstanceCount": 0,
+  "publicNetworkAccess": null,
+  "publishingUsername": "$django-app-budget-1751947063",
+  "push": null,
+  "pythonVersion": "",
+  "remoteDebuggingEnabled": false,
+  "remoteDebuggingVersion": "VS2022",
+  "requestTracingEnabled": false,
+  "requestTracingExpirationTime": null,
+  "resourceGroup": "django-app-budget-rg",
+  "scmIpSecurityRestrictions": [
+    {
+      "action": "Allow",
+      "description": "Allow all access",
+      "headers": null,
+      "ipAddress": "Any",
+      "name": "Allow all",
+      "priority": 2147483647,
+      "subnetMask": null,
+      "subnetTrafficTag": null,
+      "tag": null,
+      "vnetSubnetResourceId": null,
+      "vnetTrafficTag": null
+    }
+  ],
+  "scmIpSecurityRestrictionsDefaultAction": null,
+  "scmIpSecurityRestrictionsUseMain": false,
+  "scmMinTlsVersion": "1.2",
+  "scmType": "None",
+  "tags": {
+    "CostProfile": "Budget",
+    "CreatedBy": "AzureCLI",
+    "Environment": "budget",
+    "Project": "django-app"
+  },
+  "tracingOptions": null,
+  "type": "Microsoft.Web/sites",
+  "use32BitWorkerProcess": true,
+  "virtualApplications": [
+    {
+      "physicalPath": "site\\wwwroot",
+      "preloadEnabled": false,
+      "virtualDirectories": null,
+      "virtualPath": "/"
+    }
+  ],
+  "vnetName": "",
+  "vnetPrivatePortsCount": 0,
+  "vnetRouteAllEnabled": false,
+  "webSocketsEnabled": false,
+  "websiteTimeZone": null,
+  "windowsFxVersion": null,
+  "xManagedServiceIdentityId": null
+}
+{
+  "applicationLogs": {
+    "azureBlobStorage": {
+      "level": "Off",
+      "retentionInDays": null,
+      "sasUrl": null
+    },
+    "azureTableStorage": {
+      "level": "Off",
+      "sasUrl": null
+    },
+    "fileSystem": {
+      "level": "Warning"
+    }
+  },
+  "detailedErrorMessages": {
+    "enabled": true
+  },
+  "failedRequestsTracing": {
+    "enabled": true
+  },
+  "httpLogs": {
+    "azureBlobStorage": {
+      "enabled": false,
+      "retentionInDays": null,
+      "sasUrl": null
+    },
+    "fileSystem": {
+      "enabled": false,
+      "retentionInDays": null,
+      "retentionInMb": 100
+    }
+  },
+  "id": "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg/providers/Microsoft.Web/sites/django-app-budget-1751947063/config/logs",
+  "kind": null,
+  "location": "West Europe",
+  "name": "logs",
+  "resourceGroup": "django-app-budget-rg",
+  "tags": {
+    "CostProfile": "Budget",
+    "CreatedBy": "AzureCLI",
+    "Environment": "budget",
+    "Project": "django-app"
+  },
+  "type": "Microsoft.Web/sites/config"
+}
+[0;32m[2025-07-08 04:13:50][0m Налаштування Managed Identity
+{
+  "principalId": "9b58982f-e652-48c1-9014-ec848b44cf7d",
+  "tenantId": "3a7a2d8e-5083-4ef2-809c-3a88f18e0ef8",
+  "type": "SystemAssigned",
+  "userAssignedIdentities": null
+}
+{
+  "id": "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg/providers/Microsoft.KeyVault/vaults/djapp-kv-47063",
+  "location": "westeurope",
+  "name": "djapp-kv-47063",
+  "properties": {
+    "accessPolicies": [
+      {
+        "applicationId": null,
+        "objectId": "2b519bbb-fa41-470c-9279-95f55f66c3b9",
+        "permissions": {
+          "certificates": [
+            "all"
+          ],
+          "keys": [
+            "all"
+          ],
+          "secrets": [
+            "get",
+            "set",
+            "delete",
+            "list"
+          ],
+          "storage": [
+            "all"
+          ]
+        },
+        "tenantId": "3a7a2d8e-5083-4ef2-809c-3a88f18e0ef8"
+      },
+      {
+        "applicationId": null,
+        "objectId": "9b58982f-e652-48c1-9014-ec848b44cf7d",
+        "permissions": {
+          "certificates": null,
+          "keys": null,
+          "secrets": [
+            "get",
+            "list"
+          ],
+          "storage": null
+        },
+        "tenantId": "3a7a2d8e-5083-4ef2-809c-3a88f18e0ef8"
+      }
+    ],
+    "createMode": null,
+    "enablePurgeProtection": null,
+    "enableRbacAuthorization": false,
+    "enableSoftDelete": true,
+    "enabledForDeployment": false,
+    "enabledForDiskEncryption": null,
+    "enabledForTemplateDeployment": null,
+    "hsmPoolResourceId": null,
+    "networkAcls": null,
+    "privateEndpointConnections": null,
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "sku": {
+      "family": "A",
+      "name": "standard"
+    },
+    "softDeleteRetentionInDays": 90,
+    "tenantId": "3a7a2d8e-5083-4ef2-809c-3a88f18e0ef8",
+    "vaultUri": "https://djapp-kv-47063.vault.azure.net/"
+  },
+  "resourceGroup": "django-app-budget-rg",
+  "systemData": {
+    "createdAt": "2025-07-08T04:05:54.155000+00:00",
+    "createdBy": "vitalii_shevchuk3@epam.com",
+    "createdByType": "User",
+    "lastModifiedAt": "2025-07-08T04:13:57.294000+00:00",
+    "lastModifiedBy": "vitalii_shevchuk3@epam.com",
+    "lastModifiedByType": "User"
+  },
+  "tags": {
+    "CostProfile": "Budget",
+    "CreatedBy": "AzureCLI",
+    "Environment": "budget",
+    "Project": "django-app"
+  },
+  "type": "Microsoft.KeyVault/vaults"
+}
+[0;32m[2025-07-08 04:13:57][0m Увімкнення HTTPS
+{
+  "availabilityState": "Normal",
+  "clientAffinityEnabled": true,
+  "clientCertEnabled": false,
+  "clientCertExclusionPaths": null,
+  "clientCertMode": "Required",
+  "cloningInfo": null,
+  "containerSize": 0,
+  "customDomainVerificationId": "277D8A1B15CA68EB12A5F295764EA158E61A2A3D155C88E7660BB300D2D92D51",
+  "dailyMemoryTimeQuota": 0,
+  "daprConfig": null,
+  "defaultHostName": "django-app-budget-1751947063.azurewebsites.net",
+  "enabled": true,
+  "enabledHostNames": [
+    "django-app-budget-1751947063.azurewebsites.net",
+    "django-app-budget-1751947063.scm.azurewebsites.net"
+  ],
+  "endToEndEncryptionEnabled": false,
+  "extendedLocation": null,
+  "hostNameSslStates": [
+    {
+      "certificateResourceId": null,
+      "hostType": "Standard",
+      "ipBasedSslResult": null,
+      "ipBasedSslState": "NotConfigured",
+      "name": "django-app-budget-1751947063.azurewebsites.net",
+      "sslState": "Disabled",
+      "thumbprint": null,
+      "toUpdate": null,
+      "toUpdateIpBasedSsl": null,
+      "virtualIPv6": null,
+      "virtualIp": null
+    },
+    {
+      "certificateResourceId": null,
+      "hostType": "Repository",
+      "ipBasedSslResult": null,
+      "ipBasedSslState": "NotConfigured",
+      "name": "django-app-budget-1751947063.scm.azurewebsites.net",
+      "sslState": "Disabled",
+      "thumbprint": null,
+      "toUpdate": null,
+      "toUpdateIpBasedSsl": null,
+      "virtualIPv6": null,
+      "virtualIp": null
+    }
+  ],
+  "hostNames": [
+    "django-app-budget-1751947063.azurewebsites.net"
+  ],
+  "hostNamesDisabled": false,
+  "hostingEnvironmentProfile": null,
+  "httpsOnly": true,
+  "hyperV": false,
+  "id": "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg/providers/Microsoft.Web/sites/django-app-budget-1751947063",
+  "identity": {
+    "principalId": "9b58982f-e652-48c1-9014-ec848b44cf7d",
+    "tenantId": "3a7a2d8e-5083-4ef2-809c-3a88f18e0ef8",
+    "type": "SystemAssigned",
+    "userAssignedIdentities": null
+  },
+  "inProgressOperationId": null,
+  "isDefaultContainer": null,
+  "isXenon": false,
+  "keyVaultReferenceIdentity": "SystemAssigned",
+  "kind": "app,linux",
+  "lastModifiedTimeUtc": "2025-07-08T04:14:01.496666",
+  "location": "West Europe",
+  "managedEnvironmentId": null,
+  "maxNumberOfWorkers": null,
+  "name": "django-app-budget-1751947063",
+  "outboundIpAddresses": "51.124.59.99,51.124.59.175,51.124.59.252,51.124.60.129,51.124.60.243,51.124.60.249,20.105.224.17",
+  "possibleOutboundIpAddresses": "51.124.59.99,51.124.59.175,51.124.59.252,51.124.60.129,51.124.60.243,51.124.60.249,51.124.61.31,51.124.61.49,51.124.61.56,51.124.61.142,51.124.61.184,51.124.61.192,51.105.209.160,51.105.210.136,51.105.210.122,51.124.56.53,51.124.61.162,51.105.210.2,51.124.61.169,51.105.209.155,51.124.57.83,51.124.62.101,51.124.57.229,51.124.58.97,20.105.224.17",
+  "publicNetworkAccess": null,
+  "redundancyMode": "None",
+  "repositorySiteName": "django-app-budget-1751947063",
+  "reserved": true,
+  "resourceConfig": null,
+  "resourceGroup": "django-app-budget-rg",
+  "scmSiteAlsoStopped": false,
+  "serverFarmId": "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg/providers/Microsoft.Web/serverfarms/django-app-budget-plan",
+  "siteConfig": {
+    "acrUseManagedIdentityCreds": false,
+    "acrUserManagedIdentityId": null,
+    "alwaysOn": false,
+    "antivirusScanEnabled": null,
+    "apiDefinition": null,
+    "apiManagementConfig": null,
+    "appCommandLine": null,
+    "appSettings": null,
+    "autoHealEnabled": null,
+    "autoHealRules": null,
+    "autoSwapSlotName": null,
+    "azureMonitorLogCategories": null,
+    "azureStorageAccounts": null,
+    "clusteringEnabled": false,
+    "connectionStrings": null,
+    "cors": null,
+    "customAppPoolIdentityAdminState": null,
+    "customAppPoolIdentityTenantState": null,
+    "defaultDocuments": null,
+    "detailedErrorLoggingEnabled": null,
+    "documentRoot": null,
+    "elasticWebAppScaleLimit": 0,
+    "experiments": null,
+    "fileChangeAuditEnabled": null,
+    "ftpsState": null,
+    "functionAppScaleLimit": null,
+    "functionsRuntimeScaleMonitoringEnabled": null,
+    "handlerMappings": null,
+    "healthCheckPath": null,
+    "http20Enabled": true,
+    "http20ProxyFlag": null,
+    "httpLoggingEnabled": null,
+    "ipSecurityRestrictions": [
+      {
+        "action": "Allow",
+        "description": "Allow all access",
+        "headers": null,
+        "ipAddress": "Any",
+        "name": "Allow all",
+        "priority": 2147483647,
+        "subnetMask": null,
+        "subnetTrafficTag": null,
+        "tag": null,
+        "vnetSubnetResourceId": null,
+        "vnetTrafficTag": null
+      }
+    ],
+    "ipSecurityRestrictionsDefaultAction": null,
+    "javaContainer": null,
+    "javaContainerVersion": null,
+    "javaVersion": null,
+    "keyVaultReferenceIdentity": null,
+    "limits": null,
+    "linuxFxVersion": "PYTHON|3.11",
+    "loadBalancing": null,
+    "localMySqlEnabled": null,
+    "logsDirectorySizeLimit": null,
+    "machineKey": null,
+    "managedPipelineMode": null,
+    "managedServiceIdentityId": null,
+    "metadata": null,
+    "minTlsCipherSuite": null,
+    "minTlsVersion": null,
+    "minimumElasticInstanceCount": 1,
+    "netFrameworkVersion": null,
+    "nodeVersion": null,
+    "numberOfWorkers": 1,
+    "phpVersion": null,
+    "powerShellVersion": null,
+    "preWarmedInstanceCount": null,
+    "publicNetworkAccess": null,
+    "publishingPassword": null,
+    "publishingUsername": null,
+    "push": null,
+    "pythonVersion": null,
+    "remoteDebuggingEnabled": null,
+    "remoteDebuggingVersion": null,
+    "requestTracingEnabled": null,
+    "requestTracingExpirationTime": null,
+    "routingRules": null,
+    "runtimeADUser": null,
+    "runtimeADUserPassword": null,
+    "sandboxType": null,
+    "scmIpSecurityRestrictions": [
+      {
+        "action": "Allow",
+        "description": "Allow all access",
+        "headers": null,
+        "ipAddress": "Any",
+        "name": "Allow all",
+        "priority": 2147483647,
+        "subnetMask": null,
+        "subnetTrafficTag": null,
+        "tag": null,
+        "vnetSubnetResourceId": null,
+        "vnetTrafficTag": null
+      }
+    ],
+    "scmIpSecurityRestrictionsDefaultAction": null,
+    "scmIpSecurityRestrictionsUseMain": null,
+    "scmMinTlsCipherSuite": null,
+    "scmMinTlsVersion": null,
+    "scmSupportedTlsCipherSuites": null,
+    "scmType": null,
+    "sitePort": null,
+    "sitePrivateLinkHostEnabled": null,
+    "storageType": null,
+    "supportedTlsCipherSuites": null,
+    "tracingOptions": null,
+    "use32BitWorkerProcess": null,
+    "virtualApplications": null,
+    "vnetName": null,
+    "vnetPrivatePortsCount": null,
+    "vnetRouteAllEnabled": null,
+    "webSocketsEnabled": null,
+    "websiteTimeZone": null,
+    "winAuthAdminState": null,
+    "winAuthTenantState": null,
+    "windowsConfiguredStacks": null,
+    "windowsFxVersion": null,
+    "xManagedServiceIdentityId": null
+  },
+  "slotSwapStatus": null,
+  "state": "Running",
+  "storageAccountRequired": false,
+  "suspendedTill": null,
+  "tags": {
+    "CostProfile": "Budget",
+    "CreatedBy": "AzureCLI",
+    "Environment": "budget",
+    "Project": "django-app"
+  },
+  "targetSwapSlot": null,
+  "trafficManagerHostNames": null,
+  "type": "Microsoft.Web/sites",
+  "usageState": "Normal",
+  "virtualNetworkSubnetId": null,
+  "vnetContentShareEnabled": false,
+  "vnetImagePullEnabled": false,
+  "vnetRouteAllEnabled": false,
+  "workloadProfileName": null
+}
+[0;32m[2025-07-08 04:14:02][0m Створення бюджетних файлів конфігурації
+[0;32m[2025-07-08 04:14:04][0m ✅ БЮДЖЕТНА інфраструктура успішно створена!
+
+[0;32m============================================[0m
+[0;32m💰 БЮДЖЕТНЕ РОЗГОРТАННЯ ЗАВЕРШЕНО![0m
+[0;32m============================================[0m
+
+[0;36m💵 ОРІЄНТОВНА ВАРТІСТЬ: 0-25/місяць[0m
+
+📋 СТВОРЕНІ РЕСУРСИ:
+🌍 Resource Group: django-app-budget-rg
+🚀 Web App: django-app-budget-1751947063 (F1 - безкоштовно)
+🔗 URL: https://django-app-budget-1751947063.azurewebsites.net
+📊 App Service Plan: django-app-budget-plan (F1)
+🗄️  PostgreSQL Server: django-app-budget-db-1751947063 (B1ms - ~2-15)
+🗃️  Database: django-app_db
+💾 Storage Account: djapp1947063 (LRS - ~-5)
+🔐 Key Vault: djapp-kv-47063 (~)
+📈 Application Insights: django-app-budget-insights (безкоштовно до 5GB)
+
+[1;33m⚠️  ОБМЕЖЕННЯ БЮДЖЕТНОЇ ВЕРСІЇ:[0m
+- F1 план: 60 хвилин CPU/день, 1GB RAM
+- B1ms DB: 1 vCore, 2GB RAM, 32GB storage
+- Без Always On (cold start можливий)
+- Обмежене логування
+- 1 worker process
+
+📁 СТВОРЕНІ ФАЙЛИ:
+  ✅ requirements.txt - мінімальні залежності
+  ✅ .env.budget - бюджетна конфігурація
+  ✅ startup.sh - оптимізований startup
+  ✅ budget_settings.py - бюджетні Django settings
+  ✅ cleanup_budget_infrastructure.sh - видалення
+
+🔧 ДОСТУПИ:
+Database Admin User: djangoadmin
+Database Admin Password: AAVuo8twx4OAaebmAa1!
+
+🚀 НАСТУПНІ КРОКИ:
+1. Використовуйте budget_settings.py у вашому Django проекті
+2. Розгорніть код: az webapp deployment source config-zip
+3. Моніторьте використання CPU (ліміт 60 хв/день для F1)
+4. При необхідності оновіть до B1 (~3/міс додатково)
+
+[0;32mВаш бюджетний Django додаток готовий! 🐍💰[0m
+
+[0;32m[2025-07-08 04:14:04][0m 📄 Бюджетна конфігурація збережена у файл: budget-infrastructure-summary.txt
+
+================================================================================
+DEPLOYMENT SUMMARY
+================================================================================
+Status: ✅ SUCCESS
+Duration: 982 seconds
+Log file: logs/azure-deploy-20250708-035742.log
+Exit code: 0
+Completed: Tue Jul  8 04:14:04 UTC 2025
+================================================================================
+
+```
+
+# Аналіз розгортання Azure Django Infrastructure
+
+## 🎯 Загальна оцінка: **4.5/5** ⭐⭐⭐⭐⭐
+
+Відмінне розгортання бюджетної інфраструктури з чіткою архітектурою та економічним підходом.
+
+## ✅ Сильні сторони
+
+### **Архітектура та планування**
+- **Правильний вибір рівнів обслуговування** для бюджетного проекту
+- **Комплексність**: всі необхідні Azure сервіси налаштовані
+- **Безпека**: Key Vault, Managed Identity, HTTPS
+- **Моніторинг**: Application Insights інтегрований
+
+### **Економічна ефективність**
+- **F1 App Service Plan** (безкоштовно) 
+- **B1ms PostgreSQL** (~$12-15/міс) - розумний вибір
+- **Standard_LRS Storage** (~$5/міс)
+- **Загальна вартість 0-25$/міс** - чудово для стартапу
+
+### **Автоматизація**
+- **Детальне логування** всіх операцій
+- **Structured deployment** з 11 чіткими кроками
+- **Автоматичне створення секретів** та налаштувань
+- **Cleanup script** для видалення ресурсів
+
+## ⚠️ Обмеження та ризики
+
+### **F1 Plan обмеження**
+- **60 хвилин CPU/день** - може бути критичним для активних додатків
+- **Cold start** через відсутність Always On
+- **1 worker process** - обмежена продуктивність
+
+### **Потенційні проблеми**
+- **Database firewall** відкритий для всіх Azure сервісів (0.0.0.0-0.0.0.0)
+- **PostgreSQL v14** замість новішої v17
+- **Відсутність backup стратегії** для бази даних
+
+## 💡 Рекомендації для покращення
+
+### **Короткострокові (1-2 тижні)**
+1. **Моніторинг CPU використання** - налаштувати алерти
+2. **Database backup** - налаштувати автоматичні бекапи
+3. **Тестування cold start** - оптимізувати час запуску
+
+### **Середньострокові (1-3 місяці)**
+1. **Upgrade до B1 Basic** (~$13/міс) при перевищенні CPU лімітів
+2. **Налаштування CDN** для статичних файлів
+3. **Custom domain** та SSL сертифікат
+
+### **Довгострокові (3+ місяці)**
+1. **Production environment** з окремою інфраструктурою
+2. **CI/CD pipeline** через Azure DevOps або GitHub Actions
+3. **Load balancing** при зростанні трафіку
+
+## 🔧 Технічні деталі
+
+### **Конфігурація**
+```
+✅ Resource Group: django-app-budget-rg
+✅ Web App: django-app-budget-1751947063.azurewebsites.net
+✅ PostgreSQL: django-app-budget-db-1751947063
+✅ Storage: djapp1947063
+✅ Key Vault: djapp-kv-47063
+```
+
+### **Безпека**
+- ✅ HTTPS обов'язковий
+- ✅ Managed Identity налаштована
+- ✅ Key Vault з proper access policies
+- ⚠️ Database доступна з усіх Azure IP
+
+## 📊 Порівняння з альтернативами
+
+| Критерій | Ваше рішення | Azure Container Apps | Heroku |
+|----------|--------------|---------------------|--------|
+| Вартість | 💚 $0-25/міс | 🟡 $15-40/міс | 🔴 $25-50/міс |
+| Складність | 🟡 Середня | 💚 Низька | 💚 Низька |
+| Гнучкість | 💚 Висока | 🟡 Середня | 🔴 Обмежена |
+| Vendor Lock-in | 🟡 Azure | 🟡 Azure | 🔴 Heroku |
+
+## 🎯 Підсумок
+
+**Відмінне рішення** для MVP або стартап проекту. Архітектура масштабується, вартість мінімальна, всі best practices дотримані. Головне - моніторити використання CPU та бути готовим до upgrade при зростанні навантаження.
+
+**Рекомендація**: Розгортайте та тестуйте! При досягненні лімітів F1 плану легко можна перейти на B1 Basic за додаткові $13/місяць.
+
+
+
+
 
 ```bash
 #!/bin/bash
