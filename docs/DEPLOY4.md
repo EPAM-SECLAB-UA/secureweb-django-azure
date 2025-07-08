@@ -6507,6 +6507,267 @@ az appservice plan update \
 
 ----------------------------------------------------------------------------------------------------------------------------------------
 
+```bash
+@VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $ az webapp log tail --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+2025-07-08T07:06:40  Welcome, you are now connected to log-streaming service.
+Starting Log Tail -n 10 of existing logs ----
+/home/LogFiles/__lastCheckTime.txt  (https://django-app-budget-1751947063.scm.azurewebsites.net/api/vfs/LogFiles/__lastCheckTime.txt)
+07/08/2025 07:06:10
+/home/LogFiles/kudu/deployment/8a5159cbeba9-33b37a90-0540-4d4f-a420-a73a2e789c06.txt  (https://django-app-budget-1751947063.scm.azurewebsites.net/api/vfs/LogFiles/kudu/deployment/8a5159cbeba9-33b37a90-0540-4d4f-a420-a73a2e789c06.txt)
+2025-07-08T06:44:17    Total bytes received: 35
+2025-07-08T06:44:17    
+2025-07-08T06:44:17    sent 198 bytes  received 35 bytes  466.00 bytes/sec
+2025-07-08T06:44:17    total size is 32  speedup is 0.14
+
+2025-07-08T06:44:17    Attempt 1: Rsync for filelist /tmp//splits/split.ab completed with exit code 0
+2025-07-08T06:44:17    Completed successfully in 2 seconds
+2025-07-08T06:44:17  Build completed succesfully.
+2025-07-08T06:44:17  Running post deployment command(s)...
+2025-07-08T06:44:18  Triggering container recycle for OneDeploy by adding/updating restartTrigger.txt to the site root path
+2025-07-08T06:44:18  Deployment successful. deployer = OneDeploy deploymentPath = OneDeploy
+/home/LogFiles/kudu/trace/8a5159cbeba9-eab3c85f-e8f1-4f50-998d-a02f97255efd.txt  (https://django-app-budget-1751947063.scm.azurewebsites.net/api/vfs/LogFiles/kudu/trace/8a5159cbeba9-eab3c85f-e8f1-4f50-998d-a02f97255efd.txt)
+
+2025-07-08T06:44:07  Startup Request, url: /api/deployments?warmup=true, method: GET, type: request, pid: 768,1,51, ScmType: None
+/home/LogFiles/kudu/trace/c662ab074d2c-5e28c189-65d2-4847-8fc7-bceeb3aa14a3.txt  (https://django-app-budget-1751947063.scm.azurewebsites.net/api/vfs/LogFiles/kudu/trace/c662ab074d2c-5e28c189-65d2-4847-8fc7-bceeb3aa14a3.txt)
+2025-07-08T05:49:37    Error occurred, type: error, text: LogStreamManager: ProcessRequest end
+2025-07-08T05:49:37  Error occurred, type: error, text: LogStreamManager: Inside Reset
+/home/LogFiles/kudu/trace/c662ab074d2c-80f5f7e6-8bed-4dfc-aac9-c38aea45d7ff.txt  (https://django-app-budget-1751947063.scm.azurewebsites.net/api/vfs/LogFiles/kudu/trace/c662ab074d2c-80f5f7e6-8bed-4dfc-aac9-c38aea45d7ff.txt)
+2025-07-08T04:51:08  Startup Request, url: /api/deployments/?$orderby=ReceivedTime%20desc&$top=20&api-version=2022-03-01, method: GET, type: request, pid: 767,1,5, ScmType: None
+/home/LogFiles/kudu/trace/django-app-kudu-59c04bee-6ff75603-d812-41fc-b125-2f89091cf8ab.txt  (https://django-app-budget-1751947063.scm.azurewebsites.net/api/vfs/LogFiles/kudu/trace/django-app-kudu-59c04bee-6ff75603-d812-41fc-b125-2f89091cf8ab.txt)
+2025-07-08T04:41:51  Startup Request, url: /api/zipdeploy?isAsync=true, method: POST, type: request, pid: 768,1,7, ScmType: None
+/home/LogFiles/2025_07_08_10-30-1-212_default_docker.log  (https://django-app-budget-1751947063.scm.azurewebsites.net/api/vfs/LogFiles/2025_07_08_10-30-1-212_default_docker.log)
+2025-07-08T07:06:30.211735735Z   File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+2025-07-08T07:06:30.211741115Z   File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+2025-07-08T07:06:30.211746565Z   File "/home/site/wwwroot/working_django.py", line 2, in <module>
+2025-07-08T07:06:30.211776832Z     import django
+2025-07-08T07:06:30.211782773Z ModuleNotFoundError: No module named 'django'
+2025-07-08T07:06:30.211789526Z [2025-07-08 07:06:30 +0000] [1007] [INFO] Worker exiting (pid: 1007)
+2025-07-08T07:06:30.240650444Z [2025-07-08 07:06:30 +0000] [1006] [ERROR] Worker (pid:1007) exited with code 3
+2025-07-08T07:06:30.241362778Z [2025-07-08 07:06:30 +0000] [1006] [ERROR] Shutting down: Master
+2025-07-08T07:06:30.241662309Z [2025-07-08 07:06:30 +0000] [1006] [ERROR] Reason: Worker failed to boot.
+
+/home/LogFiles/2025_07_08_10-30-1-212_docker.log  (https://django-app-budget-1751947063.scm.azurewebsites.net/api/vfs/LogFiles/2025_07_08_10-30-1-212_docker.log)
+2025-07-08T07:06:19.809Z INFO  - Starting container for site
+2025-07-08T07:06:19.811Z INFO  - docker run -d --expose=8000 --name django-app-budget-1751947063_0_9c241e39 -e WEBSITE_USE_DIAGNOSTIC_SERVER=false -e WEBSITE_SITE_NAME=django-app-budget-1751947063 -e WEBSITE_AUTH_ENABLED=False -e WEBSITE_ROLE_INSTANCE_ID=0 -e WEBSITE_HOSTNAME=django-app-budget-1751947063.azurewebsites.net -e WEBSITE_INSTANCE_ID=9c40c56bec10cc140e0e48da7a51d229543a291400ffbee72722d697742cf7b3 appsvc/python:3.11_20250506.5.tuxprod REDACTED
+2025-07-08T07:06:19.817Z INFO  - Logging is not enabled for this container.
+Please use https://aka.ms/linux-diagnostics to enable logging to see container logs here.
+2025-07-08T07:06:23.792Z INFO  - Initiating warmup request to container django-app-budget-1751947063_0_9c241e39_msiProxy for site django-app-budget-1751947063
+2025-07-08T07:06:23.800Z INFO  - Container django-app-budget-1751947063_0_9c241e39_msiProxy for site django-app-budget-1751947063 initialized successfully and is ready to serve requests.
+2025-07-08T07:06:23.808Z INFO  - Initiating warmup request to container django-app-budget-1751947063_0_9c241e39 for site django-app-budget-1751947063
+2025-07-08T07:06:31.127Z ERROR - Container django-app-budget-1751947063_0_9c241e39 for site django-app-budget-1751947063 has exited, failing site start
+2025-07-08T07:06:31.210Z ERROR - Container django-app-budget-1751947063_0_9c241e39 didn't respond to HTTP pings on port: 8000. Failing site start. See container logs for debugging.
+2025-07-08T07:06:31.895Z INFO  - Stopping site django-app-budget-1751947063 because it failed during startup.
+Ending Log Tail of existing logs ---
+Starting Live Log Stream ---
+2025-07-08T07:07:40  No new trace in the past 1 min(s).
+2025-07-08T07:08:40  No new trace in the past 2 min(s).
+2025-07-08T07:09:40  No new trace in the past 3 min(s).
+2025-07-08T07:10:40  No new trace in the past 4 min(s).
+2025-07-08T07:11:40  No new trace in the past 5 min(s).
+2025-07-08T07:12:40  No new trace in the past 6 min(s).
+2025-07-08T07:13:40  No new trace in the past 7 min(s).
+2025-07-08T07:14:40  No new trace in the past 8 min(s).
+2025-07-08T07:15:40  No new trace in the past 9 min(s).
+2025-07-08T07:16:40  No new trace in the past 10 min(s).
+2025-07-08T07:17:40  No new trace in the past 11 min(s).
+2025-07-08T07:18:40  No new trace in the past 12 min(s).
+2025-07-08T07:19:40  No new trace in the past 13 min(s).
+2025-07-08T07:20:40  No new trace in the past 14 min(s).
+2025-07-08T07:21:40  No new trace in the past 15 min(s).
+2025-07-08T07:22:40  No new trace in the past 16 min(s).
+2025-07-08T07:23:40  No new trace in the past 17 min(s).
+2025-07-08T07:24:40  No new trace in the past 18 min(s).
+2025-07-08T07:25:40  No new trace in the past 19 min(s).
+2025-07-08T07:26:40  No new trace in the past 20 min(s).
+2025-07-08T07:27:40  No new trace in the past 21 min(s).
+```
+
+# 🎯 Знайшли точну проблему!
+
+**Ключова помилка**:
+```
+ModuleNotFoundError: No module named 'django'
+```
+
+**Причина**: Azure не встановлює залежності з `requirements.txt` автоматично!
+
+## 🛠️ Рішення - Startup скрипт з встановленням залежностей
+
+### **1. Створіть startup скрипт з встановленням**
+```bash
+cat > startup_with_install.sh << 'EOF'
+#!/bin/bash
+echo "🚀 Starting Django deployment with dependency installation..."
+
+# Встановлення залежностей
+echo "📦 Installing dependencies..."
+pip install --upgrade pip
+pip install Django==4.2.11 gunicorn==20.1.0
+
+# Перевірка встановлення
+echo "🔍 Checking Django installation..."
+python -c "import django; print(f'Django version: {django.get_version()}')"
+
+# Запуск gunicorn
+echo "🌐 Starting gunicorn server..."
+gunicorn --bind=0.0.0.0:8000 --timeout 600 --workers 1 working_django:application
+EOF
+
+chmod +x startup_with_install.sh
+```
+
+### **2. Оновіть startup команду**
+```bash
+az webapp config set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --startup-file "bash startup_with_install.sh"
+```
+
+### **3. Створіть архів з startup скриптом**
+```bash
+zip working_with_deps.zip working_django.py startup_with_install.sh
+```
+
+### **4. Розгорніть**
+```bash
+az webapp deploy \
+  --resource-group django-app-budget-rg \
+  --name django-app-budget-1751947063 \
+  --src-path working_with_deps.zip \
+  --type zip
+```
+
+## 🚀 Альтернативне рішення - Inline встановлення
+
+### **Якщо startup скрипт не працює, використайте inline команду:**
+```bash
+az webapp config set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --startup-file "pip install Django==4.2.11 gunicorn==20.1.0 && python -c 'import django; print(f\"Django {django.get_version()} installed\")' && gunicorn --bind=0.0.0.0:8000 --timeout 600 working_django:application"
+```
+
+## 📋 Ще простіше рішення - Самодостатній файл
+
+### **Створіть Django без імпорту**
+```bash
+cat > simple_server.py << 'EOF'
+#!/usr/bin/env python3
+import http.server
+import socketserver
+import os
+import subprocess
+import sys
+
+PORT = int(os.environ.get('PORT', 8000))
+
+class DjangoInstallHandler(http.server.SimpleHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        
+        # Спроба встановити Django
+        try:
+            import django
+            django_status = f"✅ Django {django.get_version()} встановлений"
+        except ImportError:
+            try:
+                subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'Django==4.2.11'])
+                import django
+                django_status = f"✅ Django {django.get_version()} щойно встановлений"
+            except Exception as e:
+                django_status = f"❌ Помилка встановлення Django: {e}"
+        
+        html = f"""
+        <html>
+        <head>
+            <title>Azure Django Test</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; margin: 40px; background: #f0f2f5; }}
+                .container {{ background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+                h1 {{ color: #28a745; }}
+                .status {{ background: #d4edda; padding: 15px; border-radius: 5px; margin: 15px 0; }}
+                .error {{ background: #f8d7da; padding: 15px; border-radius: 5px; margin: 15px 0; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>🚀 Azure Django Test Server</h1>
+                
+                <div class="status">
+                    <h3>📊 Системна інформація:</h3>
+                    <p><strong>Python:</strong> {sys.version}</p>
+                    <p><strong>Port:</strong> {PORT}</p>
+                    <p><strong>Working Directory:</strong> {os.getcwd()}</p>
+                </div>
+                
+                <div class="{'status' if '✅' in django_status else 'error'}">
+                    <h3>🐍 Django статус:</h3>
+                    <p>{django_status}</p>
+                </div>
+                
+                <div class="status">
+                    <h3>📁 Файли в директорії:</h3>
+                    <ul>
+                        {''.join(f'<li>{f}</li>' for f in os.listdir('.') if not f.startswith('.'))}
+                    </ul>
+                </div>
+                
+                <div class="status">
+                    <h3>🌍 Environment Variables:</h3>
+                    <ul>
+                        <li><strong>PORT:</strong> {os.environ.get('PORT', 'Not set')}</li>
+                        <li><strong>WEBSITE_SITE_NAME:</strong> {os.environ.get('WEBSITE_SITE_NAME', 'Not set')}</li>
+                        <li><strong>WEBSITE_HOSTNAME:</strong> {os.environ.get('WEBSITE_HOSTNAME', 'Not set')}</li>
+                    </ul>
+                </div>
+                
+                <hr>
+                <p><strong>🎯 Наступний крок:</strong> Якщо Django встановлюється успішно, можна додавати повний проект!</p>
+            </div>
+        </body>
+        </html>
+        """
+        
+        self.wfile.write(html.encode())
+
+if __name__ == "__main__":
+    print(f"🚀 Starting server on port {PORT}")
+    with socketserver.TCPServer(("", PORT), DjangoInstallHandler) as httpd:
+        print(f"✅ Server running at http://0.0.0.0:{PORT}")
+        httpd.serve_forever()
+EOF
+```
+
+### **Налаштуйте простий сервер**
+```bash
+az webapp config set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --startup-file "python3 simple_server.py"
+
+zip simple_test.zip simple_server.py
+
+az webapp deploy \
+  --resource-group django-app-budget-rg \
+  --name django-app-budget-1751947063 \
+  --src-path simple_test.zip \
+  --type zip
+```
+
+## 🎯 Рекомендований план дій
+
+1. **Спочатку спробуйте inline встановлення** - найпростіше
+2. **Якщо не працює - простий HTTP сервер** - для діагностики
+3. **Після успіху - повний Django з GitHub Actions** - автоматизація
+
+**Виберіть один з підходів і спробуйте! Проблема в тому, що Azure не встановлює залежності автоматично.** 🚀
+
+
+
+
 
 ----------------------------------------------------------------------------------------------------------------------------------------
 
