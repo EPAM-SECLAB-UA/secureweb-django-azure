@@ -6624,6 +6624,227 @@ az webapp config set \
   --startup-file "bash startup_with_install.sh"
 ```
 
+```bash
+VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $ az webapp config set \
+>   --name django-app-budget-1751947063 \
+>   --resource-group django-app-budget-rg \
+>   --startup-file "bash startup_with_install.sh"
+{
+  "acrUseManagedIdentityCreds": false,
+  "acrUserManagedIdentityId": null,
+  "alwaysOn": false,
+  "apiDefinition": null,
+  "apiManagementConfig": null,
+  "appCommandLine": "bash startup_with_install.sh",
+  "appSettings": null,
+  "autoHealEnabled": false,
+  "autoHealRules": null,
+  "autoSwapSlotName": null,
+  "azureStorageAccounts": {},
+  "connectionStrings": null,
+  "cors": null,
+  "defaultDocuments": [
+    "Default.htm",
+    "Default.html",
+    "Default.asp",
+    "index.htm",
+    "index.html",
+    "iisstart.htm",
+    "default.aspx",
+    "index.php",
+    "hostingstart.html"
+  ],
+  "detailedErrorLoggingEnabled": true,
+  "documentRoot": null,
+  "elasticWebAppScaleLimit": 0,
+  "experiments": {
+    "rampUpRules": []
+  },
+  "ftpsState": "FtpsOnly",
+  "functionAppScaleLimit": null,
+  "functionsRuntimeScaleMonitoringEnabled": false,
+  "handlerMappings": null,
+  "healthCheckPath": null,
+  "http20Enabled": true,
+  "httpLoggingEnabled": false,
+  "id": "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg/providers/Microsoft.Web/sites/django-app-budget-1751947063",
+  "ipSecurityRestrictions": [
+    {
+      "action": "Allow",
+      "description": "Allow all access",
+      "headers": null,
+      "ipAddress": "Any",
+      "name": "Allow all",
+      "priority": 2147483647,
+      "subnetMask": null,
+      "subnetTrafficTag": null,
+      "tag": null,
+      "vnetSubnetResourceId": null,
+      "vnetTrafficTag": null
+    }
+  ],
+  "ipSecurityRestrictionsDefaultAction": null,
+  "javaContainer": null,
+  "javaContainerVersion": null,
+  "javaVersion": null,
+  "keyVaultReferenceIdentity": null,
+  "kind": null,
+  "limits": null,
+  "linuxFxVersion": "PYTHON|3.11",
+  "loadBalancing": "LeastRequests",
+  "localMySqlEnabled": false,
+  "location": "West Europe",
+  "logsDirectorySizeLimit": 100,
+  "machineKey": null,
+  "managedPipelineMode": "Integrated",
+  "managedServiceIdentityId": 50756,
+  "metadata": null,
+  "minTlsCipherSuite": null,
+  "minTlsVersion": "1.2",
+  "minimumElasticInstanceCount": 1,
+  "name": "django-app-budget-1751947063",
+  "netFrameworkVersion": "v4.0",
+  "nodeVersion": "",
+  "numberOfWorkers": 1,
+  "phpVersion": "",
+  "powerShellVersion": "",
+  "preWarmedInstanceCount": 0,
+  "publicNetworkAccess": null,
+  "publishingUsername": "$django-app-budget-1751947063",
+  "push": null,
+  "pythonVersion": "",
+  "remoteDebuggingEnabled": false,
+  "remoteDebuggingVersion": "VS2022",
+  "requestTracingEnabled": true,
+  "requestTracingExpirationTime": "9999-12-31T23:59:00+00:00",
+  "resourceGroup": "django-app-budget-rg",
+  "scmIpSecurityRestrictions": [
+    {
+      "action": "Allow",
+      "description": "Allow all access",
+      "headers": null,
+      "ipAddress": "Any",
+      "name": "Allow all",
+      "priority": 2147483647,
+      "subnetMask": null,
+      "subnetTrafficTag": null,
+      "tag": null,
+      "vnetSubnetResourceId": null,
+      "vnetTrafficTag": null
+    }
+  ],
+  "scmIpSecurityRestrictionsDefaultAction": null,
+  "scmIpSecurityRestrictionsUseMain": false,
+  "scmMinTlsVersion": "1.2",
+  "scmType": "None",
+  "tags": {
+    "CostProfile": "Budget",
+    "CreatedBy": "AzureCLI",
+    "Environment": "budget",
+    "Project": "django-app",
+    "hidden-link: /app-insights-resource-id": "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg/providers/microsoft.insights/components/django-app-budget-insights"
+  },
+  "tracingOptions": null,
+  "type": "Microsoft.Web/sites",
+  "use32BitWorkerProcess": true,
+  "virtualApplications": [
+    {
+      "physicalPath": "site\\wwwroot",
+      "preloadEnabled": false,
+      "virtualDirectories": null,
+      "virtualPath": "/"
+    }
+  ],
+  "vnetName": "",
+  "vnetPrivatePortsCount": 0,
+  "vnetRouteAllEnabled": false,
+  "webSocketsEnabled": false,
+  "websiteTimeZone": null,
+  "windowsFxVersion": null,
+  "xManagedServiceIdentityId": null
+}
+@VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $ 
+```
+
+# ✅ Startup команда встановлена!
+
+Бачу, що команда успішно налаштована:
+```json
+"appCommandLine": "bash startup_with_install.sh"
+```
+
+## 🚀 Продовжуємо розгортання
+
+### **1. Розгорніть з новим startup скриптом**
+```bash
+zip working_with_deps.zip working_django.py startup_with_install.sh
+
+az webapp deploy \
+  --resource-group django-app-budget-rg \
+  --name django-app-budget-1751947063 \
+  --src-path working_with_deps.zip \
+  --type zip
+```
+
+### **2. Моніторьте процес**
+```bash
+# У іншому терміналі запустіть моніторинг
+az webapp log tail --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+```
+
+## 📊 Очікувані результати
+
+### **Успішний сценарій:**
+1. ✅ Bash скрипт встановить Django та gunicorn
+2. ✅ Python сервер запуститься
+3. ✅ Сайт стане доступним через 2-3 хвилини
+
+### **Що шукати в логах:**
+```
+Installing dependencies...
+Django version: 4.2.11
+Starting gunicorn server...
+[INFO] Starting gunicorn 20.1.0
+[INFO] Worker class: sync
+[INFO] Application has started successfully
+```
+
+### **Якщо все ще не працює - план С:**
+```bash
+# Спробуйте inline команду без bash скрипта
+az webapp config set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --startup-file "pip install Django==4.2.11 gunicorn==20.1.0 && gunicorn --bind=0.0.0.0:8000 --timeout 600 working_django:application"
+```
+
+## 🎯 Тестування після розгортання
+
+```bash
+# Через 2-3 хвилини перевірте доступність
+curl -I https://django-app-budget-1751947063.azurewebsites.net
+
+# Якщо повертає 200 OK, відкрийте в браузері
+az webapp browse --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+```
+
+## 📋 Наступні кроки після успіху
+
+Коли цей тест спрацює:
+1. **✅ Azure конфігурація працює**
+2. **🔄 Адаптуємо ваш project_portfolio**
+3. **📁 Налаштуємо статичні файли**
+4. **🗄️ Підключимо PostgreSQL**
+5. **🚀 Створимо GitHub Actions**
+
+**Виконайте розгортання і дайте знати про результат через 2-3 хвилини!** 
+
+Якщо побачите красиву Django сторінку - значить проблема розв'язана! 🎉
+
+
+
+
+
 ### **3. Створіть архів з startup скриптом**
 ```bash
 zip working_with_deps.zip working_django.py startup_with_install.sh
@@ -6637,6 +6858,57 @@ az webapp deploy \
   --src-path working_with_deps.zip \
   --type zip
 ```
+
+
+```bash
+@VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $ az webapp deploy \
+>   --resource-group django-app-budget-rg \
+>   --name django-app-budget-1751947063 \
+>   --src-path working_with_deps.zip \
+>   --type zip
+Initiating deployment
+Deploying from local path: working_with_deps.zip
+Warming up Kudu before deployment.
+Warmed up Kudu instance successfully.
+Polling the status of sync deployment. Start Time: 2025-07-08 09:20:28.873777+00:00 UTC
+Status: Build successful. Time: 0(s)
+Status: Starting the site... Time: 16(s)
+Status: Site started successfully. Time: 31(s)
+Deployment has completed successfully
+You can visit your app at: http://django-app-budget-1751947063.azurewebsites.net
+{
+  "id": "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg/providers/Microsoft.Web/sites/django-app-budget-1751947063/deploymentStatus/92136e88-4b6d-4aa1-b6c3-a915b4e4be85",
+  "location": "West Europe",
+  "name": "92136e88-4b6d-4aa1-b6c3-a915b4e4be85",
+  "properties": {
+    "deploymentId": "92136e88-4b6d-4aa1-b6c3-a915b4e4be85",
+    "errors": null,
+    "failedInstancesLogs": null,
+    "numberOfInstancesFailed": 0,
+    "numberOfInstancesInProgress": 0,
+    "numberOfInstancesSuccessful": 1,
+    "status": "RuntimeSuccessful"
+  },
+  "resourceGroup": "django-app-budget-rg",
+  "tags": {
+    "CostProfile": "Budget",
+    "CreatedBy": "AzureCLI",
+    "Environment": "budget",
+    "Project": "django-app",
+    "hidden-link: /app-insights-resource-id": "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg/providers/microsoft.insights/components/django-app-budget-insights"
+  },
+  "type": "Microsoft.Web/sites/deploymentStatus"
+}
+@VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $ 
+```
+
+
+
+
+
+
+
+
 
 ## 🚀 Альтернативне рішення - Inline встановлення
 
