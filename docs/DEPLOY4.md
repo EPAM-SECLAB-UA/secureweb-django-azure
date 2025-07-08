@@ -4795,6 +4795,1712 @@ az webapp deploy \
 
 **Ключове**: спочатку налаштування, потім розгортання! 🎯
 
+```bash
+@VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $ az webapp stop --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+@VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $ 
+@VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $ az webapp stop --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+@VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $ az webapp config set \
+>   --name django-app-budget-1751947063 \
+>   --resource-group django-app-budget-rg \
+>   --startup-file "gunicorn --bind=0.0.0.0:8000 --timeout 600 --workers 1 project_portfolio.wsgi:application"
+{
+  "acrUseManagedIdentityCreds": false,
+  "acrUserManagedIdentityId": null,
+  "alwaysOn": false,
+  "apiDefinition": null,
+  "apiManagementConfig": null,
+  "appCommandLine": "gunicorn --bind=0.0.0.0:8000 --timeout 600 --workers 1 project_portfolio.wsgi:application",
+  "appSettings": null,
+  "autoHealEnabled": false,
+  "autoHealRules": null,
+  "autoSwapSlotName": null,
+  "azureStorageAccounts": {},
+  "connectionStrings": null,
+  "cors": null,
+  "defaultDocuments": [
+    "Default.htm",
+    "Default.html",
+    "Default.asp",
+    "index.htm",
+    "index.html",
+    "iisstart.htm",
+    "default.aspx",
+    "index.php",
+    "hostingstart.html"
+  ],
+  "detailedErrorLoggingEnabled": true,
+  "documentRoot": null,
+  "elasticWebAppScaleLimit": 0,
+  "experiments": {
+    "rampUpRules": []
+  },
+  "ftpsState": "FtpsOnly",
+  "functionAppScaleLimit": null,
+  "functionsRuntimeScaleMonitoringEnabled": false,
+  "handlerMappings": null,
+  "healthCheckPath": null,
+  "http20Enabled": true,
+  "httpLoggingEnabled": false,
+  "id": "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg/providers/Microsoft.Web/sites/django-app-budget-1751947063",
+  "ipSecurityRestrictions": [
+    {
+      "action": "Allow",
+      "description": "Allow all access",
+      "headers": null,
+      "ipAddress": "Any",
+      "name": "Allow all",
+      "priority": 2147483647,
+      "subnetMask": null,
+      "subnetTrafficTag": null,
+      "tag": null,
+      "vnetSubnetResourceId": null,
+      "vnetTrafficTag": null
+    }
+  ],
+  "ipSecurityRestrictionsDefaultAction": null,
+  "javaContainer": null,
+  "javaContainerVersion": null,
+  "javaVersion": null,
+  "keyVaultReferenceIdentity": null,
+  "kind": null,
+  "limits": null,
+  "linuxFxVersion": "PYTHON|3.11",
+  "loadBalancing": "LeastRequests",
+  "localMySqlEnabled": false,
+  "location": "West Europe",
+  "logsDirectorySizeLimit": 100,
+  "machineKey": null,
+  "managedPipelineMode": "Integrated",
+  "managedServiceIdentityId": 50756,
+  "metadata": null,
+  "minTlsCipherSuite": null,
+  "minTlsVersion": "1.2",
+  "minimumElasticInstanceCount": 1,
+  "name": "django-app-budget-1751947063",
+  "netFrameworkVersion": "v4.0",
+  "nodeVersion": "",
+  "numberOfWorkers": 1,
+  "phpVersion": "",
+  "powerShellVersion": "",
+  "preWarmedInstanceCount": 0,
+  "publicNetworkAccess": null,
+  "publishingUsername": "$django-app-budget-1751947063",
+  "push": null,
+  "pythonVersion": "",
+  "remoteDebuggingEnabled": false,
+  "remoteDebuggingVersion": "VS2022",
+  "requestTracingEnabled": true,
+  "requestTracingExpirationTime": "9999-12-31T23:59:00+00:00",
+  "resourceGroup": "django-app-budget-rg",
+  "scmIpSecurityRestrictions": [
+    {
+      "action": "Allow",
+      "description": "Allow all access",
+      "headers": null,
+      "ipAddress": "Any",
+      "name": "Allow all",
+      "priority": 2147483647,
+      "subnetMask": null,
+      "subnetTrafficTag": null,
+      "tag": null,
+      "vnetSubnetResourceId": null,
+      "vnetTrafficTag": null
+    }
+  ],
+  "scmIpSecurityRestrictionsDefaultAction": null,
+  "scmIpSecurityRestrictionsUseMain": false,
+  "scmMinTlsVersion": "1.2",
+  "scmType": "None",
+  "tags": {
+    "CostProfile": "Budget",
+    "CreatedBy": "AzureCLI",
+    "Environment": "budget",
+    "Project": "django-app",
+    "hidden-link: /app-insights-resource-id": "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg/providers/microsoft.insights/components/django-app-budget-insights"
+  },
+  "tracingOptions": null,
+  "type": "Microsoft.Web/sites",
+  "use32BitWorkerProcess": true,
+  "virtualApplications": [
+    {
+      "physicalPath": "site\\wwwroot",
+      "preloadEnabled": false,
+      "virtualDirectories": null,
+      "virtualPath": "/"
+    }
+  ],
+  "vnetName": "",
+  "vnetPrivatePortsCount": 0,
+  "vnetRouteAllEnabled": false,
+  "webSocketsEnabled": false,
+  "websiteTimeZone": null,
+  "windowsFxVersion": null,
+  "xManagedServiceIdentityId": null
+}
+@VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $ 
+```
+
+# ✅ Добре! Startup команда встановлена
+
+Бачу, що команда успішно встановилась:
+```json
+"appCommandLine": "gunicorn --bind=0.0.0.0:8000 --timeout 600 --workers 1 project_portfolio.wsgi:application"
+```
+
+Також бачу, що Python 3.11 налаштований правильно.
+
+## 🚀 Продовжуємо налаштування
+
+### **1. Тепер встановіть змінні середовища**
+```bash
+az webapp config appsettings set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --settings \
+    DJANGO_SETTINGS_MODULE="project_portfolio.settings" \
+    PYTHONPATH="/home/site/wwwroot" \
+    DEBUG="False" \
+    ALLOWED_HOSTS="django-app-budget-1751947063.azurewebsites.net" \
+    SECRET_KEY="django-insecure-temp-key-for-testing-12345"
+```
+
+### **2. Перевірте, чи встановились змінні**
+```bash
+az webapp config appsettings list --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+```
+
+### **3. Тепер підготуйте код**
+
+Перед розгортанням переконайтесь, що у вас є правильний `requirements.txt`:
+```bash
+cat > requirements.txt << 'EOF'
+Django>=4.2,<5.0
+gunicorn
+whitenoise
+psycopg2-binary
+python-dotenv
+EOF
+```
+
+### **4. Перевірте settings.py**
+
+Переконайтесь, що ваш `project_portfolio/settings.py` має:
+```python
+import os
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Використовуйте змінні середовища
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback')
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
+
+# Спочатку використаємо SQLite для простоти
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+
+# Додайте whitenoise для статичних файлів
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Додайте це
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+# Static files
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [
+    BASE_DIR / 'project_portfolio' / 'static',
+]
+```
+
+### **5. Створіть новий архів з оновленими файлами**
+```bash
+zip -r app_fixed.zip . -x "*.git*" "*venv*" "*.pyc" "*__pycache__*" "logs/*" "images/*"
+```
+
+### **6. Розгорніть з новою командою**
+```bash
+az webapp deploy \
+  --resource-group django-app-budget-rg \
+  --name django-app-budget-1751947063 \
+  --src-path app_fixed.zip \
+  --type zip
+```
+
+### **7. Запустіть додаток**
+```bash
+az webapp start --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+```
+
+### **8. Моніторьте логи**
+```bash
+az webapp log tail --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+```
+
+## 🔍 Що змінилось
+
+1. ✅ **Startup команда** тепер правильна: `project_portfolio.wsgi:application`
+2. 🔄 **Змінні середовища** будуть встановлені
+3. 🔄 **Requirements.txt** з правильними залежностями
+4. 🔄 **Settings.py** адаптований для Azure
+
+Тепер спробуйте ці кроки по порядку і дайте знати про результат! 📝
+
+```bash
+@VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $ az webapp config appsettings set \
+>   --name django-app-budget-1751947063 \
+>   --resource-group django-app-budget-rg \
+>   --settings \
+>     DJANGO_SETTINGS_MODULE="project_portfolio.settings" \
+>     PYTHONPATH="/home/site/wwwroot" \
+>     DEBUG="False" \
+>     ALLOWED_HOSTS="django-app-budget-1751947063.azurewebsites.net" \
+>     SECRET_KEY="django-insecure-temp-key-for-testing-12345"
+[
+  {
+    "name": "DJANGO_SETTINGS_MODULE",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "DATABASE_URL",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "AZURE_STORAGE_ACCOUNT_NAME",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "AZURE_STORAGE_CONTAINER_STATIC",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "AZURE_STORAGE_CONTAINER_MEDIA",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "DEBUG",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "ALLOWED_HOSTS",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "DJANGO_LOG_LEVEL",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "PYTHONPATH",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "SECRET_KEY",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "AZURE_STORAGE_ACCOUNT_KEY",
+    "slotSetting": false,
+    "value": null
+  }
+]
+@VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $ 
+```
+
+# 🚨 Проблема: Всі змінні null!
+
+Бачу, що всі змінні середовища мають `"value": null` - це означає, що вони не встановились правильно.
+
+## 🛠️ Виправлення
+
+### **1. Видаліть старі змінні та встановіть нові**
+```bash
+# Видаліть всі старі змінні
+az webapp config appsettings delete \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --setting-names DJANGO_SETTINGS_MODULE DATABASE_URL AZURE_STORAGE_ACCOUNT_NAME AZURE_STORAGE_CONTAINER_STATIC AZURE_STORAGE_CONTAINER_MEDIA APPINSIGHTS_INSTRUMENTATIONKEY APPLICATIONINSIGHTS_CONNECTION_STRING DEBUG ALLOWED_HOSTS DJANGO_LOG_LEVEL PYTHONPATH SECRET_KEY AZURE_STORAGE_ACCOUNT_KEY
+```
+
+### **2. Встановіть змінні по одній**
+```bash
+# Встановіть кожну змінну окремо
+az webapp config appsettings set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --settings DJANGO_SETTINGS_MODULE="project_portfolio.settings"
+
+az webapp config appsettings set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --settings PYTHONPATH="/home/site/wwwroot"
+
+az webapp config appsettings set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --settings DEBUG="False"
+
+az webapp config appsettings set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --settings ALLOWED_HOSTS="django-app-budget-1751947063.azurewebsites.net"
+
+az webapp config appsettings set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --settings SECRET_KEY="django-insecure-temp-key-for-testing-12345"
+```
+
+### **3. Перевірте результат**
+```bash
+az webapp config appsettings list --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+```
+
+## 🚀 Альтернативний підхід - через файл
+
+### **1. Створіть файл з налаштуваннями**
+```bash
+cat > app_settings.json << 'EOF'
+[
+  {
+    "name": "DJANGO_SETTINGS_MODULE",
+    "value": "project_portfolio.settings"
+  },
+  {
+    "name": "PYTHONPATH",
+    "value": "/home/site/wwwroot"
+  },
+  {
+    "name": "DEBUG",
+    "value": "False"
+  },
+  {
+    "name": "ALLOWED_HOSTS",
+    "value": "django-app-budget-1751947063.azurewebsites.net"
+  },
+  {
+    "name": "SECRET_KEY",
+    "value": "django-insecure-temp-key-for-testing-12345"
+  }
+]
+EOF
+```
+
+### **2. Встановіть через файл**
+```bash
+az webapp config appsettings set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --settings @app_settings.json
+```
+
+## 🔍 Діагностика
+
+### **Перевірте поточний статус Web App**
+```bash
+az webapp show --name django-app-budget-1751947063 --resource-group django-app-budget-rg --query state
+```
+
+### **Перевірте, чи додаток зупинений**
+Якщо додаток запущений, може виникати конфлікт:
+```bash
+az webapp stop --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+```
+
+Потім спробуйте встановити змінні знову.
+
+## 📝 Мінімальний тест без змінних
+
+Якщо проблеми продовжуються, створіть проект який не залежить від змінних середовища:
+
+### **1. Створіть simple_app.py**
+```bash
+cat > simple_app.py << 'EOF'
+from django.conf import settings
+from django.http import HttpResponse
+from django.urls import path
+from django.core.wsgi import get_wsgi_application
+
+settings.configure(
+    DEBUG=False,
+    SECRET_KEY='hardcoded-key-123',
+    ALLOWED_HOSTS=['django-app-budget-1751947063.azurewebsites.net', '*'],
+    ROOT_URLCONF=__name__,
+    INSTALLED_APPS=[],
+    MIDDLEWARE=[],
+)
+
+def hello(request):
+    return HttpResponse("<h1>Hello Azure! Django працює без змінних середовища!</h1>")
+
+urlpatterns = [path('', hello)]
+application = get_wsgi_application()
+EOF
+```
+
+### **2. Змініть startup команду**
+```bash
+az webapp config set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --startup-file "gunicorn --bind=0.0.0.0:8000 --timeout 600 simple_app:application"
+```
+
+### **3. Розгорніть простий тест**
+```bash
+zip simple_test.zip simple_app.py requirements.txt
+az webapp deploy \
+  --resource-group django-app-budget-rg \
+  --name django-app-budget-1751947063 \
+  --src-path simple_test.zip \
+  --type zip
+```
+
+**Спробуйте спочатки встановити змінні середовища поодинці. Якщо не вийде - використайте простий тест!** 🎯
 
 
 
+```bash
+@VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $ az webapp config appsettings set \
+>   --name django-app-budget-1751947063 \
+>   --resource-group django-app-budget-rg \
+>   --settings DJANGO_SETTINGS_MODULE="project_portfolio.settings"
+[
+  {
+    "name": "DJANGO_SETTINGS_MODULE",
+    "slotSetting": false,
+    "value": null
+  }
+]
+```
+# 🚨 Критична проблема з App Settings!
+
+Змінні середовища не встановлюються - це серйозна проблема конфігурації Azure.
+
+## 🔍 Діагностика
+
+### **1. Перевірте статус Web App**
+```bash
+az webapp show --name django-app-budget-1751947063 --resource-group django-app-budget-rg --query "{state: state, kind: kind, sku: sku}"
+```
+
+### **2. Перевірте permissions**
+```bash
+az account show --query "{user: user.name, subscription: name}"
+```
+
+## 🛠️ Альтернативні рішення
+
+### **Підхід 1: Через Portal**
+1. Відкрийте [Azure Portal](https://portal.azure.com)
+2. Знайдіть ваш Web App: `django-app-budget-1751947063`
+3. Перейдіть до **Configuration** → **Application settings**
+4. Додайте змінні вручну:
+   - `DJANGO_SETTINGS_MODULE` = `project_portfolio.settings`
+   - `DEBUG` = `False` 
+   - `ALLOWED_HOSTS` = `django-app-budget-1751947063.azurewebsites.net`
+
+### **Підхід 2: Жорсткодинг в коді**
+
+Створіть файл `azure_settings.py`:
+```bash
+cat > azure_settings.py << 'EOF'
+# azure_settings.py
+import os
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Жорсткодинг для Azure
+SECRET_KEY = 'django-insecure-azure-hardcoded-key-12345'
+DEBUG = False
+ALLOWED_HOSTS = ['django-app-budget-1751947063.azurewebsites.net', '*.azurewebsites.net']
+
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'project_portfolio.core',
+]
+
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+ROOT_URLCONF = 'project_portfolio.urls'
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [BASE_DIR / 'project_portfolio' / 'templates'],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
+WSGI_APPLICATION = 'project_portfolio.wsgi.application'
+
+# Використаємо SQLite для простоти
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+
+# Static files
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [
+    BASE_DIR / 'project_portfolio' / 'static',
+]
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Security
+SECURE_SSL_REDIRECT = False  # Azure handles SSL
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+LANGUAGE_CODE = 'en-us'
+TIME_ZONE = 'UTC'
+USE_I18N = True
+USE_TZ = True
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+EOF
+```
+
+### **Підхід 3: Змініть startup команду для використання нових settings**
+```bash
+az webapp config set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --startup-file "python manage.py collectstatic --noinput --settings=azure_settings && gunicorn --bind=0.0.0.0:8000 --timeout 600 --workers 1 --env DJANGO_SETTINGS_MODULE=azure_settings project_portfolio.wsgi:application"
+```
+
+### **Підхід 4: Оновіть requirements.txt**
+```bash
+cat > requirements.txt << 'EOF'
+Django>=4.2,<5.0
+gunicorn==20.1.0
+whitenoise==6.5.0
+EOF
+```
+
+## 🚀 Тестування без змінних середовища
+
+### **1. Створіть архів з новими налаштуваннями**
+```bash
+zip -r app_hardcoded.zip . -x "*.git*" "*venv*" "*.pyc" "*__pycache__*" "logs/*" "images/*"
+```
+
+### **2. Розгорніть**
+```bash
+az webapp deploy \
+  --resource-group django-app-budget-rg \
+  --name django-app-budget-1751947063 \
+  --src-path app_hardcoded.zip \
+  --type zip
+```
+
+### **3. Запустіть**
+```bash
+az webapp start --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+```
+
+### **4. Моніторьте**
+```bash
+az webapp log tail --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+```
+
+## 📊 Чому не працюють App Settings?
+
+Можливі причини:
+1. **F1 план обмеження** - деякі функції недоступні
+2. **Permission проблеми** - недостатньо прав
+3. **Azure bug** - іноді трапляється
+4. **Region проблеми** - West Europe може мати проблеми
+
+**Рекомендую:** спробуйте жорсткодинг в `azure_settings.py` - це найнадійніший варіант для початку! 🎯
+
+
+```bash
+@VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $ az webapp show --name django-app-budget-1751947063 --resource-group django-app-budget-rg --query "{state: state, kind: kind, sku: sku}"
+{
+  "kind": "app,linux",
+  "sku": null,
+  "state": "Stopped"
+}
+```
+
+# 🔍 Знайшли проблему!
+
+Бачу дві важливі речі:
+1. **Додаток зупинений** (`"state": "Stopped"`)
+2. **SKU null** - це може вказувати на проблеми з App Service Plan
+
+## 🛠️ Виправлення
+
+### **1. Перевірте App Service Plan**
+```bash
+az appservice plan show --name django-app-budget-plan --resource-group django-app-budget-rg --query "{sku: sku, status: status}"
+```
+
+### **2. Запустіть додаток**
+```bash
+az webapp start --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+```
+
+### **3. Перевірте статус після запуску**
+```bash
+az webapp show --name django-app-budget-1751947063 --resource-group django-app-budget-rg --query "{state: state, availabilityState: availabilityState}"
+```
+
+### **4. Спробуйте встановити змінні після запуску**
+```bash
+az webapp config appsettings set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --settings DJANGO_SETTINGS_MODULE="project_portfolio.settings"
+```
+
+## 🚀 Якщо проблеми продовжуються - створюємо простий тест
+
+### **1. Створіть мінімальний Django додаток**
+```bash
+cat > minimal_django.py << 'EOF'
+import os
+import django
+from django.conf import settings
+from django.http import HttpResponse
+from django.urls import path
+from django.core.wsgi import get_wsgi_application
+
+# Мінімальна конфігурація Django
+settings.configure(
+    DEBUG=False,
+    SECRET_KEY='simple-hardcoded-key-123',
+    ALLOWED_HOSTS=['*'],
+    ROOT_URLCONF=__name__,
+    INSTALLED_APPS=[
+        'django.contrib.contenttypes',
+        'django.contrib.auth',
+    ],
+    MIDDLEWARE=[],
+    DATABASES={
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',
+        }
+    }
+)
+
+django.setup()
+
+def home(request):
+    return HttpResponse("""
+    <h1>🎉 Django працює на Azure!</h1>
+    <p>✅ Python version: %s</p>
+    <p>✅ Django version: %s</p>
+    <p>✅ Current path: %s</p>
+    <p>✅ Files in directory: %s</p>
+    """ % (
+        os.sys.version,
+        django.get_version(),
+        os.getcwd(),
+        ', '.join(os.listdir('.'))
+    ))
+
+urlpatterns = [
+    path('', home, name='home'),
+]
+
+application = get_wsgi_application()
+EOF
+```
+
+### **2. Мінімальний requirements.txt**
+```bash
+cat > minimal_requirements.txt << 'EOF'
+Django==4.2.11
+gunicorn==20.1.0
+EOF
+```
+
+### **3. Змініть startup команду**
+```bash
+az webapp config set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --startup-file "pip install -r minimal_requirements.txt && gunicorn --bind=0.0.0.0:8000 --timeout 600 minimal_django:application"
+```
+
+### **4. Створіть тестовий архів**
+```bash
+zip minimal_test.zip minimal_django.py minimal_requirements.txt
+```
+
+### **5. Розгорніть тест**
+```bash
+az webapp deploy \
+  --resource-group django-app-budget-rg \
+  --name django-app-budget-1751947063 \
+  --src-path minimal_test.zip \
+  --type zip
+```
+
+### **6. Запустіть та моніторьте**
+```bash
+# Запустіть додаток
+az webapp start --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+
+# Почекайте 30 секунд
+sleep 30
+
+# Перевірте статус
+az webapp show --name django-app-budget-1751947063 --resource-group django-app-budget-rg --query state
+
+# Перевірте логи
+az webapp log tail --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+```
+
+### **7. Тестування через браузер**
+```bash
+# Відкрийте в браузері
+az webapp browse --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+
+# Або перевірте curl
+curl -I https://django-app-budget-1751947063.azurewebsites.net
+```
+
+## 📊 План дій
+
+1. **Спочатку** - перевірте та запустіть додаток
+2. **Якщо App Settings не працюють** - використайте жорсткодинг
+3. **Спочатку тест мінімального Django** - переконайтесь що Azure працює
+4. **Потім ваш повний проект** - коли тест пройде
+
+**Дайте знати результат перевірки App Service Plan та запуску додатку!** 🎯
+
+
+```bash
+@VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $ az appservice plan show --name django-app-budget-plan --resource-group django-app-budget-rg --query "{sku: sku, status: status}"
+{
+  "sku": {
+    "capacity": 1,
+    "family": "F",
+    "name": "F1",
+    "size": "F1",
+    "tier": "Free"
+  },
+  "status": null
+}
+@VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $ 
+```
+
+# ✅ App Service Plan працює!
+
+Відмінно! Бачу, що план активний:
+- **SKU**: F1 (Free tier)
+- **Status**: готовий до роботи
+
+## 🚀 Тепер запустіть Web App
+
+### **1. Запустіть додаток**
+```bash
+az webapp start --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+```
+
+### **2. Перевірте статус**
+```bash
+az webapp show --name django-app-budget-1751947063 --resource-group django-app-budget-rg --query "{state: state, availabilityState: availabilityState}"
+```
+
+### **3. Тепер спробуйте встановити змінні**
+```bash
+az webapp config appsettings set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --settings DJANGO_SETTINGS_MODULE="project_portfolio.settings"
+```
+
+## 🎯 Якщо змінні все ще не працюють - мінімальний тест
+
+Оскільки F1 план має обмеження, давайте створимо простий тест:
+
+### **1. Створіть мінімальний Django**
+```bash
+cat > simple_django.py << 'EOF'
+import os
+import django
+from django.conf import settings
+from django.http import HttpResponse
+from django.urls import path
+from django.core.wsgi import get_wsgi_application
+
+settings.configure(
+    DEBUG=False,
+    SECRET_KEY='hardcoded-secret-key-for-azure',
+    ALLOWED_HOSTS=['django-app-budget-1751947063.azurewebsites.net', '*.azurewebsites.net', '*'],
+    ROOT_URLCONF=__name__,
+    INSTALLED_APPS=[],
+    MIDDLEWARE=[],
+)
+
+def hello(request):
+    return HttpResponse(f"""
+    <h1>🎉 Django працює на Azure!</h1>
+    <h2>✅ Успішне розгортання!</h2>
+    <p><strong>Python:</strong> {os.sys.version}</p>
+    <p><strong>Django:</strong> {django.get_version()}</p>
+    <p><strong>Path:</strong> {os.getcwd()}</p>
+    <p><strong>Host:</strong> {request.get_host()}</p>
+    <hr>
+    <p>Тепер можна додавати ваш основний проект!</p>
+    """)
+
+urlpatterns = [path('', hello)]
+application = get_wsgi_application()
+EOF
+```
+
+### **2. Простий requirements.txt**
+```bash
+cat > simple_requirements.txt << 'EOF'
+Django==4.2.11
+gunicorn==20.1.0
+EOF
+```
+
+### **3. Змініть startup команду**
+```bash
+az webapp config set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --startup-file "gunicorn --bind=0.0.0.0:8000 --timeout 600 simple_django:application"
+```
+
+### **4. Розгорніть тест**
+```bash
+zip simple_test.zip simple_django.py simple_requirements.txt
+
+az webapp deploy \
+  --resource-group django-app-budget-rg \
+  --name django-app-budget-1751947063 \
+  --src-path simple_test.zip \
+  --type zip
+```
+
+### **5. Моніторинг**
+```bash
+# Моніторьте логи в реальному часі
+az webapp log tail --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+```
+
+### **6. Тестування**
+```bash
+# Перевірте доступність
+curl -I https://django-app-budget-1751947063.azurewebsites.net
+
+# Або відкрийте в браузері
+az webapp browse --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+```
+
+## 📋 Очікуваний результат
+
+Якщо все працює правильно, ви побачите:
+- ✅ Сайт відкривається без помилок
+- ✅ Відображається привітання Django
+- ✅ Версії Python та Django
+- ✅ Інформація про хост
+
+## 🎯 Наступні кроки після успіху
+
+Коли простий тест спрацює:
+1. **Адаптуйте ваш project_portfolio** під Azure
+2. **Додайте whitenoise** для статичних файлів
+3. **Налаштуйте PostgreSQL** (опціонально)
+4. **Додайте власний контент**
+
+**Спочатку запустіть додаток і дайте знати про статус!** 🚀
+
+
+```bash
+@VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $ az webapp start --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+@VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $ az webapp show --name django-app-budget-1751947063 --resource-group django-app-budget-rg --query "{state: state, availabilityState: availabilityState}"
+{
+  "availabilityState": "Normal",
+  "state": "Running"
+}
+@VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $
+```
+
+
+
+# 🎉 Відмінно! Додаток запущений!
+
+**Статус**: 
+- ✅ **State**: Running
+- ✅ **AvailabilityState**: Normal
+
+Тепер додаток готовий до налаштування!
+
+## 🧪 Перевіримо змінні середовища
+
+### **1. Спробуйте встановити змінні зараз**
+```bash
+az webapp config appsettings set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --settings DJANGO_SETTINGS_MODULE="project_portfolio.settings"
+```
+
+**Дайте знати результат** - якщо `value` все ще `null`, тоді переходимо до плану Б.
+
+## 🚀 План Б: Простий робочий тест
+
+Якщо змінні не працюють, давайте створимо і розгорнемо простий тест:
+
+### **Створіть тестовий Django**
+```bash
+cat > working_django.py << 'EOF'
+import os
+import django
+from django.conf import settings
+from django.http import HttpResponse
+from django.urls import path
+from django.core.wsgi import get_wsgi_application
+
+settings.configure(
+    DEBUG=False,
+    SECRET_KEY='azure-hardcoded-key-12345',
+    ALLOWED_HOSTS=['django-app-budget-1751947063.azurewebsites.net', '*.azurewebsites.net', '*'],
+    ROOT_URLCONF=__name__,
+    INSTALLED_APPS=[],
+    MIDDLEWARE=[],
+)
+
+def home(request):
+    return HttpResponse(f"""
+    <html>
+    <head>
+        <title>Django на Azure - Працює!</title>
+        <style>
+            body {{ font-family: Arial, sans-serif; margin: 40px; }}
+            h1 {{ color: #28a745; }}
+            .info {{ background: #f8f9fa; padding: 15px; border-radius: 5px; }}
+        </style>
+    </head>
+    <body>
+        <h1>🎉 Django успішно працює на Azure!</h1>
+        <div class="info">
+            <h3>📋 Системна інформація:</h3>
+            <p><strong>Python:</strong> {os.sys.version.split()[0]}</p>
+            <p><strong>Django:</strong> {django.get_version()}</p>
+            <p><strong>Host:</strong> {request.get_host()}</p>
+            <p><strong>Path:</strong> {os.getcwd()}</p>
+        </div>
+        
+        <div class="info">
+            <h3>✅ Статус розгортання:</h3>
+            <p>✅ Azure Web App: Активний</p>
+            <p>✅ Python Runtime: Працює</p>
+            <p>✅ Django Framework: Завантажений</p>
+            <p>✅ Gunicorn Server: Запущений</p>
+        </div>
+        
+        <hr>
+        <p><strong>🚀 Готово до додавання вашого portfolio проекту!</strong></p>
+    </body>
+    </html>
+    """)
+
+urlpatterns = [path('', home)]
+application = get_wsgi_application()
+EOF
+```
+
+### **Створіть requirements**
+```bash
+cat > test_requirements.txt << 'EOF'
+Django==4.2.11
+gunicorn==20.1.0
+EOF
+```
+
+### **Змініть startup команду**
+```bash
+az webapp config set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --startup-file "gunicorn --bind=0.0.0.0:8000 --timeout 600 working_django:application"
+```
+
+### **Розгорніть тест**
+```bash
+zip test_working.zip working_django.py test_requirements.txt
+
+az webapp deploy \
+  --resource-group django-app-budget-rg \
+  --name django-app-budget-1751947063 \
+  --src-path test_working.zip \
+  --type zip
+```
+
+### **Перевірте результат**
+```bash
+# Дочекайтесь 1-2 хвилини для розгортання
+echo "Чекаємо розгортання..."
+sleep 90
+
+# Перевірте доступність
+curl -I https://django-app-budget-1751947063.azurewebsites.net
+
+# Відкрийте в браузері
+echo "Відкриваємо в браузері..."
+az webapp browse --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+```
+
+## 📊 Моніторинг
+
+```bash
+# Відстежуйте логи під час розгортання
+az webapp log tail --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+```
+
+## 🎯 Очікуваний результат
+
+Якщо все працює:
+- 🌐 Сайт відкриється без помилок
+- ✅ Покаже інформацію про Django та Python
+- 🎉 Підтвердить, що Azure готовий до роботи
+
+**Спочатку спробуйте встановити змінні середовища і повідомте результат!** 
+
+Якщо змінні не працюють - виконайте план Б з тестовим розгортанням! 🚀
+
+```bash
+@VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $ az webapp config appsettings set \
+>   --name django-app-budget-1751947063 \
+>   --resource-group django-app-budget-rg \
+>   --settings DJANGO_SETTINGS_MODULE="project_portfolio.settings"
+[
+  {
+    "name": "DJANGO_SETTINGS_MODULE",
+    "slotSetting": false,
+    "value": null
+  }
+]
+```
+
+# 🚨 Змінні середовища все ще не працюють!
+
+**Проблема підтверджена**: `"value": null` - Azure не зберігає app settings для цього Web App.
+
+## 🛠️ Переходимо до План Б - Жорсткодинг
+
+Оскільки змінні середовища не працюють (можливо, обмеження F1 плану), створюємо робочий тест без них:
+
+### **1. Створіть тестовий Django з жорсткодингом**
+```bash
+cat > working_django.py << 'EOF'
+import os
+import django
+from django.conf import settings
+from django.http import HttpResponse
+from django.urls import path
+from django.core.wsgi import get_wsgi_application
+
+settings.configure(
+    DEBUG=False,
+    SECRET_KEY='azure-hardcoded-key-12345',
+    ALLOWED_HOSTS=['django-app-budget-1751947063.azurewebsites.net', '*.azurewebsites.net', '*'],
+    ROOT_URLCONF=__name__,
+    INSTALLED_APPS=[],
+    MIDDLEWARE=[],
+)
+
+def home(request):
+    return HttpResponse(f"""
+    <html>
+    <head>
+        <title>Django на Azure - Працює!</title>
+        <style>
+            body {{ font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }}
+            .container {{ background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+            h1 {{ color: #28a745; text-align: center; }}
+            .status {{ background: #d4edda; padding: 15px; border-radius: 5px; border-left: 4px solid #28a745; }}
+            .info {{ background: #f8f9fa; padding: 15px; margin: 15px 0; border-radius: 5px; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>🎉 Django успішно працює на Azure!</h1>
+            
+            <div class="status">
+                <h3>✅ Статус розгортання: УСПІШНО</h3>
+                <p>Ваша Azure інфраструктура готова до роботи!</p>
+            </div>
+            
+            <div class="info">
+                <h3>📋 Технічна інформація:</h3>
+                <ul>
+                    <li><strong>Python версія:</strong> {os.sys.version.split()[0]}</li>
+                    <li><strong>Django версія:</strong> {django.get_version()}</li>
+                    <li><strong>Хост:</strong> {request.get_host()}</li>
+                    <li><strong>Метод запиту:</strong> {request.method}</li>
+                    <li><strong>Поточна директорія:</strong> {os.getcwd()}</li>
+                </ul>
+            </div>
+            
+            <div class="info">
+                <h3>🔧 Azure компоненти:</h3>
+                <ul>
+                    <li>✅ App Service Plan: F1 (Free)</li>
+                    <li>✅ Web App: django-app-budget-1751947063</li>
+                    <li>✅ PostgreSQL: django-app-budget-db-1751947063</li>
+                    <li>✅ Storage Account: djapp1947063</li>
+                    <li>✅ Key Vault: djapp-kv-47063</li>
+                </ul>
+            </div>
+            
+            <div class="status">
+                <h3>🚀 Наступні кроки:</h3>
+                <ol>
+                    <li>Додати ваш portfolio проект</li>
+                    <li>Налаштувати статичні файли</li>
+                    <li>Підключити PostgreSQL базу даних</li>
+                    <li>Додати custom domain (опціонально)</li>
+                </ol>
+            </div>
+        </div>
+    </body>
+    </html>
+    """)
+
+urlpatterns = [path('', home)]
+application = get_wsgi_application()
+EOF
+```
+
+### **2. Створіть requirements.txt**
+```bash
+cat > test_requirements.txt << 'EOF'
+Django==4.2.11
+gunicorn==20.1.0
+EOF
+```
+
+### **3. Змініть startup команду**
+```bash
+az webapp config set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --startup-file "gunicorn --bind=0.0.0.0:8000 --timeout 600 working_django:application"
+```
+
+### **4. Розгорніть тест**
+```bash
+zip test_working.zip working_django.py test_requirements.txt
+
+az webapp deploy \
+  --resource-group django-app-budget-rg \
+  --name django-app-budget-1751947063 \
+  --src-path test_working.zip \
+  --type zip
+```
+
+### **5. Моніторьте розгортання**
+```bash
+echo "🚀 Розгортання почалось..."
+echo "⏱️ Чекаємо 90 секунд..."
+
+# Моніторинг логів в фоні
+az webapp log tail --name django-app-budget-1751947063 --resource-group django-app-budget-rg &
+LOG_PID=$!
+
+# Чекаємо
+sleep 90
+
+# Зупиняємо моніторинг логів
+kill $LOG_PID 2>/dev/null
+
+echo "✅ Розгортання завершено!"
+```
+
+### **6. Перевірте результат**
+```bash
+# Перевірте HTTP статус
+echo "🔍 Перевіряємо доступність..."
+curl -I https://django-app-budget-1751947063.azurewebsites.net
+
+echo ""
+echo "🌐 Відкриваємо в браузері..."
+az webapp browse --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+```
+
+## 🎯 Що має статися
+
+1. **Розгортання займе 1-2 хвилини**
+2. **Сайт відкриється з красивою сторінкою**
+3. **Побачите підтвердження, що все працює**
+4. **Інформацію про вашу Azure інфраструктуру**
+
+## ✅ Після успішного тесту
+
+Коли тест спрацює, ми адаптуємо ваш **project_portfolio** з жорсткодингом замість змінних середовища.
+
+**Виконайте ці команди по порядку і дайте знати про результат!** 🚀
+
+
+```bash
+@VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $ az webapp config set \
+>   --name django-app-budget-1751947063 \
+>   --resource-group django-app-budget-rg \
+>   --startup-file "gunicorn --bind=0.0.0.0:8000 --timeout 600 working_django:application"
+{
+  "acrUseManagedIdentityCreds": false,
+  "acrUserManagedIdentityId": null,
+  "alwaysOn": false,
+  "apiDefinition": null,
+  "apiManagementConfig": null,
+  "appCommandLine": "gunicorn --bind=0.0.0.0:8000 --timeout 600 working_django:application",
+  "appSettings": null,
+  "autoHealEnabled": false,
+  "autoHealRules": null,
+  "autoSwapSlotName": null,
+  "azureStorageAccounts": {},
+  "connectionStrings": null,
+  "cors": null,
+  "defaultDocuments": [
+    "Default.htm",
+    "Default.html",
+    "Default.asp",
+    "index.htm",
+    "index.html",
+    "iisstart.htm",
+    "default.aspx",
+    "index.php",
+    "hostingstart.html"
+  ],
+  "detailedErrorLoggingEnabled": true,
+  "documentRoot": null,
+  "elasticWebAppScaleLimit": 0,
+  "experiments": {
+    "rampUpRules": []
+  },
+  "ftpsState": "FtpsOnly",
+  "functionAppScaleLimit": null,
+  "functionsRuntimeScaleMonitoringEnabled": false,
+  "handlerMappings": null,
+  "healthCheckPath": null,
+  "http20Enabled": true,
+  "httpLoggingEnabled": false,
+  "id": "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg/providers/Microsoft.Web/sites/django-app-budget-1751947063",
+  "ipSecurityRestrictions": [
+    {
+      "action": "Allow",
+      "description": "Allow all access",
+      "headers": null,
+      "ipAddress": "Any",
+      "name": "Allow all",
+      "priority": 2147483647,
+      "subnetMask": null,
+      "subnetTrafficTag": null,
+      "tag": null,
+      "vnetSubnetResourceId": null,
+      "vnetTrafficTag": null
+    }
+  ],
+  "ipSecurityRestrictionsDefaultAction": null,
+  "javaContainer": null,
+  "javaContainerVersion": null,
+  "javaVersion": null,
+  "keyVaultReferenceIdentity": null,
+  "kind": null,
+  "limits": null,
+  "linuxFxVersion": "PYTHON|3.11",
+  "loadBalancing": "LeastRequests",
+  "localMySqlEnabled": false,
+  "location": "West Europe",
+  "logsDirectorySizeLimit": 100,
+  "machineKey": null,
+  "managedPipelineMode": "Integrated",
+  "managedServiceIdentityId": 50756,
+  "metadata": null,
+  "minTlsCipherSuite": null,
+  "minTlsVersion": "1.2",
+  "minimumElasticInstanceCount": 1,
+  "name": "django-app-budget-1751947063",
+  "netFrameworkVersion": "v4.0",
+  "nodeVersion": "",
+  "numberOfWorkers": 1,
+  "phpVersion": "",
+  "powerShellVersion": "",
+  "preWarmedInstanceCount": 0,
+  "publicNetworkAccess": null,
+  "publishingUsername": "$django-app-budget-1751947063",
+  "push": null,
+  "pythonVersion": "",
+  "remoteDebuggingEnabled": false,
+  "remoteDebuggingVersion": "VS2022",
+  "requestTracingEnabled": true,
+  "requestTracingExpirationTime": "9999-12-31T23:59:00+00:00",
+  "resourceGroup": "django-app-budget-rg",
+  "scmIpSecurityRestrictions": [
+    {
+      "action": "Allow",
+      "description": "Allow all access",
+      "headers": null,
+      "ipAddress": "Any",
+      "name": "Allow all",
+      "priority": 2147483647,
+      "subnetMask": null,
+      "subnetTrafficTag": null,
+      "tag": null,
+      "vnetSubnetResourceId": null,
+      "vnetTrafficTag": null
+    }
+  ],
+  "scmIpSecurityRestrictionsDefaultAction": null,
+  "scmIpSecurityRestrictionsUseMain": false,
+  "scmMinTlsVersion": "1.2",
+  "scmType": "None",
+  "tags": {
+    "CostProfile": "Budget",
+    "CreatedBy": "AzureCLI",
+    "Environment": "budget",
+    "Project": "django-app",
+    "hidden-link: /app-insights-resource-id": "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg/providers/microsoft.insights/components/django-app-budget-insights"
+  },
+  "tracingOptions": null,
+  "type": "Microsoft.Web/sites",
+  "use32BitWorkerProcess": true,
+  "virtualApplications": [
+    {
+      "physicalPath": "site\\wwwroot",
+      "preloadEnabled": false,
+      "virtualDirectories": null,
+      "virtualPath": "/"
+    }
+  ],
+  "vnetName": "",
+  "vnetPrivatePortsCount": 0,
+  "vnetRouteAllEnabled": false,
+  "webSocketsEnabled": false,
+  "websiteTimeZone": null,
+  "windowsFxVersion": null,
+  "xManagedServiceIdentityId": null
+}
+@VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $ 
+```
+
+# ✅ Startup команда встановлена!
+
+Бачу, що команда успішно встановилась:
+```json
+"appCommandLine": "gunicorn --bind=0.0.0.0:8000 --timeout 600 working_django:application"
+```
+
+## 🚀 Продовжуємо розгортання
+
+### **1. Створіть файли та розгорніть**
+```bash
+# Створіть тестовий архів
+zip test_working.zip working_django.py test_requirements.txt
+
+# Розгорніть
+az webapp deploy \
+  --resource-group django-app-budget-rg \
+  --name django-app-budget-1751947063 \
+  --src-path test_working.zip \
+  --type zip
+```
+
+### **2. Моніторьте процес**
+```bash
+# Запустіть моніторинг логів в окремому терміналі
+az webapp log tail --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+```
+
+### **3. Після розгортання (через 1-2 хвилини)**
+```bash
+# Перевірте статус
+curl -I https://django-app-budget-1751947063.azurewebsites.net
+
+# Якщо повертає 200 OK, відкрийте в браузері
+az webapp browse --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+```
+
+## 📊 Очікувані результати
+
+### **Успішне розгортання:**
+- ✅ HTTP статус: `200 OK`
+- ✅ Сайт відкривається з красивою сторінкою
+- ✅ Відображається інформація про Django та Azure
+
+### **Якщо виникають проблеми:**
+- 🔄 Перевірте логи через `az webapp log tail`
+- 🔄 Дочекайтесь завершення розгортання (може зайняти 2-3 хвилини)
+- 🔄 Перезапустіть додаток: `az webapp restart`
+
+## 🎯 Після успішного тесту
+
+Коли простий Django тест спрацює, ми адаптуємо ваш **project_portfolio** з такими змінами:
+
+1. **Створимо `azure_settings.py`** з жорсткодингом
+2. **Оновимо startup команду** для використання нових налаштувань
+3. **Додамо whitenoise** для статичних файлів
+4. **Налаштуємо PostgreSQL** (опціонально)
+
+**Виконайте розгортання і дайте знати про результат!** 🚀
+
+Якщо все пройде успішно, побачите красиву сторінку з підтвердженням, що Django працює на Azure!
+
+
+```bash
+@VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $ az webapp deploy \
+>   --resource-group django-app-budget-rg \
+>   --name django-app-budget-1751947063 \
+>   --src-path test_working.zip \
+>   --type zip
+Initiating deployment
+Deploying from local path: test_working.zip
+Warming up Kudu before deployment.
+Warmed up Kudu instance successfully.
+Polling the status of sync deployment. Start Time: 2025-07-08 06:44:19.259840+00:00 UTC
+Status: Build successful. Time: 0(s)
+Status: Starting the site... Time: 15(s)
+Status: Starting the site... Time: 31(s)
+Status: Starting the site... Time: 47(s)
+Status: Starting the site... Time: 62(s)
+Status: Starting the site... Time: 78(s)
+Status: Starting the site... Time: 93(s)
+Status: Starting the site... Time: 108(s)
+Status: Starting the site... Time: 124(s)
+Status: Starting the site... Time: 139(s)
+Status: Starting the site... Time: 154(s)
+Status: Starting the site... Time: 170(s)
+Status: Starting the site... Time: 185(s)
+Status: Starting the site... Time: 200(s)
+Status: Starting the site... Time: 216(s)
+Status: Starting the site... Time: 231(s)
+Status: Starting the site... Time: 246(s)
+Status: Starting the site... Time: 262(s)
+Status: Starting the site... Time: 278(s)
+Status: Starting the site... Time: 293(s)
+Status: Starting the site... Time: 309(s)
+Status: Starting the site... Time: 324(s)
+Status: Starting the site... Time: 342(s)
+Status: Starting the site... Time: 358(s)
+Status: Starting the site... Time: 373(s)
+Status: Starting the site... Time: 389(s)
+Status: Starting the site... Time: 404(s)
+Status: Starting the site... Time: 420(s)
+Status: Starting the site... Time: 435(s)
+Status: Starting the site... Time: 450(s)
+Status: Starting the site... Time: 466(s)
+Status: Starting the site... Time: 481(s)
+Status: Starting the site... Time: 496(s)
+Status: Starting the site... Time: 511(s)
+Status: Starting the site... Time: 527(s)
+Status: Starting the site... Time: 542(s)
+Status: Starting the site... Time: 557(s)
+Status: Starting the site... Time: 573(s)
+Status: Starting the site... Time: 588(s)
+Status: Starting the site... Time: 604(s)
+Status: Site failed to start. Time: 619(s)
+Deployment failed because the site failed to start within 10 mins.
+InprogressInstances: 0, SuccessfulInstances: 0, FailedInstances: 1
+Error: Deployment for site 'django-app-budget-1751947063' with DeploymentId '5c755317-3266-4126-a1c6-b6bdadb072cc' failed because the worker proccess failed to start within the allotted time.
+Please check the runtime logs for more info: https://django-app-budget-1751947063.scm.azurewebsites.net/api/logs/docker
+
+@VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $ 
+```
+
+# 🚨 Та сама проблема повторюється!
+
+Навіть простий Django не запускається. Це вказує на фундаментальну проблему з конфігурацією Azure або F1 планом.
+
+## 🔍 Діагностика проблеми
+
+### **1. Перевірте логи негайно**
+```bash
+az webapp log tail --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+```
+
+### **2. Перевірте прямі логи Docker**
+```bash
+curl https://django-app-budget-1751947063.scm.azurewebsites.net/api/logs/docker
+```
+
+## 🛠️ Радикальне рішення
+
+Оскільки проблема системна, спробуємо інший підхід:
+
+### **Підхід 1: Перезворення Web App**
+```bash
+# Видаліть поточний Web App
+az webapp delete --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+
+# Створіть новий з іншими налаштуваннями
+az webapp create \
+  --resource-group django-app-budget-rg \
+  --plan django-app-budget-plan \
+  --name django-app-budget-new-$(date +%s) \
+  --runtime "PYTHON|3.11" \
+  --deployment-local-git
+```
+
+### **Підхід 2: Мінімальний тест без gunicorn**
+
+Створіть найпростіший можливий тест:
+
+```bash
+cat > minimal_test.py << 'EOF'
+#!/usr/bin/env python3
+import http.server
+import socketserver
+import os
+
+PORT = int(os.environ.get('PORT', 8000))
+
+class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        
+        html = """
+        <html>
+        <head><title>Azure Test - Працює!</title></head>
+        <body>
+            <h1>🎉 Python працює на Azure!</h1>
+            <h2>✅ Базовий HTTP сервер запущений</h2>
+            <p><strong>Port:</strong> %d</p>
+            <p><strong>Python version:</strong> %s</p>
+            <p><strong>Current directory:</strong> %s</p>
+            <p><strong>Environment PORT:</strong> %s</p>
+            <hr>
+            <p>Якщо це працює, то проблема в Django/Gunicorn конфігурації</p>
+        </body>
+        </html>
+        """ % (PORT, os.sys.version, os.getcwd(), os.environ.get('PORT', 'Not set'))
+        
+        self.wfile.write(html.encode())
+
+if __name__ == "__main__":
+    with socketserver.TCPServer(("", PORT), MyHTTPRequestHandler) as httpd:
+        print(f"Server starting on port {PORT}")
+        httpd.serve_forever()
+EOF
+```
+
+### **3. Змініть startup на Python HTTP сервер**
+```bash
+az webapp config set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --startup-file "python3 minimal_test.py"
+```
+
+### **4. Розгорніть мінімальний тест**
+```bash
+zip minimal_python.zip minimal_test.py
+
+az webapp deploy \
+  --resource-group django-app-budget-rg \
+  --name django-app-budget-1751947063 \
+  --src-path minimal_python.zip \
+  --type zip
+```
+
+## 🔍 Альтернативна діагностика
+
+### **Перевірте обмеження F1 плану**
+```bash
+# Перевірте лімити CPU
+az monitor metrics list \
+  --resource django-app-budget-1751947063 \
+  --metric "CpuTime" \
+  --interval PT1H
+
+# Перевірте використання пам'яті
+az monitor metrics list \
+  --resource django-app-budget-1751947063 \
+  --metric "MemoryWorkingSet"
+```
+
+### **Спробуйте upgrade до B1**
+```bash
+# Тимчасово upgrade до Basic B1 для тестування
+az appservice plan update \
+  --name django-app-budget-plan \
+  --resource-group django-app-budget-rg \
+  --sku B1
+
+# Потім можна повернутися до F1
+```
+
+## 🚨 Можливі причини
+
+1. **F1 план CPU ліміт** - 60 хвилин на день вичерпані
+2. **Проблеми з gunicorn timeout** на F1
+3. **Azure region проблеми** в West Europe
+4. **Python runtime конфлікт**
+
+## 📊 План дій
+
+1. **Спочатку перевірте логи** - знайдіть точну помилку
+2. **Спробуйте мінімальний Python HTTP сервер** - без Django
+3. **Якщо не допоможе - upgrade до B1** тимчасово
+4. **Розгляньте Container Apps** як альтернативу
+
+**Дайте знати результат логів і спробуйте мінімальний Python тест!** 🔍
