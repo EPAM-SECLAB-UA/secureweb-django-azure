@@ -4317,6 +4317,254 @@ az webapp restart --name django-app-budget-1751947063 --resource-group django-ap
 **Надішліть вивід логів з команди `az webapp log tail` - це допоможе точно визначити проблему!** 🔍
 
 
+```bash
+@VitaliiShevchuk2023 ➜ /workspaces/portfolio-django-azure (feature/infrastructure-update) $ az webapp log tail --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+2025-07-08T05:04:36  Welcome, you are now connected to log-streaming service.
+Starting Log Tail -n 10 of existing logs ----
+/home/LogFiles/__lastCheckTime.txt  (https://django-app-budget-1751947063.scm.azurewebsites.net/api/vfs/LogFiles/__lastCheckTime.txt)
+07/08/2025 05:04:09
+/home/LogFiles/kudu/trace/c662ab074d2c-80f5f7e6-8bed-4dfc-aac9-c38aea45d7ff.txt  (https://django-app-budget-1751947063.scm.azurewebsites.net/api/vfs/LogFiles/kudu/trace/c662ab074d2c-80f5f7e6-8bed-4dfc-aac9-c38aea45d7ff.txt)
+2025-07-08T04:51:08  Startup Request, url: /api/deployments/?$orderby=ReceivedTime%20desc&$top=20&api-version=2022-03-01, method: GET, type: request, pid: 767,1,5, ScmType: None
+/home/LogFiles/kudu/trace/django-app-kudu-59c04bee-6ff75603-d812-41fc-b125-2f89091cf8ab.txt  (https://django-app-budget-1751947063.scm.azurewebsites.net/api/vfs/LogFiles/kudu/trace/django-app-kudu-59c04bee-6ff75603-d812-41fc-b125-2f89091cf8ab.txt)
+2025-07-08T04:41:51  Startup Request, url: /api/zipdeploy?isAsync=true, method: POST, type: request, pid: 768,1,7, ScmType: None
+/home/LogFiles/2025_07_08_10-30-1-212_default_docker.log  (https://django-app-budget-1751947063.scm.azurewebsites.net/api/vfs/LogFiles/2025_07_08_10-30-1-212_default_docker.log)
+2025-07-08T05:04:22.406935168Z   File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+2025-07-08T05:04:22.406940077Z   File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+2025-07-08T05:04:22.406944926Z   File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+2025-07-08T05:04:22.406949885Z   File "<frozen importlib._bootstrap>", line 1140, in _find_and_load_unlocked
+2025-07-08T05:04:22.406961818Z ModuleNotFoundError: No module named 'config'
+2025-07-08T05:04:22.409914734Z [2025-07-08 05:04:22 +0000] [1008] [INFO] Worker exiting (pid: 1008)
+2025-07-08T05:04:22.433174363Z [2025-07-08 05:04:22 +0000] [1007] [ERROR] Worker (pid:1008) exited with code 3
+2025-07-08T05:04:22.433629987Z [2025-07-08 05:04:22 +0000] [1007] [ERROR] Shutting down: Master
+2025-07-08T05:04:22.433883702Z [2025-07-08 05:04:22 +0000] [1007] [ERROR] Reason: Worker failed to boot.
 
+/home/LogFiles/2025_07_08_10-30-1-212_docker.log  (https://django-app-budget-1751947063.scm.azurewebsites.net/api/vfs/LogFiles/2025_07_08_10-30-1-212_docker.log)
+2025-07-08T05:04:16.351Z INFO  - Starting container for site
+2025-07-08T05:04:16.353Z INFO  - docker run -d --expose=8000 --name django-app-budget-1751947063_0_c862cabe -e WEBSITE_USE_DIAGNOSTIC_SERVER=false -e WEBSITE_SITE_NAME=django-app-budget-1751947063 -e WEBSITE_AUTH_ENABLED=False -e WEBSITE_ROLE_INSTANCE_ID=0 -e WEBSITE_HOSTNAME=django-app-budget-1751947063.azurewebsites.net -e WEBSITE_INSTANCE_ID=9c40c56bec10cc140e0e48da7a51d229543a291400ffbee72722d697742cf7b3 appsvc/python:3.11_20250506.5.tuxprod REDACTED
+2025-07-08T05:04:16.355Z INFO  - Logging is not enabled for this container.
+Please use https://aka.ms/linux-diagnostics to enable logging to see container logs here.
+2025-07-08T05:04:18.147Z INFO  - Initiating warmup request to container django-app-budget-1751947063_0_c862cabe_msiProxy for site django-app-budget-1751947063
+2025-07-08T05:04:18.158Z INFO  - Container django-app-budget-1751947063_0_c862cabe_msiProxy for site django-app-budget-1751947063 initialized successfully and is ready to serve requests.
+2025-07-08T05:04:18.161Z INFO  - Initiating warmup request to container django-app-budget-1751947063_0_c862cabe for site django-app-budget-1751947063
+2025-07-08T05:04:25.339Z ERROR - Container django-app-budget-1751947063_0_c862cabe for site django-app-budget-1751947063 has exited, failing site start
+2025-07-08T05:04:25.376Z ERROR - Container django-app-budget-1751947063_0_c862cabe didn't respond to HTTP pings on port: 8000. Failing site start. See container logs for debugging.
+2025-07-08T05:04:27.347Z INFO  - Stopping site django-app-budget-1751947063 because it failed during startup.
+Ending Log Tail of existing logs ---
+Starting Live Log Stream ---
+2025-07-08T05:05:37  No new trace in the past 1 min(s).
+2025-07-08T05:06:37  No new trace in the past 2 min(s).
+2025-07-08T05:07:37  No new trace in the past 3 min(s).
+2025-07-08T05:08:37  No new trace in the past 4 min(s).
+2025-07-08T05:09:37  No new trace in the past 5 min(s).
+2025-07-08T05:10:37  No new trace in the past 6 min(s).
+2025-07-08T05:11:37  No new trace in the past 7 min(s).
+2025-07-08T05:12:37  No new trace in the past 8 min(s).
+2025-07-08T05:13:37  No new trace in the past 9 min(s).
+2025-07-08T05:14:37  No new trace in the past 10 min(s).
+2025-07-08T05:15:37  No new trace in the past 11 min(s).
+2025-07-08T05:16:37  No new trace in the past 12 min(s).
+2025-07-08T05:17:37  No new trace in the past 13 min(s).
+2025-07-08T05:18:37  No new trace in the past 14 min(s).
+2025-07-08T05:19:37  No new trace in the past 15 min(s).
+2025-07-08T05:20:37  No new trace in the past 16 min(s).
+2025-07-08T05:21:37  No new trace in the past 17 min(s).
+2025-07-08T05:22:37  No new trace in the past 18 min(s).
+2025-07-08T05:23:37  No new trace in the past 19 min(s).
+2025-07-08T05:24:37  No new trace in the past 20 min(s).
+2025-07-08T05:25:37  No new trace in the past 21 min(s).
+2025-07-08T05:26:37  No new trace in the past 22 min(s).
+2025-07-08T05:27:37  No new trace in the past 23 min(s).
+2025-07-08T05:28:37  No new trace in the past 24 min(s).
+2025-07-08T05:29:37  No new trace in the past 25 min(s).
+2025-07-08T05:30:37  No new trace in the past 26 min(s).
+2025-07-08T05:31:37  No new trace in the past 27 min(s).
+2025-07-08T05:32:37  No new trace in the past 28 min(s).
+2025-07-08T05:33:37  No new trace in the past 29 min(s).
+2025-07-08T05:34:37  No new trace in the past 30 min(s).
+2025-07-08T05:35:37  No new trace in the past 31 min(s).
+2025-07-08T05:36:37  No new trace in the past 32 min(s).
+2025-07-08T05:37:37  No new trace in the past 33 min(s).
+2025-07-08T05:38:37  No new trace in the past 34 min(s).
+2025-07-08T05:39:37  No new trace in the past 35 min(s).
+2025-07-08T05:40:37  No new trace in the past 36 min(s).
+2025-07-08T05:41:37  No new trace in the past 37 min(s).
+2025-07-08T05:42:37  No new trace in the past 38 min(s).
+2025-07-08T05:43:37  No new trace in the past 39 min(s).
+2025-07-08T05:44:37  No new trace in the past 40 min(s).
+```
+# 🎯 Проблема знайдена!
 
+## Основна помилка
+```
+ModuleNotFoundError: No module named 'config'
+```
+
+**Проблема**: Azure намагається запустити додаток з `config.wsgi`, але ваш проект називається `project_portfolio`, а не `config`.
+
+## 🛠️ Швидке виправлення
+
+### **1. Виправте startup команду**
+```bash
+az webapp config set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --startup-file "gunicorn --bind=0.0.0.0:8000 --timeout 600 --workers 1 project_portfolio.wsgi:application"
+```
+
+### **2. Налаштуйте змінні середовища**
+```bash
+az webapp config appsettings set \
+  --name django-app-budget-1751947063 \
+  --resource-group django-app-budget-rg \
+  --settings \
+    DJANGO_SETTINGS_MODULE="project_portfolio.settings" \
+    PYTHONPATH="/home/site/wwwroot" \
+    DEBUG="False" \
+    ALLOWED_HOSTS="django-app-budget-1751947063.azurewebsites.net,localhost" \
+    SECRET_KEY="your-temp-secret-key-here"
+```
+
+### **3. Перевірте структуру проекту**
+Ваша структура:
+```
+project_portfolio/
+├── __init__.py
+├── settings.py
+├── urls.py
+├── wsgi.py
+└── asgi.py
+```
+
+### **4. Оновіть requirements.txt**
+```txt
+Django>=4.2,<5.0
+gunicorn
+whitenoise
+psycopg2-binary
+python-dotenv
+```
+
+### **5. Створіть правильний startup.sh**
+```bash
+cat > startup.sh << 'EOF'
+#!/bin/bash
+cd /home/site/wwwroot
+python manage.py collectstatic --noinput
+gunicorn --bind=0.0.0.0:8000 --timeout 600 --workers 1 project_portfolio.wsgi:application
+EOF
+```
+
+### **6. Оновіть project_portfolio/settings.py**
+```python
+import os
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-temporary-key-for-testing')
+
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
+
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'project_portfolio.core',  # якщо є додаток core
+]
+
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+ROOT_URLCONF = 'project_portfolio.urls'
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [BASE_DIR / 'project_portfolio' / 'templates'],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
+WSGI_APPLICATION = 'project_portfolio.wsgi.application'
+
+# Database - спочатку використайте SQLite для тестування
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+
+# Static files
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [
+    BASE_DIR / 'project_portfolio' / 'static',
+]
+
+# Whitenoise
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+```
+
+## 🚀 Повторне розгортання
+
+### **1. Створіть новий архів**
+```bash
+# Оновіть файли та створіть новий архів
+zip -r app_fixed.zip . -x "*.git*" "*venv*" "*.pyc" "*__pycache__*" "logs/*"
+```
+
+### **2. Розгорніть з новою командою**
+```bash
+az webapp deploy \
+  --resource-group django-app-budget-rg \
+  --name django-app-budget-1751947063 \
+  --src-path app_fixed.zip \
+  --type zip
+```
+
+### **3. Перезапустіть додаток**
+```bash
+az webapp restart --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+```
+
+### **4. Перевірте статус**
+```bash
+# Моніторинг логів
+az webapp log tail --name django-app-budget-1751947063 --resource-group django-app-budget-rg
+
+# Перевірка сайту
+curl -I https://django-app-budget-1751947063.azurewebsites.net
+```
+
+## 📋 Чек-лист
+
+- [ ] Startup команда виправлена: `project_portfolio.wsgi:application`
+- [ ] DJANGO_SETTINGS_MODULE: `project_portfolio.settings`
+- [ ] requirements.txt містить gunicorn
+- [ ] settings.py налаштований для Azure
+- [ ] ALLOWED_HOSTS включає домен Azure
+
+**Після цих змін додаток має запуститись успішно!** 🚀
 
