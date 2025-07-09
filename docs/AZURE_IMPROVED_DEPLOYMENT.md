@@ -73,3 +73,153 @@
 - **✅ CI/CD ready** - GitHub Actions compatible
 
 **Ці покращені скрипти вирішують всі критичні проблеми і готові для enterprise використання!** 🎯🚀
+
+
+------------------------------------------------------------------------------------------------------------
+
+
+# 🚀 Правильна інструкція запуску покращених скриптів
+
+## ❌ Неправильно (ваш варіант):
+```bash
+./deploy-with-logs.sh budget-azure-deploy.sh  # ❌ Помилка!
+```
+
+## ✅ Правильно:
+
+### 1. Підготовка файлів
+```bash
+# Зберегти всі три скрипти:
+# - deploy-with-logs.sh (wrapper)
+# - azure-deploy-improved.sh (основний deployment)
+# - cleanup-improved.sh (cleanup)
+
+# Надати права на виконання
+chmod +x deploy-with-logs.sh
+chmod +x azure-deploy-improved.sh
+chmod +x cleanup-improved.sh
+```
+
+### 2. Правильний запуск
+```bash
+# Wrapper скрипт САМ викликає azure-deploy-improved.sh
+./deploy-with-logs.sh
+
+# Або з конкретним середовищем
+ENVIRONMENT=budget ./deploy-with-logs.sh
+```
+
+### 3. Що відбувається всередині
+```bash
+# deploy-with-logs.sh автоматично:
+# 1. Створює папку logs/
+# 2. Запускає azure-deploy-improved.sh
+# 3. Логує весь процес
+# 4. Робить health check
+# 5. Показує підсумок
+```
+
+### 4. Перегляд логів
+```bash
+# Останній лог
+cat logs/azure-deploy-$(date +%Y%m%d)-*.log
+
+# Або конкретний файл
+cat logs/azure-deploy-20250709-143022.log
+
+# Живий перегляд
+tail -f logs/azure-deploy-$(date +%Y%m%d)-*.log
+```
+
+## 🎯 Структура файлів
+
+```
+project/
+├── deploy-with-logs.sh      # Wrapper з логуванням
+├── azure-deploy-improved.sh # Основний deployment
+├── cleanup-improved.sh      # Cleanup скрипт
+└── logs/                    # Створюється автоматично
+    ├── azure-deploy-20250709-143022.log
+    └── azure-deploy-20250709-143022.error.log
+```
+
+## 🔧 Різні варіанти запуску
+
+### Розробка (дешево)
+```bash
+ENVIRONMENT=budget ./deploy-with-logs.sh
+# ~$30/місяць
+```
+
+### Тестування
+```bash
+ENVIRONMENT=staging ./deploy-with-logs.sh  
+# ~$75/місяць
+```
+
+### Продакшн
+```bash
+ENVIRONMENT=production ./deploy-with-logs.sh
+# ~$175/місяць
+```
+
+### З додатковими параметрами
+```bash
+APP_NAME="my-app" LOCATION="westeurope" ENVIRONMENT=budget ./deploy-with-logs.sh
+```
+
+## 📋 Що ви побачите під час виконання
+
+```bash
+$ ./deploy-with-logs.sh
+
+🚀 Розпочинаю розгортання Django додатку...
+📋 Конфігурація:
+   - Додаток: my-django-app
+   - Середовище: budget
+   - Локація: eastus
+   - План: B1 (оптимізовано для розробки)
+
+✅ Створюю Resource Group...
+✅ Розгортую App Service Plan...
+✅ Налаштовую PostgreSQL...
+✅ Конфігурую Web App...
+✅ Налаштовую Container Registry...
+✅ Health check: SUCCESS
+
+🎉 Розгортання завершено!
+📊 URL: https://my-django-app.azurewebsites.net
+📝 Логи: logs/azure-deploy-20250709-143022.log
+```
+
+## 🗑️ Видалення ресурсів
+
+```bash
+# Безпечне видалення з backup
+./cleanup-improved.sh
+
+# З конкретним середовищем
+ENVIRONMENT=budget ./cleanup-improved.sh
+```
+
+## ⚠️ Важливо!
+
+1. **Wrapper НЕ приймає параметри** - він сам знає який скрипт запускати
+2. **Змінні середовища** встановлюються ПЕРЕД запуском wrapper'а
+3. **Логи створюються автоматично** в папці `logs/`
+4. **Health check** виконується автоматично після deployment
+
+## 🔍 Налагодження
+
+```bash
+# Якщо щось пішло не так, перевірте:
+cat logs/azure-deploy-20250709-143022.error.log
+
+# Статус ресурсів
+az resource list --resource-group "my-django-app-rg" --output table
+
+# Логи Azure
+az webapp log tail --name "my-django-app" --resource-group "my-django-app-rg"
+```
+
+Тепер все правильно! Wrapper скрипт - це "розумний" запускач, який сам керує процесом. 🎯
