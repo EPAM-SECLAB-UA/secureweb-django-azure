@@ -77,6 +77,127 @@
 
 ------------------------------------------------------------------------------------------------------------
 
+```bash
+@VitaliiShevchuk2023 ➜ /workspaces/secureweb-django-azure (feature/infrastructure-update) $  ./deploy-with-logs-new.sh --help
+Azure Django Deployment Wrapper v2.0
+
+ВИКОРИСТАННЯ:
+  ./deploy-with-logs-new.sh <script-name> [deployment-type]
+
+ПАРАМЕТРИ:
+  script-name      - Шлях до скрипта розгортання
+  deployment-type  - Тип розгортання (standard|production|cleanup)
+
+ОПЦІЇ:
+  -h, --help      - Показати цю довідку
+  -v, --version   - Показати версію
+  --validate      - Тільки валідувати середовище
+
+ПРИКЛАДИ:
+  ./deploy-with-logs-new.sh azure-deploy.sh production
+  ./deploy-with-logs-new.sh cleanup-infrastructure.sh cleanup
+  ./deploy-with-logs-new.sh --validate
+
+ФАЙЛИ:
+  logs/           - Директорія з логами
+  .deploy-config  - Конфігурація останнього розгортання
+
+ВИМОГИ:
+  - Azure CLI (az)
+  - Git (опціонально)
+  - Docker (опціонально)
+
+ВЕРСІЯ: 2.0.0
+@VitaliiShevchuk2023 ➜ /workspaces/secureweb-django-azure (feature/infrastructure-update) $ ./deploy-with-logs-new.sh --validate
+[INFO 2025-07-09 17:09:06] 🔍 Валідація середовища...
+[INFO 2025-07-09 17:09:06] ✅ Azure CLI version: 2.72.0
+[INFO 2025-07-09 17:09:07] ✅ Azure Account: vitalii_shevchuk3@epam.com
+[INFO 2025-07-09 17:09:07] ✅ Azure Subscription: Pay-As-You-Go-Student02
+[INFO 2025-07-09 17:09:07] ✅ Git Branch: feature/infrastructure-update
+[INFO 2025-07-09 17:09:07] ✅ Git Commit: db5a326
+[INFO 2025-07-09 17:09:08] ✅ Docker доступний
+@VitaliiShevchuk2023 ➜ /workspaces/secureweb-django-azure (feature/infrastructure-update) $ 
+
+```
+
+Wrapper скрипт працює відмінно! 🎉 Тепер запустимо правильно:
+
+## 🚀 Правильний запуск вашого скрипта
+
+### 1. Для бюджетного розгортання:
+```bash
+./deploy-with-logs-new.sh azure-deploy-improved.sh standard
+```
+
+### 2. Для продакшн розгортання:
+```bash
+./deploy-with-logs-new.sh azure-deploy-improved.sh production
+```
+
+### 3. Для видалення ресурсів:
+```bash
+./deploy-with-logs-new.sh cleanup-improved.sh cleanup
+```
+
+## 📋 Рекомендована послідовність
+
+```bash
+# 1. Переконайтеся, що всі скрипти мають права на виконання
+chmod +x azure-deploy-improved.sh cleanup-improved.sh
+
+# 2. Запустіть розгортання (почніть з standard для тестування)
+./deploy-with-logs-new.sh azure-deploy-improved.sh standard
+
+# 3. Перевірте результат
+# URL буде показаний в кінці розгортання
+
+# 4. Перегляньте логи
+cat logs/azure-deploy-$(date +%Y%m%d)-*.log
+
+# 5. Коли закінчите тестування, видаліть ресурси
+./deploy-with-logs-new.sh cleanup-improved.sh cleanup
+```
+
+## 🎯 Що означають типи розгортання
+
+- **standard** - Бюджетний варіант (~$30-40/місяць)
+  - B1 App Service Plan
+  - Basic PostgreSQL
+  - Мінімальна конфігурація
+
+- **production** - Продакшн варіант (~$150-200/місяць)
+  - P1v3 App Service Plan
+  - General Purpose PostgreSQL
+  - Максимальна надійність
+
+- **cleanup** - Видалення всіх ресурсів
+  - З автоматичним backup
+  - Безпечне видалення
+
+## 📊 Моніторинг процесу
+
+Під час виконання ви будете бачити:
+```
+[INFO 2025-07-09 17:10:00] 🚀 Розпочинаю розгортання...
+[INFO 2025-07-09 17:10:05] ✅ Створення Resource Group...
+[INFO 2025-07-09 17:10:15] ✅ Розгортання App Service Plan...
+[INFO 2025-07-09 17:10:30] ✅ Налаштування PostgreSQL...
+```
+
+## 🔍 Перевірка результатів
+
+```bash
+# Перегляд останнього лога
+ls -la logs/ | tail -1
+
+# Перегляд статусу ресурсів
+az resource list --resource-group "$(cat .deploy-config | grep RESOURCE_GROUP | cut -d'=' -f2)" --output table
+```
+
+Ваш wrapper дуже добре зроблений з правильним логуванням та валідацією! Тепер просто запустіть потрібний варіант розгортання. 🎯
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
 
 # 🚀 Правильна інструкція запуску покращених скриптів
 
