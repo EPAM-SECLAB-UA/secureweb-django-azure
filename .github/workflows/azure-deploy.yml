@@ -2,39 +2,202 @@ name: Deploy Django to Azure App Service
 
 on:
   push:
-    branches: [ main ]
+    branches: [ feature/infrastructure-update, main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:  # Дозволяє ручний запуск
+
+env:
+  AZURE_WEBAPP_NAME: django-app-budget-1752082786
+  AZURE_WEBAPP_PACKAGE_PATH: '.'
+  PYTHON_VERSION: '3.11'
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v4
+    - name: 🚀 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🐍 Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
-    
-    - name: Install dependencies
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: 📦 Cache pip dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          
+    - name: 📋 Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    
-    - name: Collect static files
+        
+    - name: 🧪 Run tests
       run: |
-        python manage.py collectstatic --noinput
-    
-    - name: Create deployment package
+        python manage.py check --deploy
+        # python manage.py test  # Розкоментуйте коли будуть тести
+        
+    - name: 🔒 Collect static files
       run: |
-        zip -r deployment.zip . -x "*.git*" "*__pycache__*" "*.pyc" "venv/*" "node_modules/*"
-    
-    - name: Deploy to Azure Web App
-      uses: azure/webapps-deploy@v2
+        python manage.py collectstatic --noinput --settings=project_portfolio.settings
+      env:
+        SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY || 'build-time-secret-key' }}
+        DEBUG: 'False'
+        
+    - name: 📄 Create deployment package
+      run: |
+        # Видаляємо непотрібні файли для продакшну
+        rm -rf .git .gitignore .github
+        rm -rf __pycache__ */__pycache__ */*/__pycache__
+        rm -rf *.pyc */*.pyc */*/*.pyc
+        rm -rf tests/ docs/ images/
+        rm -rf logs/ .env .env.* *.log
+        rm -rf node_modules/ .vscode/ .devcontainer/
+        
+        # Створюємо архів для deployment
+        zip -r deployment.zip . -x "*.git*" "*__pycache__*" "*.pyc" "tests/*" "docs/*"
+        
+    - name: 📤 Upload artifact for deployment job
+      uses: actions/upload-artifact@v4
       with:
-        app-name: 'django-portfolio-web-1751348856'
-        slot-name: 'production'
-        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-        package: deployment.zip
+        name: python-app
+        path: deployment.zip
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/feature/infrastructure-update' || github.ref == 'refs/heads/main'
+    environment:
+      name: 'Production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+      
+    steps:
+    - name: 📥 Download artifact from build job
+      uses: actions/download-artifact@v4
+      with:
+        name: python-app
+        
+    - name: 🔓 Unzip deployment package
+      run: unzip deployment.zip
+      
+    - name: 🔑 Login to Azure
+      uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
+        
+    - name: ⚙️ Configure App Service settings
+      uses: azure/appservice-settings@v1
+      with:
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        app-settings-json: |
+          [
+            {
+              "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
+              "value": "true"
+            },
+            {
+              "name": "ENABLE_ORYX_BUILD",
+              "value": "true"
+            },
+            {
+              "name": "DJANGO_SETTINGS_MODULE",
+              "value": "project_portfolio.settings"
+            },
+            {
+              "name": "SECRET_KEY",
+              "value": "${{ secrets.DJANGO_SECRET_KEY }}"
+            },
+            {
+              "name": "DEBUG",
+              "value": "False"
+            },
+            {
+              "name": "PYTHONPATH",
+              "value": "/home/site/wwwroot"
+            },
+            {
+              "name": "WEBSITE_TIME_ZONE",
+              "value": "Europe/Kiev"
+            },
+            {
+              "name": "DB_NAME",
+              "value": "${{ secrets.DB_NAME || 'django-app_db' }}"
+            },
+            {
+              "name": "DB_USER", 
+              "value": "${{ secrets.DB_USER || 'djangoadmin' }}"
+            },
+            {
+              "name": "DB_PASSWORD",
+              "value": "${{ secrets.DB_PASSWORD }}"
+            },
+            {
+              "name": "DB_HOST",
+              "value": "${{ secrets.DB_HOST || 'django-app-budget-db-1752082786.postgres.database.azure.com' }}"
+            }
+          ]
+          
+    - name: 🚀 Deploy to Azure Web App
+      id: deploy-to-webapp
+      uses: azure/webapps-deploy@v3
+      with:
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        package: .
+        startup-command: 'gunicorn --bind=0.0.0.0:8000 --timeout 600 --workers 2 project_portfolio.wsgi:application'
+        
+    - name: 🏥 Health check
+      run: |
+        echo "🏥 Виконання health check..."
+        sleep 60  # Чекаємо поки додаток запуститься
+        
+        for i in {1..10}; do
+          echo "🔍 Спроба $i/10: Перевірка https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net"
+          
+          if curl -f -s --max-time 30 "https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net" > /dev/null; then
+            echo "✅ Додаток працює!"
+            echo "🌐 URL: https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net"
+            exit 0
+          fi
+          
+          if [ $i -lt 10 ]; then
+            echo "⏳ Очікування 30 секунд перед наступною спробою..."
+            sleep 30
+          fi
+        done
+        
+        echo "⚠️ Додаток не відповідає після 10 спроб"
+        echo "🔍 Перевірте логи у Azure Portal"
+        exit 1
+        
+    - name: 📊 Deployment summary
+      if: always()
+      run: |
+        echo "## 📋 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+        echo "| Parameter | Value |" >> $GITHUB_STEP_SUMMARY
+        echo "|-----------|-------|" >> $GITHUB_STEP_SUMMARY
+        echo "| 🌐 App Name | ${{ env.AZURE_WEBAPP_NAME }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| 🔗 URL | https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net |" >> $GITHUB_STEP_SUMMARY
+        echo "| 🐍 Python Version | ${{ env.PYTHON_VERSION }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| 🌿 Branch | ${{ github.ref_name }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| 📦 Commit | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| 👤 Author | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| ⏰ Deployed at | $(date -u) |" >> $GITHUB_STEP_SUMMARY
+        
+  cleanup:
+    runs-on: ubuntu-latest
+    needs: [build, deploy]
+    if: always()
+    
+    steps:
+    - name: 🧹 Cleanup artifacts
+      uses: actions/github-script@v6
+      with:
+        script: |
+          console.log('🧹 Очищення artifacts...');
+          // Artifacts будуть автоматично видалені через 90 днів
