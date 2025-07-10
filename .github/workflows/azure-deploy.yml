@@ -1,11 +1,15 @@
 name: Deploy Django to Azure App Service
 
+#on:
+#  push:
+#    branches: [ feature/infrastructure-update, main ]
+#  pull_request:
+#    branches: [ main ]
+#  workflow_dispatch:  # Дозволяє ручний запуск
+
+# Залишіть тільки manual trigger
 on:
-  push:
-    branches: [ feature/infrastructure-update, main ]
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch:  # Дозволяє ручний запуск
+  workflow_dispatch:  # Тільки ручний запуск
 
 env:
   AZURE_WEBAPP_NAME: django-app-budget-1752082786
