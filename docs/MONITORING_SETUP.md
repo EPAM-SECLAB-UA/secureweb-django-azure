@@ -972,6 +972,10 @@ chmod +x monitoring_setup.sh
 # 2. Запустити з логуванням
 nohup ./monitoring_setup.sh > monitoring_setup_$(date +%Y%m%d_%H%M%S).log 2>&1 &
 
+
+nohup ./setup-monitoring.sh > monitoring_setup_$(date +%Y%m%d_%H%M%S).log 2>&1 &
+
+
 # 3. Зберегти PID
 echo $! > monitoring_setup.pid
 
@@ -989,6 +993,211 @@ tail -f monitoring_setup_*.log
 ```bash
 # Обмежити розмір логів
 ./monitoring_setup.sh > >(split -d -l 1000 - monitoring_setup.log.) 2>&1 &
+```
+
+
+
+```bash
+nohup: ignoring input
+[0;34m[2025-07-10 15:30:55] 🚀 Початок налаштування моніторингу для існуючої інфраструктури[0m
+[0;34m[2025-07-10 15:30:55] 🚀 App Service: django-app-budget-1752082786[0m
+[0;34m[2025-07-10 15:30:55] 🚀 Resource Group: django-app-budget-rg[0m
+[0;34m[2025-07-10 15:30:55] 🚀 Валідація передумов...[0m
+[0;32m[2025-07-10 15:31:12] ✅ Валідація завершена. Subscription: f7dc8823-4f06-4346-9de0-badbe6273a54[0m
+[0;34m[2025-07-10 15:31:12] 🚀 Перевірка існуючих Log Analytics workspaces...[0m
+Існуючі Log Analytics workspaces:
+CreatedDate                   CustomerId                            Location    ModifiedDate                  Name                             ProvisioningState    PublicNetworkAccessForIngestion    PublicNetworkAccessForQuery    ResourceGroup         RetentionInDays
+----------------------------  ------------------------------------  ----------  ----------------------------  -------------------------------  -------------------  ---------------------------------  -----------------------------  --------------------  -----------------
+2025-07-10T09:22:45.7275277Z  d1465464-c336-4566-bbb3-449a866ff8e1  westeurope  2025-07-10T09:22:48.6245189Z  log-analytics-django-app         Succeeded            Enabled                            Enabled                        django-app-budget-rg  30
+2025-07-10T10:06:40.3796049Z  4f2a1974-8b2d-4083-833e-f42b73144e88  westeurope  2025-07-10T10:06:44.0694095Z  django-app-custom-monitoring-ws  Succeeded            Enabled                            Enabled                        django-app-budget-rg  30
+[1;33m[2025-07-10 15:31:24] ⚠️ Workspace 'django-app-custom-monitoring-ws' вже існує. Буде використано існуючий.[0m
+[0;34m[2025-07-10 15:31:24] 🚀 Створення Log Analytics workspace...[0m
+[1;33m[2025-07-10 15:31:25] ⚠️ Workspace 'django-app-custom-monitoring-ws' вже існує, пропускаємо створення[0m
+[0;34m[2025-07-10 15:31:25] 🚀 Налаштування Diagnostic Settings...[0m
+[1;33m[2025-07-10 15:31:28] ⚠️ Diagnostic setting 'django-app-budget-1752082786-enhanced-diagnostics' вже існує. Оновлюємо...[0m
+{
+  "id": "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourcegroups/django-app-budget-rg/providers/microsoft.web/sites/django-app-budget-1752082786/providers/microsoft.insights/diagnosticSettings/django-app-budget-1752082786-enhanced-diagnostics",
+  "logs": [
+    {
+      "category": "AppServiceHTTPLogs",
+      "enabled": true,
+      "retentionPolicy": {
+        "days": 0,
+        "enabled": false
+      }
+    },
+    {
+      "category": "AppServiceConsoleLogs",
+      "enabled": true,
+      "retentionPolicy": {
+        "days": 0,
+        "enabled": false
+      }
+    },
+    {
+      "category": "AppServiceAppLogs",
+      "enabled": true,
+      "retentionPolicy": {
+        "days": 0,
+        "enabled": false
+      }
+    },
+    {
+      "category": "AppServiceAuditLogs",
+      "enabled": true,
+      "retentionPolicy": {
+        "days": 0,
+        "enabled": false
+      }
+    },
+    {
+      "category": "AppServiceIPSecAuditLogs",
+      "enabled": true,
+      "retentionPolicy": {
+        "days": 0,
+        "enabled": false
+      }
+    },
+    {
+      "category": "AppServicePlatformLogs",
+      "enabled": true,
+      "retentionPolicy": {
+        "days": 0,
+        "enabled": false
+      }
+    }
+  ],
+  "metrics": [
+    {
+      "category": "AllMetrics",
+      "enabled": true,
+      "retentionPolicy": {
+        "days": 0,
+        "enabled": false
+      },
+      "timeGrain": "PT1M"
+    }
+  ],
+  "name": "django-app-budget-1752082786-enhanced-diagnostics",
+  "resourceGroup": "django-app-budget-rg",
+  "type": "Microsoft.Insights/diagnosticSettings",
+  "workspaceId": "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg/providers/Microsoft.OperationalInsights/workspaces/django-app-custom-monitoring-ws"
+}
+[0;32m[2025-07-10 15:31:34] ✅ Diagnostic Settings налаштовано для workspace: django-app-custom-monitoring-ws[0m
+[0;34m[2025-07-10 15:31:34] 🚀 Налаштування App Service логування...[0m
+{
+  "applicationLogs": {
+    "azureBlobStorage": {
+      "level": "Off",
+      "retentionInDays": null,
+      "sasUrl": null
+    },
+    "azureTableStorage": {
+      "level": "Off",
+      "sasUrl": null
+    },
+    "fileSystem": {
+      "level": "Information"
+    }
+  },
+  "detailedErrorMessages": {
+    "enabled": true
+  },
+  "failedRequestsTracing": {
+    "enabled": true
+  },
+  "httpLogs": {
+    "azureBlobStorage": {
+      "enabled": false,
+      "retentionInDays": 3,
+      "sasUrl": null
+    },
+    "fileSystem": {
+      "enabled": true,
+      "retentionInDays": 3,
+      "retentionInMb": 100
+    }
+  },
+  "id": "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg/providers/Microsoft.Web/sites/django-app-budget-1752082786/config/logs",
+  "kind": null,
+  "location": "West Europe",
+  "name": "logs",
+  "resourceGroup": "django-app-budget-rg",
+  "tags": {
+    "CostProfile": "Budget",
+    "CreatedBy": "AzureCLI",
+    "Environment": "budget",
+    "Project": "django-app",
+    "hidden-link: /app-insights-resource-id": "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg/providers/microsoft.insights/components/django-app-budget-insights"
+  },
+  "type": "Microsoft.Web/sites/config"
+}
+[0;32m[2025-07-10 15:31:36] ✅ App Service логування налаштовано[0m
+[0;34m[2025-07-10 15:31:36] 🚀 Створення зразкових alert rules...[0m
+[1;33m[2025-07-10 15:32:04] ⚠️ Не вдалося створити HTTP 5xx alert[0m
+[1;33m[2025-07-10 15:32:06] ⚠️ Не вдалося створити CPU alert[0m
+[0;32m[2025-07-10 15:32:06] ✅ Зразкові alert rules створено[0m
+[0;34m[2025-07-10 15:32:06] 🚀 Тестування логування...[0m
+[0;34m[2025-07-10 15:32:06] 🚀 Генерація тестового трафіку...[0m
+[0;32m[2025-07-10 15:32:07] ✅ Тестовий трафік згенеровано[0m
+[0;34m[2025-07-10 15:32:07] 🚀 Перевірка real-time логування (5 секунд)...[0m
+Exception in thread Thread-1 (_get_log):
+Traceback (most recent call last):
+  File "/opt/az/lib/python3.12/threading.py", line 1075, in _bootstrap_inner
+    self.run()
+  File "/opt/az/lib/python3.12/threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+  File "/opt/az/lib/python3.12/site-packages/azure/cli/command_modules/appservice/custom.py", line 3884, in _get_log
+    raise CLIError("Failed to connect to '{}' with status code '{}' and reason '{}'".format(
+knack.util.CLIError: Failed to connect to 'https://django-app-budget-1752082786.scm.azurewebsites.net/logstream' with status code '403' and reason 'Ip Forbidden'
+[0;32m[2025-07-10 15:32:12] ✅ Логування працює[0m
+
+=============================================================
+🎉 МОНІТОРИНГ НАЛАШТОВАНО УСПІШНО
+=============================================================
+
+📊 Log Analytics Workspace:
+   📋 Назва: django-app-custom-monitoring-ws
+   🆔 Workspace ID: 4f2a1974-8b2d-4083-833e-f42b73144e88
+   📍 Resource Group: django-app-budget-rg
+
+🔍 Де переглядати логи:
+   🌐 Azure Portal: https://portal.azure.com
+   📊 Log Analytics: Workspaces → django-app-custom-monitoring-ws → Logs
+   📈 App Service: django-app-budget-1752082786 → Monitoring → Logs
+
+📋 Налаштовані логи:
+   ✅ HTTP Access Logs
+   ✅ Console Logs
+   ✅ Application Logs
+   ✅ Audit Logs
+   ✅ Security Logs
+   ✅ Platform Logs
+   ✅ Metrics
+
+🧪 Корисні Kusto запити:
+
+   // HTTP логи за останню годину
+   AppServiceHTTPLogs
+   | where TimeGenerated > ago(1h)
+   | project TimeGenerated, CsMethod, CsUriStem, ScStatus
+
+   // Помилки додатку
+   AppServiceConsoleLogs
+   | where TimeGenerated > ago(1h)
+   | where Level == "Error"
+
+   // Топ IP адрес
+   AppServiceHTTPLogs
+   | summarize count() by CIp
+   | top 10 by count_
+
+🚨 Alert Rules:
+   ⚠️ HTTP 5xx errors (>5 за 5 хвилин)
+   ⚠️ High CPU usage (>80%)
+
+./setup-monitoring.sh: line 326: $2: unbound variable
+
 ```
 
 
