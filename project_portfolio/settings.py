@@ -29,17 +29,19 @@ DEBUG = config("DEBUG", default=True)
 
 
 
-# ALLOWED_HOSTS з environment variable
-ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost').split(',')
-
-# Якщо змінна не встановлена, використати Azure домен
-if not ALLOWED_HOSTS or ALLOWED_HOSTS == ['']:
+# Читаємо ALLOWED_HOSTS з environment variable
+DJANGO_ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '')
+if DJANGO_ALLOWED_HOSTS:
+    ALLOWED_HOSTS = [host.strip() for host in DJANGO_ALLOWED_HOSTS.split(',')]
+else:
+    # Fallback для Azure
     ALLOWED_HOSTS = [
         'django-app-budget-1752082786.azurewebsites.net',
         '.azurewebsites.net',
         'localhost',
         '127.0.0.1'
     ]
+
 
 
 
