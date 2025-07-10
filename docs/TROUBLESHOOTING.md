@@ -162,6 +162,8 @@ az webapp log tail \
 
 **Найвірогідніше filesystem logging буде працювати без додаткових прав!** 🚀
 
+
+```bash
 ^C@VitaliiShevchuk2023 ➜ /workspaces/secureweb-django-azure (feature/infrastructure-update) $ az webapp log show \
 >     --resource-group django-app-budget-rg \
 >     --name django-app-budget-1752082786
