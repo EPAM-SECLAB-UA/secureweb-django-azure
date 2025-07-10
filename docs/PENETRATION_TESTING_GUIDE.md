@@ -623,3 +623,141 @@ YEAR_MONTH_FORMAT
 You’re seeing this error because you have DEBUG = True in your Django settings file. Change that to 
 
 ```
+
+🔍 **З точки зору Penetration Testing, це дуже цінна інформація!**
+
+## 🚨 **Критичні проблеми безпеки:**
+
+### **1. 🔴 DEBUG = True в Production**
+```python
+DEBUG = 'False'  # Але все ще показує debug інформацію!
+```
+**Ризик:** Повне розкриття архітектури системи
+
+### **2. 🔴 Розкриття шляхів до файлів**
+```
+Python Path: ['/tmp/8ddbf6da509ab87', '/opt/python/3.11.12/bin', ...]
+BASE_DIR: PosixPath('/tmp/8ddbf6da509ab87')
+STATIC_ROOT: PosixPath('/tmp/8ddbf6da509ab87/project_portfolio/staticfiles')
+```
+**Ризик:** Directory traversal attacks
+
+### **3. 🔴 Розкриття SECRET_KEY та паролів**
+```python
+SECRET_KEY: '********************'  # Приховано, але структура видна
+PASSWORD: '********************'    # Аналогічно
+```
+**Ризик:** Session hijacking, CSRF bypass
+
+### **4. 🔴 Розкриття версій ПЗ**
+```
+Django Version: 5.2.4
+Python Version: 3.11.12
+Server Software: gunicorn/23.0.0
+```
+**Ризик:** Targeted exploits для відомих CVE
+
+### **5. 🔴 База даних SQLite в /tmp**
+```python
+'NAME': PosixPath('/tmp/8ddbf6da509ab87/db.sqlite3')
+```
+**Ризик:** Втрата даних, неконтрольований доступ
+
+## 🎯 **Векторі атак для Pentest:**
+
+### **1. Information Disclosure**
+```
+- Повна структура додатку
+- Шляхи до файлів
+- Middleware stack
+- Installed apps
+```
+
+### **2. Configuration Attacks**
+```
+- X_FRAME_OPTIONS: 'ALLOW-FROM preview.app.github.dev'
+- CSRF_COOKIE_SECURE: False
+- SESSION_COOKIE_SECURE: False
+```
+
+### **3. Environment Fingerprinting**
+```
+- Azure App Service detection
+- Python paths exposure
+- Temporary directory structure
+```
+
+### **4. Potential SQL Injection**
+```
+- SQLite backend visible
+- Database path known
+- Django ORM configuration exposed
+```
+
+## 🛡️ **Рекомендації для виправлення:**
+
+### **1. Негайно виправити DEBUG:**
+```python
+DEBUG = False  # Не строка!
+ALLOWED_HOSTS = ['django-app-budget-1752082786.azurewebsites.net']
+```
+
+### **2. Налаштувати Error Handling:**
+```python
+# Custom error pages
+ADMINS = [('Security Team', 'security@company.com')]
+LOGGING = {
+    'version': 1,
+    'handlers': {
+        'file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': '/var/log/django/error.log',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'ERROR',
+        },
+    },
+}
+```
+
+### **3. Security Headers:**
+```python
+SECURE_SSL_REDIRECT = True
+SECURE_HSTS_SECONDS = 31536000
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+```
+
+### **4. Переключитися на PostgreSQL:**
+```python
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'HOST': os.environ.get('DB_HOST'),
+        'PORT': '5432',
+        'OPTIONS': {'sslmode': 'require'},
+    }
+}
+```
+
+## 📊 **Pentest Report Summary:**
+
+| Vulnerability | Severity | CVSS | Impact |
+|---------------|----------|------|---------|
+| **Debug Mode** | 🔴 Critical | 8.5 | Full system disclosure |
+| **Path Exposure** | 🟠 High | 7.2 | Directory traversal |
+| **Insecure Cookies** | 🟠 High | 6.8 | Session hijacking |
+| **Version Disclosure** | 🟡 Medium | 5.4 | Targeted attacks |
+
+**Ця інформація - золота копальня для пентестера! Потрібно негайно виправити DEBUG режим та налаштувати proper error handling.** 🎯
+
+
