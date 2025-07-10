@@ -14,6 +14,16 @@ import os
 from pathlib import Path
 from decouple import config
 
+
+# Admin безпека
+ADMIN_URL = os.environ.get('DJANGO_ADMIN_URL', 'admin/')
+
+# URLs
+ROOT_URLCONF = 'project_portfolio.urls'
+
+
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -52,26 +62,42 @@ if 'CODESPACE_NAME' in os.environ:
 
 # Application definition
 
+
+# Переконайтеся, що admin app включений
 INSTALLED_APPS = [
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
-    "django_browser_reload",
+    'django.contrib.admin',          # ✅ Admin панель
+    'django.contrib.auth',           # ✅ Аутентифікація
+    'django.contrib.contenttypes',   # ✅ Content types
+    'django.contrib.sessions',       # ✅ Сесії
+    'django.contrib.messages',       # ✅ Повідомлення
+    'django.contrib.staticfiles',    # ✅ Статичні файли
+    # Ваші додатки
 ]
 
+#INSTALLED_APPS = [
+#    "django.contrib.admin",
+#    "django.contrib.auth",
+#    "django.contrib.contenttypes",
+#    "django.contrib.sessions",
+#    "django.contrib.messages",
+#   "django.contrib.staticfiles",
+#    "django_browser_reload",
+#]
+
+
+# Middleware для admin
 MIDDLEWARE = [
-    "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',  # ✅ Для admin сесій
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',  # ✅ Для admin auth
+    'django.contrib.messages.middleware.MessageMiddleware',     # ✅ Для admin messages
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
     "django_browser_reload.middleware.BrowserReloadMiddleware",
 ]
+
+
 
 X_FRAME_OPTIONS = "ALLOW-FROM preview.app.github.dev"
 
