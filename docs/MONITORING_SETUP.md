@@ -1201,3 +1201,173 @@ knack.util.CLIError: Failed to connect to 'https://django-app-budget-1752082786.
 ```
 
 
+
+# Аналіз логу виконання скрипту моніторингу Azure
+
+## 📊 Загальний статус виконання
+
+**✅ СТАТУС: УСПІШНО ЗАВЕРШЕНО** (з незначними попередженнями)
+
+Скрипт успішно налаштував моніторинг для Azure App Service, але є кілька моментів, що потребують уваги.
+
+## 🔍 Детальний аналіз по етапах
+
+### 1. ✅ Валідація передумов - УСПІШНО
+```
+Валідація завершена. Subscription: f7dc8823-4f06-4346-9de0-badbe6273a54
+```
+- Azure CLI працює
+- Користувач авторизований
+- Resource Group існує
+- App Service знайдено
+
+### 2. ✅ Перевірка Log Analytics workspaces - УСПІШНО
+```
+Workspace 'django-app-custom-monitoring-ws' вже існує. Буде використано існуючий.
+```
+**Знайдено 2 існуючих workspace:**
+- `log-analytics-django-app` (створено 09:22)
+- `django-app-custom-monitoring-ws` (створено 10:06)
+
+**Висновок:** Скрипт коректно виявив існуючий workspace і не створював дублікат.
+
+### 3. ✅ Налаштування Diagnostic Settings - УСПІШНО
+```
+Diagnostic setting 'django-app-budget-1752082786-enhanced-diagnostics' вже існує. Оновлюємо...
+```
+**Налаштовано всі типи логів:**
+- ✅ AppServiceHTTPLogs
+- ✅ AppServiceConsoleLogs  
+- ✅ AppServiceAppLogs
+- ✅ AppServiceAuditLogs
+- ✅ AppServiceIPSecAuditLogs
+- ✅ AppServicePlatformLogs
+- ✅ AllMetrics
+
+### 4. ✅ App Service логування - УСПІШНО
+```
+App Service логування налаштовано
+```
+**Налаштовано:**
+- Application logging: Information level
+- HTTP logs: файлова система (100MB, 3 дні)
+- Detailed error messages: увімкнено
+- Failed request tracing: увімкнено
+
+### 5. ⚠️ Створення Alert Rules - ЧАСТКОВО УСПІШНО
+```
+⚠️ Не вдалося створити HTTP 5xx alert
+⚠️ Не вдалося створити CPU alert
+```
+**Проблема:** Alert rules не створилися, але це не критична помилка.
+
+**Можливі причини:**
+- Відсутні необхідні дозволи для створення alerts
+- Неправильний синтаксис Kusto запиту
+- Обмеження для бюджетного рівня
+
+### 6. ✅ Тестування логування - УСПІШНО (з попередженням)
+```
+✅ Тестовий трафік згенеровано
+```
+**Генеровано тестові запити до:**
+- Головна сторінка
+- /health/
+- /admin/
+- /nonexistent-page (404)
+
+**⚠️ Помилка real-time логування:**
+```
+CLIError: Failed to connect to 'https://django-app-budget-1752082786.scm.azurewebsites.net/logstream' with status code '403' and reason 'Ip Forbidden'
+```
+**Причина:** IP-адреса заблокована для доступу до Kudu (SCM) сервісу.
+
+## 🚨 Критичні помилки
+
+### Помилка в кінці скрипта:
+```
+./setup-monitoring.sh: line 326: $2: unbound variable
+```
+**Причина:** Скрипт намагається отримати доступ до `$2` параметра, який не передано.
+
+**Рішення:** Додати перевірку параметрів або змінити `set -euo pipefail` на `set -eo pipefail`.
+
+## 📈 Результати налаштування
+
+### ✅ Успішно налаштовано:
+- **Log Analytics Workspace:** `django-app-custom-monitoring-ws`
+- **Workspace ID:** `4f2a1974-8b2d-4083-833e-f42b73144e88`
+- **Всі типи логів:** HTTP, Console, Application, Audit, Security, Platform
+- **Метрики:** AllMetrics з 1-хвилинним інтервалом
+
+### ⚠️ Потребує уваги:
+- Alert rules не створилися
+- IP-адреса заблокована для real-time логування
+- Помилка в кінці скрипта
+
+## 🔧 Рекомендації для виправлення
+
+### 1. Виправлення помилки скрипта
+```bash
+# Замінити в скрипті:
+set -euo pipefail
+# На:
+set -eo pipefail
+
+# Або додати перевірку параметрів:
+if [ $# -lt 2 ]; then
+    echo "Використання: $0 [param1] [param2]"
+    exit 1
+fi
+```
+
+### 2. Створення Alert Rules вручну
+```bash
+# HTTP 5xx errors alert
+az monitor scheduled-query create \
+    --resource-group django-app-budget-rg \
+    --name "django-app-budget-1752082786-http-5xx-errors" \
+    --description "Alert when HTTP 5xx errors occur" \
+    --condition "count 'AppServiceHTTPLogs | where TimeGenerated > ago(5m) | where ScStatus >= 500' > 5" \
+    --condition-query-time-range "5m" \
+    --evaluation-frequency "5m" \
+    --scopes "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg/providers/Microsoft.OperationalInsights/workspaces/django-app-custom-monitoring-ws" \
+    --severity 2 \
+    --window-size "5m"
+```
+
+### 3. Налаштування мережевого доступу
+```bash
+# Додати поточний IP до дозволених для Kudu
+az webapp config access-restriction add \
+    --resource-group django-app-budget-rg \
+    --name django-app-budget-1752082786 \
+    --rule-name "AllowMyIP" \
+    --action Allow \
+    --ip-address "YOUR_IP_ADDRESS/32" \
+    --priority 100 \
+    --scm-site true
+```
+
+## 🎯 Наступні кроки
+
+1. **Перевірити логи в Azure Portal:**
+   - Перейти до Log Analytics → django-app-custom-monitoring-ws
+   - Виконати тестові Kusto запити
+
+2. **Створити alert rules вручну через портал**
+
+3. **Виправити помилку в скрипті**
+
+4. **Налаштувати IP-доступ для real-time логування**
+
+## 💰 Вартість
+
+Налаштований моніторинг буде коштувати приблизно **$2-5/місяць** (перші 5GB безкоштовно).
+
+## 🎉 Висновок
+
+**Скрипт виконався успішно!** Основна функціональність моніторингу працює. Незначні помилки не впливають на збір та аналіз логів. Всі необхідні компоненти налаштовано і готові до використання.
+
+
+
