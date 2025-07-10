@@ -1,5 +1,7 @@
 
 
+```
+
 DisallowedHost at /
 Invalid HTTP_HOST header: 'django-app-budget-1752082786.azurewebsites.net'. You may need to add 'django-app-budget-1752082786.azurewebsites.net' to ALLOWED_HOSTS.
 Request Method:	GET
@@ -619,3 +621,5 @@ X_FRAME_OPTIONS
 YEAR_MONTH_FORMAT	
 'F Y'
 You’re seeing this error because you have DEBUG = True in your Django settings file. Change that to 
+
+```
