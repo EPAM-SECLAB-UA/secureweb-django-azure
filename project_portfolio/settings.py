@@ -27,14 +27,21 @@ SECRET_KEY = config("SECRET_KEY", default='')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=True)
 
-#ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='').split(',')
 
-ALLOWED_HOSTS = [
-    'django-app-budget-1752082786.azurewebsites.net',
-    'localhost',
-    '127.0.0.1',
-    '.azurewebsites.net',  # Для всіх Azure subdomain
-]
+
+# ALLOWED_HOSTS з environment variable
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost').split(',')
+
+# Якщо змінна не встановлена, використати Azure домен
+if not ALLOWED_HOSTS or ALLOWED_HOSTS == ['']:
+    ALLOWED_HOSTS = [
+        'django-app-budget-1752082786.azurewebsites.net',
+        '.azurewebsites.net',
+        'localhost',
+        '127.0.0.1'
+    ]
+
+
 
 if 'CODESPACE_NAME' in os.environ:
     codespace_name = config("CODESPACE_NAME")
