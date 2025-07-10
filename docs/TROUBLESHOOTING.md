@@ -92,6 +92,253 @@ az webapp log show \
     --resource-group django-app-budget-rg \
     --name django-app-budget-1752082786
 
+```
+
+
+
+```bash
+^C@VitaliiShevchuk2023 ➜ /workspaces/secureweb-django-azure (feature/infrastructure-update) $ az webapp log show \
+>     --resource-group django-app-budget-rg \
+>     --name django-app-budget-1752082786
+{
+  "applicationLogs": {
+    "azureBlobStorage": {
+      "level": "Off",
+      "retentionInDays": null,
+      "sasUrl": null
+    },
+    "azureTableStorage": {
+      "level": "Off",
+      "sasUrl": null
+    },
+    "fileSystem": {
+      "level": "Information"
+    }
+  },
+  "detailedErrorMessages": {
+    "enabled": true
+  },
+  "failedRequestsTracing": {
+    "enabled": true
+  },
+  "httpLogs": {
+    "azureBlobStorage": {
+      "enabled": false,
+      "retentionInDays": null,
+      "sasUrl": null
+    },
+    "fileSystem": {
+      "enabled": false,
+      "retentionInDays": null,
+      "retentionInMb": 100
+    }
+  },
+  "id": "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg/providers/Microsoft.Web/sites/django-app-budget-1752082786/config/logs",
+  "kind": null,
+  "location": "West Europe",
+  "name": "logs",
+  "resourceGroup": "django-app-budget-rg",
+  "tags": {
+    "CostProfile": "Budget",
+    "CreatedBy": "AzureCLI",
+    "Environment": "budget",
+    "Project": "django-app",
+    "hidden-link: /app-insights-resource-id": "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg/providers/microsoft.insights/components/django-app-budget-insights"
+  },
+  "type": "Microsoft.Web/sites/config"
+}
+@VitaliiShevchuk2023 ➜ /workspaces/secureweb-django-azure (feature/infrastructure-update) $ 
+```
+
+
+## 📋 **Аналіз поточних налаштувань логування:**
+
+### **✅ Що працює:**
+- **Application Logs (FileSystem)**: `Information` level ✅
+- **Detailed Error Messages**: `enabled` ✅  
+- **Failed Requests Tracing**: `enabled` ✅
+
+### **❌ Що відключено:**
+- **HTTP Logs (FileSystem)**: `disabled` ❌
+- **Azure Blob Storage**: `disabled` ❌
+- **Azure Table Storage**: `disabled` ❌
+
+## 🔧 **Увімкнемо HTTP логування:**
+
+```bash
+# Увімкніть HTTP логи у файлову систему
+az webapp log config \
+    --resource-group django-app-budget-rg \
+    --name django-app-budget-1752082786 \
+    --web-server-logging filesystem \
+    --retention-in-days 7
+```
+
+## 📊 **Перевірка логів:**
+
+### **1. Real-time логи:**
+```bash
+az webapp log tail \
+    --resource-group django-app-budget-rg \
+    --name django-app-budget-1752082786
+```
+
+### **2. Завантаження логів:**
+```bash
+# Завантажити всі логи у ZIP файл
+az webapp log download \
+    --resource-group django-app-budget-rg \
+    --name django-app-budget-1752082786 \
+    --log-file django-logs.zip
+```
+
+### **3. SSH доступ до файлів логів:**
+```bash
+# Підключення через SSH
+az webapp ssh \
+    --resource-group django-app-budget-rg \
+    --name django-app-budget-1752082786
+
+# У SSH виконайте:
+# ls -la /home/LogFiles/
+# cat /home/LogFiles/Application/*.log
+# tail -f /home/LogFiles/Application/*.log
+```
+
+## 🔍 **Структура логів на Azure:**
+
+```
+/home/LogFiles/
+├── Application/          # Django application logs
+│   └── *.log
+├── http/                # HTTP access logs (якщо увімкнені)
+│   └── *.log  
+├── DetailedErrors/      # Detailed error pages
+│   └── *.htm
+└── FailedRequestsTracing/  # Failed request traces
+    └── *.xml
+```
+
+## 📝 **Додайте Django логування у код:**
+
+```python
+# У settings.py
+import os
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'azure_file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': '/home/LogFiles/Application/django.log',
+            'formatter': 'verbose',
+        },
+        'console': {
+            'level': 'INFO', 
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['azure_file', 'console'],
+            'level': 'INFO',
+        },
+        'project_portfolio': {
+            'handlers': ['azure_file', 'console'],
+            'level': 'DEBUG',
+        },
+    },
+}
+```
+
+## 🎯 **Тестування логування:**
+
+### **1. Додайте логи у views.py:**
+```python
+# project_portfolio/core/views.py
+import logging
+
+logger = logging.getLogger('project_portfolio')
+
+def index(request):
+    logger.info(f"Index page accessed from IP: {request.META.get('REMOTE_ADDR')}")
+    
+    # Логування user agent
+    user_agent = request.META.get('HTTP_USER_AGENT', 'Unknown')
+    logger.info(f"User Agent: {user_agent}")
+    
+    return HttpResponse("""...""")
+
+def health(request):
+    logger.info("Health check endpoint accessed")
+    return HttpResponse("OK", content_type="text/plain")
+```
+
+### **2. Commit і deploy:**
+```bash
+git add project_portfolio/settings.py
+git add project_portfolio/core/views.py  
+git commit -m "Add comprehensive logging configuration"
+git push origin feature/infrastructure-update
+```
+
+## 🔍 **Моніторинг після deployment:**
+
+### **1. Перевірте роботу логів:**
+```bash
+# Відразу після deployment
+az webapp log tail \
+    --resource-group django-app-budget-rg \
+    --name django-app-budget-1752082786
+
+# Відкрийте сайт кілька разів:
+curl https://django-app-budget-1752082786.azurewebsites.net
+curl https://django-app-budget-1752082786.azurewebsites.net/health/
+```
+
+### **2. SSH перевірка файлів:**
+```bash
+az webapp ssh \
+    --resource-group django-app-budget-rg \
+    --name django-app-budget-1752082786
+
+# У SSH:
+ls -la /home/LogFiles/Application/
+tail -f /home/LogFiles/Application/django.log
+```
+
+## 📊 **Application Insights інтеграція:**
+
+Якщо потрібна розширена аналітика:
+
+```python
+# settings.py - додайте Application Insights
+INSTALLED_APPS = [
+    # ... інші apps
+    'applicationinsights.django',
+]
+
+APPLICATION_INSIGHTS = {
+    'ikey': os.environ.get('APPINSIGHTS_INSTRUMENTATIONKEY', ''),
+}
+```
+
+**Ваші логи налаштовані правильно! Тепер маєте Information level для application логів і детальні error messages.** 🚀
+
+
+
+
+```bash
+
 # Перегляд real-time логів
 az webapp log tail \
     --resource-group django-app-budget-rg \
@@ -161,59 +408,4 @@ az webapp log tail \
 ```
 
 **Найвірогідніше filesystem logging буде працювати без додаткових прав!** 🚀
-
-
-```bash
-^C@VitaliiShevchuk2023 ➜ /workspaces/secureweb-django-azure (feature/infrastructure-update) $ az webapp log show \
->     --resource-group django-app-budget-rg \
->     --name django-app-budget-1752082786
-{
-  "applicationLogs": {
-    "azureBlobStorage": {
-      "level": "Off",
-      "retentionInDays": null,
-      "sasUrl": null
-    },
-    "azureTableStorage": {
-      "level": "Off",
-      "sasUrl": null
-    },
-    "fileSystem": {
-      "level": "Information"
-    }
-  },
-  "detailedErrorMessages": {
-    "enabled": true
-  },
-  "failedRequestsTracing": {
-    "enabled": true
-  },
-  "httpLogs": {
-    "azureBlobStorage": {
-      "enabled": false,
-      "retentionInDays": null,
-      "sasUrl": null
-    },
-    "fileSystem": {
-      "enabled": false,
-      "retentionInDays": null,
-      "retentionInMb": 100
-    }
-  },
-  "id": "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg/providers/Microsoft.Web/sites/django-app-budget-1752082786/config/logs",
-  "kind": null,
-  "location": "West Europe",
-  "name": "logs",
-  "resourceGroup": "django-app-budget-rg",
-  "tags": {
-    "CostProfile": "Budget",
-    "CreatedBy": "AzureCLI",
-    "Environment": "budget",
-    "Project": "django-app",
-    "hidden-link: /app-insights-resource-id": "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg/providers/microsoft.insights/components/django-app-budget-insights"
-  },
-  "type": "Microsoft.Web/sites/config"
-}
-@VitaliiShevchuk2023 ➜ /workspaces/secureweb-django-azure (feature/infrastructure-update) $ 
-```
 
