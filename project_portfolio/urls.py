@@ -19,14 +19,17 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+import os
 
-from project_portfolio.core import views as core_views
+# Отримуємо admin URL з environment або використовуємо дефолтний
+admin_url = os.environ.get('DJANGO_ADMIN_URL', 'admin/')
 
 urlpatterns = [
-    path("", core_views.index),
-    path("admin/", admin.site.urls),
-    path("__reload__/", include("django_browser_reload.urls")),
+    path(admin_url, admin.site.urls),  # Admin панель
+    path('', include('project_portfolio.core.urls')),  # Основні URLs
 ]
+
+# Статичні файли для development
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
