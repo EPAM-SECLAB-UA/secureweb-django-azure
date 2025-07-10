@@ -733,4 +733,262 @@ chmod +x setup-monitoring.sh
 **Просто запустіть скрипт і через 5-10 хвилин у вас буде повний моніторинг!** 🎉
 
 
+# Запуск скрипта у фоновому режимі з логуванням
+
+## 1. Простий фоновий запуск з логуванням
+
+### Основний спосіб
+```bash
+# Запуск з виводом в файл логів
+./monitoring_setup.sh > monitoring_setup.log 2>&1 &
+
+# Отримати PID процесу
+echo $! > monitoring_setup.pid
+```
+
+### З детальнішим логуванням
+```bash
+# Запуск з timestamp та детальним логуванням
+./monitoring_setup.sh > monitoring_setup_$(date +%Y%m%d_%H%M%S).log 2>&1 &
+
+# Зберегти PID
+echo $! > monitoring_setup.pid
+echo "Процес запущено з PID: $(cat monitoring_setup.pid)"
+```
+
+## 2. Використання nohup (рекомендовано)
+
+```bash
+# Запуск з nohup для запобігання завершенню при закритті терміналу
+nohup ./monitoring_setup.sh > monitoring_setup.log 2>&1 &
+
+# Або з унікальним ім'ям файлу
+nohup ./monitoring_setup.sh > monitoring_setup_$(date +%Y%m%d_%H%M%S).log 2>&1 &
+```
+
+## 3. Використання screen або tmux
+
+### Screen
+```bash
+# Створити screen сесію
+screen -S monitoring_setup
+
+# Всередині screen виконати
+./monitoring_setup.sh
+
+# Відключитися: Ctrl+A, потім D
+# Повернутися: screen -r monitoring_setup
+```
+
+### Tmux
+```bash
+# Створити tmux сесію
+tmux new-session -d -s monitoring_setup
+
+# Виконати команду в сесії
+tmux send-keys -t monitoring_setup './monitoring_setup.sh' Enter
+
+# Переглянути сесію
+tmux attach-session -t monitoring_setup
+```
+
+## 4. Розширений скрипт-обгортка
+
+Створіть файл `run_monitoring_background.sh`:
+
+```bash
+#!/bin/bash
+
+# Конфігурація
+SCRIPT_NAME="monitoring_setup.sh"
+LOG_DIR="logs"
+PID_FILE="monitoring_setup.pid"
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+LOG_FILE="$LOG_DIR/monitoring_setup_$TIMESTAMP.log"
+
+# Створити директорію для логів
+mkdir -p "$LOG_DIR"
+
+# Функція для логування
+log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_FILE"
+}
+
+# Перевірити чи скрипт існує
+if [ ! -f "$SCRIPT_NAME" ]; then
+    log "ПОМИЛКА: Скрипт $SCRIPT_NAME не знайдено"
+    exit 1
+fi
+
+# Зробити скрипт виконуваним
+chmod +x "$SCRIPT_NAME"
+
+# Запустити скрипт у фоновому режимі
+log "Запуск скрипта $SCRIPT_NAME у фоновому режимі..."
+nohup ./"$SCRIPT_NAME" >> "$LOG_FILE" 2>&1 &
+
+# Зберегти PID
+SCRIPT_PID=$!
+echo "$SCRIPT_PID" > "$PID_FILE"
+
+log "Скрипт запущено з PID: $SCRIPT_PID"
+log "Логи зберігаються в: $LOG_FILE"
+log "PID зберігається в: $PID_FILE"
+
+echo "Для моніторингу логів використовуйте:"
+echo "  tail -f $LOG_FILE"
+echo ""
+echo "Для перевірки статусу процесу:"
+echo "  ps -p $SCRIPT_PID"
+echo ""
+echo "Для завершення процесу:"
+echo "  kill $SCRIPT_PID"
+```
+
+## 5. Моніторинг виконання
+
+### Перевірка статусу процесу
+```bash
+# Перевірити чи процес ще працює
+PID=$(cat monitoring_setup.pid)
+if ps -p $PID > /dev/null; then
+    echo "Процес працює (PID: $PID)"
+else
+    echo "Процес завершено"
+fi
+```
+
+### Моніторинг логів в реальному часі
+```bash
+# Стежити за логами в реальному часі
+tail -f monitoring_setup.log
+
+# Або з кольоровим виводом
+tail -f monitoring_setup.log | grep --color=always -E "(ERROR|SUCCESS|WARNING|.*)"
+```
+
+### Фільтрація логів
+```bash
+# Показати тільки помилки
+grep "❌" monitoring_setup.log
+
+# Показати успішні операції
+grep "✅" monitoring_setup.log
+
+# Показати попередження
+grep "⚠️" monitoring_setup.log
+```
+
+## 6. Автоматичне управління
+
+### Створити скрипт для зупинки
+```bash
+#!/bin/bash
+# stop_monitoring.sh
+
+PID_FILE="monitoring_setup.pid"
+
+if [ -f "$PID_FILE" ]; then
+    PID=$(cat "$PID_FILE")
+    if ps -p $PID > /dev/null; then
+        echo "Зупинка процесу $PID..."
+        kill $PID
+        rm "$PID_FILE"
+        echo "Процес зупинено"
+    else
+        echo "Процес вже не працює"
+        rm "$PID_FILE"
+    fi
+else
+    echo "PID файл не знайдено"
+fi
+```
+
+### Створити скрипт для перевірки статусу
+```bash
+#!/bin/bash
+# status_monitoring.sh
+
+PID_FILE="monitoring_setup.pid"
+
+if [ -f "$PID_FILE" ]; then
+    PID=$(cat "$PID_FILE")
+    if ps -p $PID > /dev/null; then
+        echo "✅ Процес працює (PID: $PID)"
+        echo "Час запуску: $(ps -o lstart= -p $PID)"
+    else
+        echo "❌ Процес не працює"
+    fi
+else
+    echo "❌ PID файл не знайдено"
+fi
+```
+
+## 7. Використання systemd (для серверів)
+
+Створіть файл `/etc/systemd/system/monitoring-setup.service`:
+
+```ini
+[Unit]
+Description=Azure Monitoring Setup Service
+After=network.target
+
+[Service]
+Type=simple
+User=your_username
+WorkingDirectory=/path/to/your/script
+ExecStart=/path/to/your/script/monitoring_setup.sh
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Команди для управління:
+```bash
+# Перезавантажити systemd
+sudo systemctl daemon-reload
+
+# Запустити сервіс
+sudo systemctl start monitoring-setup
+
+# Перевірити статус
+sudo systemctl status monitoring-setup
+
+# Переглянути логи
+sudo journalctl -u monitoring-setup -f
+```
+
+## 8. Практичні поради
+
+### Рекомендований спосіб для вашого скрипта:
+```bash
+# 1. Зробити скрипт виконуваним
+chmod +x monitoring_setup.sh
+
+# 2. Запустити з логуванням
+nohup ./monitoring_setup.sh > monitoring_setup_$(date +%Y%m%d_%H%M%S).log 2>&1 &
+
+# 3. Зберегти PID
+echo $! > monitoring_setup.pid
+
+# 4. Моніторити прогрес
+tail -f monitoring_setup_*.log
+```
+
+### Для швидкого налагодження:
+```bash
+# Запуск з виводом в термінал та файл одночасно
+./monitoring_setup.sh 2>&1 | tee monitoring_setup.log
+```
+
+### Ротація логів:
+```bash
+# Обмежити розмір логів
+./monitoring_setup.sh > >(split -d -l 1000 - monitoring_setup.log.) 2>&1 &
+```
+
 
