@@ -2,11 +2,12 @@ name: Deploy Django to Azure
 
 on:
   push:
-    branches: [feature/infrastructure-update ]
+    branches: [feature/infrastructure-update ] 
+
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: your-app-name  # Replace with your app name
+  AZURE_WEBAPP_NAME: django-app-budget-1752082786 # Replace with your app name
   PYTHON_VERSION: '3.11'
 
 jobs:
