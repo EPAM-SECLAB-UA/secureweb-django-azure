@@ -124,5 +124,25 @@ jobs:
           echo "✅ Memory-optimized startup command configured"
       env:
         AZURE_CREDENTIALS: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
+
+    - name: 📊 Deployment Summary
+      if: always()
+      run: |
+        echo "## 🎉 Memory-Optimized Django + PostgreSQL Deployment" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| Component | Status |" >> $GITHUB_STEP_SUMMARY
+        echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+        echo "| 🌐 **Application** | https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net |" >> $GITHUB_STEP_SUMMARY
+        echo "| 🛡️ **Admin Panel** | https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net/admin/ |" >> $GITHUB_STEP_SUMMARY
+        echo "| 🗄️ **Database** | PostgreSQL on Azure |" >> $GITHUB_STEP_SUMMARY
+        echo "| 🐍 **Python** | ${{ env.PYTHON_VERSION }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| 🌿 **Branch** | ${{ github.ref_name }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| ⚙️ **Configuration** | Manual setup required |" >> $GITHUB_STEP_SUMMARY
+        echo "| 🔧 **Startup** | startup-optimized.sh ready |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 🔧 Manual Configuration Required" >> $GITHUB_STEP_SUMMARY
+        echo "1. Azure Portal → App Service → Configuration" >> $GITHUB_STEP_SUMMARY
+        echo "2. Set Startup Command: \`bash startup-optimized.sh\`" >> $GITHUB_STEP_SUMMARY
+        echo "3. Save and Restart" >> $GITHUB_STEP_SUMMARY
         
     # Rest of the steps remain the same...
