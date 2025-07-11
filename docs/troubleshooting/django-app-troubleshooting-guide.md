@@ -644,3 +644,408 @@ Alternative (якщо бюджет обмежений):
 ```
 
 Ці зміни повинні усунути всі application-level issues та забезпечити стабільну роботу Django додатку!
+
+---------------------------------------------------------------------------------------------------------------------------------------
+
+## 🔍 **ВАЖЛИВЕ ВІДКРИТТЯ: Plan вже B1!**
+
+### 📊 **Результат перевірки:**
+```
+Name: django-app-budget-plan
+Tier: Basic
+Size: B1  
+Capacity: 1
+```
+
+### ⚡ **Це змінює всю картину!**
+
+**App Service Plan УЖЕ на Basic B1**, що означає:
+- **RAM:** 1.75GB (не 128MB як на Free tier)
+- **CPU:** 1 dedicated core
+- **Memory per worker:** ~400-500MB available
+
+## 🚨 **Нова діагностика: OOM kills на B1 = серйозні проблеми з кодом**
+
+### **Якщо OOM kills відбуваються на B1, то проблема НЕ в ресурсах:**
+
+#### 1. **Massive Memory Leaks в Django**
+```python
+# Критичні проблеми:
+- Database connection pool overflow
+- Infinite cache growth  
+- Large objects не збираються garbage collector
+- Circular references блокують GC
+- Memory-intensive operations без cleanup
+```
+
+#### 2. **Неправильна Gunicorn конфігурація**
+```python
+# Можливі проблеми:
+workers = 8  # Занадто багато для 1.75GB
+worker_memory_limit = None  # Без лімітів
+max_requests = 0  # Workers ніколи не перезапускаються
+```
+
+#### 3. **Application-level проблеми**
+```python
+# Потенційні виклики memory exhaustion:
+- Large file uploads без streaming
+- Complex querysets без pagination
+- Image processing без optimization
+- Session data explosion
+- Middleware memory accumulation
+```
+
+## 🔍 **Негайні дії для діагностики**
+
+### 1. **Перевірити Gunicorn конфігурацію**
+```bash
+# Подивитися поточну конфігурацію App Service
+az webapp config show \
+    --name django-app-budget-1752082786 \
+    --resource-group django-app-budget-rg \
+    --query "pythonVersion"
+
+# Перевірити startup command
+az webapp config show \
+    --name django-app-budget-1752082786 \
+    --resource-group django-app-budget-rg \
+    --query "appCommandLine"
+```
+
+### 2. **Детальний аналіз логів**
+```kusto
+// Розширений пошук memory-related issues
+AppServiceConsoleLogs
+| where TimeGenerated > ago(24h)
+| where ResultDescription contains "memory" or 
+        ResultDescription contains "Memory" or
+        ResultDescription contains "worker" or
+        ResultDescription contains "gunicorn" or
+        ResultDescription contains "django"
+| project TimeGenerated, Level, ResultDescription
+| order by TimeGenerated desc
+```
+
+### 3. **Перевірити метрики B1 plan**
+```bash
+# Memory usage на B1
+az monitor metrics list \
+    --resource "/subscriptions/f7dc8823-4f06-4346-9de0-badbe6273a54/resourceGroups/django-app-budget-rg/providers/Microsoft.Web/sites/django-app-budget-1752082786" \
+    --metric "MemoryWorkingSet" \
+    --interval PT1H \
+    --output table
+```
+
+## 🛠️ **Рекомендовані виправлення для B1**
+
+### **1. Оптимізувати Gunicorn (Priority 1)**
+```python
+# gunicorn_config.py для B1
+import multiprocessing
+
+# Conservative settings for 1.75GB
+workers = 2  # Не більше 2 на B1
+worker_class = "sync"
+worker_connections = 1000
+max_requests = 500  # Restart workers часто
+max_requests_jitter = 50
+preload_app = True  # Share memory
+
+# Memory management
+worker_memory_limit = 400 * 1024 * 1024  # 400MB per worker
+worker_tmp_dir = "/dev/shm"
+
+# Timeouts
+timeout = 30
+keepalive = 2
+graceful_timeout = 10
+```
+
+### **2. Django settings optimization**
+```python
+# settings.py
+# Database connections
+DATABASES = {
+    'default': {
+        # ... your db config
+        'CONN_MAX_AGE': 300,  # 5 minutes max
+        'OPTIONS': {
+            'MAX_CONNS': 10,  # Limit total connections
+        }
+    }
+}
+
+# Cache optimization  
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'OPTIONS': {
+            'MAX_ENTRIES': 5000,  # Limit cache size
+            'CULL_FREQUENCY': 4,   # Aggressive cleanup
+        }
+    }
+}
+
+# Session optimization
+SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
+SESSION_CACHE_ALIAS = 'default'
+SESSION_COOKIE_AGE = 3600  # 1 hour
+
+# File upload limits
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880
+```
+
+### **3. Memory monitoring middleware**
+```python
+# middleware/memory_monitor.py
+import psutil
+import logging
+import gc
+
+logger = logging.getLogger(__name__)
+
+class MemoryMonitorMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # Pre-request memory check
+        memory_before = psutil.virtual_memory().percent
+        
+        if memory_before > 70:  # Warning threshold
+            logger.warning(f"High memory before request: {memory_before}%")
+            gc.collect()  # Force garbage collection
+        
+        response = self.get_response(request)
+        
+        # Post-request memory check
+        memory_after = psutil.virtual_memory().percent
+        
+        if memory_after > 80:  # Critical threshold
+            logger.error(f"Critical memory after request: {memory_after}%")
+            gc.collect()
+            
+        # Log memory growth
+        growth = memory_after - memory_before
+        if growth > 5:  # 5% growth in single request
+            logger.warning(f"High memory growth: {growth}% for {request.path}")
+            
+        return response
+```
+
+## 🎯 **Висновки**
+
+**На B1 tier OOM kills = серйозна проблема з кодом**, не з ресурсами.
+
+**Пріоритети:**
+1. **Негайно** - оптимізувати Gunicorn (2 workers max)
+2. **Сьогодні** - додати memory monitoring middleware  
+3. **Цей тиждень** - профайлити Django код на memory leaks
+
+**B1 повинен бути більш ніж достатньо** для типового Django додатку! 🚀
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+## 🔍 **Аналіз startup команди - Знайшли частину проблеми!**
+
+### 📊 **Поточна конфігурація Gunicorn:**
+
+```bash
+gunicorn --bind=0.0.0.0:8000 
+         --timeout 300 
+         --workers 1 
+         --max-requests 1000 
+         --max-requests-jitter 100 
+         project_portfolio.wsgi:application
+```
+
+### ✅ **Хороші налаштування:**
+- **workers 1** - правильно для budget setup
+- **max-requests 1000** - workers перезапускаються (good for memory cleanup)
+- **max-requests-jitter 100** - randomization для уникнення thundering herd
+
+### ⚠️ **Проблемні налаштування:**
+
+#### 1. **Timeout 300 секунд (5 хвилин)**
+```bash
+--timeout 300  # ЗАНАДТО ВЕЛИКИЙ!
+```
+**Проблема:** Django requests можуть "зависати" на 5 хвилин, накопичуючи memory
+**Рекомендація:** Зменшити до 30-60 секунд
+
+#### 2. **Відсутні memory controls**
+```bash
+# ВІДСУТНІ:
+--worker-memory-limit
+--preload-app  
+--worker-class
+```
+
+## 🛠️ **Оптимізована команда для B1**
+
+### **Рекомендована заміна:**
+```bash
+# Міграції
+python manage.py migrate --noinput
+
+# Збір статичних файлів
+python manage.py collectstatic --noinput
+
+# Оптимізований запуск для B1
+exec gunicorn --bind=0.0.0.0:8000 \
+              --workers 1 \
+              --worker-class sync \
+              --timeout 30 \
+              --keepalive 2 \
+              --max-requests 500 \
+              --max-requests-jitter 50 \
+              --preload-app \
+              --worker-tmp-dir /dev/shm \
+              --access-logfile - \
+              --error-logfile - \
+              --log-level warning \
+              project_portfolio.wsgi:application
+```
+
+### **Обгрунтування змін:**
+
+#### **1. Timeout: 300 → 30 секунд**
+```bash
+--timeout 30  # Швидше виявлення зависших requests
+```
+**Ефект:** Requests що споживають багато memory будуть terminated швидше
+
+#### **2. Max-requests: 1000 → 500**
+```bash
+--max-requests 500  # Частіший restart workers
+```
+**Ефект:** Memory cleanup кожні 500 requests замість 1000
+
+#### **3. Додані memory optimizations:**
+```bash
+--preload-app           # Share memory між workers
+--worker-tmp-dir /dev/shm  # Use RAM для temp files
+--log-level warning     # Менше log output = менше memory
+```
+
+## 🚀 **Як оновити конфігурацію**
+
+### **Метод 1: Через Azure CLI**
+```bash
+# Оновити startup command
+az webapp config set \
+    --resource-group django-app-budget-rg \
+    --name django-app-budget-1752082786 \
+    --startup-file "python manage.py migrate --noinput && python manage.py collectstatic --noinput && exec gunicorn --bind=0.0.0.0:8000 --workers 1 --worker-class sync --timeout 30 --keepalive 2 --max-requests 500 --max-requests-jitter 50 --preload-app --worker-tmp-dir /dev/shm --access-logfile - --error-logfile - --log-level warning project_portfolio.wsgi:application"
+```
+
+### **Метод 2: Створити startup script**
+```bash
+# startup.sh
+#!/bin/bash
+set -e
+
+echo "Starting Django application..."
+
+# Database setup
+python manage.py migrate --noinput
+python manage.py collectstatic --noinput
+
+# Memory-optimized Gunicorn
+exec gunicorn \
+    --bind=0.0.0.0:8000 \
+    --workers 1 \
+    --worker-class sync \
+    --timeout 30 \
+    --keepalive 2 \
+    --max-requests 500 \
+    --max-requests-jitter 50 \
+    --preload-app \
+    --worker-tmp-dir /dev/shm \
+    --access-logfile - \
+    --error-logfile - \
+    --log-level warning \
+    project_portfolio.wsgi:application
+```
+
+```bash
+# Встановити startup script
+az webapp config set \
+    --resource-group django-app-budget-rg \
+    --name django-app-budget-1752082786 \
+    --startup-file "bash startup.sh"
+```
+
+## 📊 **Додаткові Django оптимізації**
+
+### **В settings.py додати:**
+```python
+# Memory-efficient logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'level': 'WARNING',  # Тільки warnings та errors
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'WARNING',
+    },
+}
+
+# Database connection optimization
+DATABASES = {
+    'default': {
+        # ... your config
+        'CONN_MAX_AGE': 300,  # 5 minutes
+        'OPTIONS': {
+            'connect_timeout': 10,
+            'options': '-c default_transaction_isolation=read_committed'
+        }
+    }
+}
+
+# Cache optimization
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'OPTIONS': {
+            'MAX_ENTRIES': 1000,
+            'CULL_FREQUENCY': 4,
+        }
+    }
+}
+```
+
+## 🔍 **Очікувані результати**
+
+### **After optimization:**
+- **Worker restart frequency:** Кожні 500 requests (замість 1000)
+- **Request timeout:** 30 секунд (замість 300)
+- **Memory cleanup:** Більш агресивний
+- **Shared memory:** preload-app зменшить memory footprint
+
+### **Expected impact:**
+```
+Before: OOM kills кожні ~55 хвилин
+After:  Значно менше OOM kills або повне усунення
+Memory usage: Більш стабільний profil
+Response times: Більш передбачувані
+```
+
+## 🎯 **План дій**
+
+1. **Негайно** - оновити startup command з оптимізаціями
+2. **Моніторити** Log Analytics наступні 2-4 години
+3. **Перевірити** чи припинилися OOM kills
+4. **Fine-tune** параметри якщо потрібно
+
+**Ці зміни повинні значно покращити memory stability на B1!** 🚀
+
+--------------------------------------------------------------------------------------------------
