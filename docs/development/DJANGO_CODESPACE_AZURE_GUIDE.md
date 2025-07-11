@@ -880,3 +880,331 @@ az webapp config appsettings set --name your-app --resource-group your-rg --sett
 
 Цей підхід забезпечує професійний workflow від розробки до продакшену! 🚀
 
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+# 📁 Опис конфігурації .devcontainer для Django проекту
+
+## 🎯 Загальний огляд
+
+Конфігурація `.devcontainer` створює повноцінне середовище розробки Django додатка з PostgreSQL та Redis в GitHub Codespace або VS Code Dev Containers.
+
+---
+
+## 1️⃣ `.devcontainer/devcontainer.json`
+
+### 📝 **Опис:**
+Головний конфігураційний файл, що визначає налаштування контейнера розробки.
+
+### 🔧 **Основні секції:**
+
+#### **Базові налаштування:**
+```json
+{
+  "name": "Django PostgreSQL Development",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "web",
+  "workspaceFolder": "/workspace"
+}
+```
+- **name** - назва середовища розробки
+- **dockerComposeFile** - посилання на Docker Compose конфігурацію
+- **service** - основний сервіс для розробки (контейнер з Django)
+- **workspaceFolder** - робоча папка всередині контейнера
+
+#### **VS Code налаштування:**
+```json
+"customizations": {
+  "vscode": {
+    "settings": {
+      "python.defaultInterpreterPath": "/usr/local/bin/python",
+      "python.linting.enabled": true,
+      "python.linting.pylintEnabled": true,
+      "python.formatting.provider": "black",
+      "python.linting.flake8Enabled": true,
+      "python.testing.pytestEnabled": true
+    }
+  }
+}
+```
+**Призначення:**
+- Автоматичне налаштування Python інтерпретатора
+- Включення лінтингу (pylint, flake8)
+- Налаштування форматування коду (black)
+- Активація pytest для тестування
+- Приховування __pycache__ файлів
+
+#### **Розширення VS Code:**
+```json
+"extensions": [
+  "ms-python.python",           // Основна підтримка Python
+  "ms-python.flake8",           // Лінтинг flake8
+  "ms-python.black-formatter",  // Форматування black
+  "ms-toolsai.jupyter",         // Jupyter notebooks
+  "mtxr.sqltools",              // SQL інструменти
+  "mtxr.sqltools-driver-pg",    // PostgreSQL драйвер
+  "ms-vscode.vscode-json",      // JSON підтримка
+  "bradlc.vscode-tailwindcss",  // TailwindCSS (якщо використовується)
+  "formulahendry.auto-rename-tag" // Автоматичне перейменування HTML тегів
+]
+```
+
+#### **Форвардинг портів:**
+```json
+"forwardPorts": [8000, 5432],
+"portsAttributes": {
+  "8000": {
+    "label": "Django Development Server",
+    "onAutoForward": "notify"
+  },
+  "5432": {
+    "label": "PostgreSQL Database", 
+    "onAutoForward": "silent"
+  }
+}
+```
+**Що робить:**
+- Порт 8000 - Django сервер (з нотифікацією при відкритті)
+- Порт 5432 - PostgreSQL (тихий форвардинг)
+
+#### **Lifecycle команди:**
+```json
+"postCreateCommand": "bash .devcontainer/post-create.sh",
+"postAttachCommand": "python manage.py runserver 0.0.0.0:8000"
+```
+- **postCreateCommand** - виконується після створення контейнера
+- **postAttachCommand** - виконується при підключенні до контейнера
+
+#### **Features:**
+```json
+"features": {
+  "ghcr.io/devcontainers/features/azure-cli:1": {},
+  "ghcr.io/devcontainers/features/git:1": {}
+}
+```
+- Автоматичне встановлення Azure CLI
+- Налаштування Git
+
+---
+
+## 2️⃣ `.devcontainer/docker-compose.yml`
+
+### 📝 **Опис:**
+Визначає мульти-контейнерне середовище з Django, PostgreSQL та Redis.
+
+### 🐳 **Сервіси:**
+
+#### **Web сервіс (Django):**
+```yaml
+web:
+  build:
+    context: ..
+    dockerfile: .devcontainer/Dockerfile
+  volumes:
+    - ../..:/workspaces:cached
+    - /var/run/docker.sock:/var/run/docker.sock
+  command: sleep infinity
+  environment:
+    - DJANGO_SETTINGS_MODULE=project_name.settings.development
+    - DATABASE_URL=postgresql://postgres:postgres@db:5432/django_dev
+    - DEBUG=True
+  depends_on:
+    - db
+    - redis
+  ports:
+    - "8000:8000"
+```
+**Особливості:**
+- Збирається з власного Dockerfile
+- Монтує проект в `/workspaces`
+- Доступ до Docker daemon (для Docker-in-Docker)
+- Залежить від db та redis сервісів
+- Налаштована на development режим
+
+#### **Database сервіс (PostgreSQL):**
+```yaml
+db:
+  image: postgres:15-alpine
+  restart: unless-stopped
+  volumes:
+    - postgres_data:/var/lib/postgresql/data
+  environment:
+    POSTGRES_DB: django_dev
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+  ports:
+    - "5432:5432"
+  healthcheck:
+    test: ["CMD-SHELL", "pg_isready -U postgres"]
+    interval: 10s
+    timeout: 5s
+    retries: 5
+```
+**Особливості:**
+- PostgreSQL 15 Alpine (легка версія)
+- Persistent дані через volume
+- Health check для перевірки готовності
+- Стандартні credentials для розробки
+
+#### **Redis сервіс:**
+```yaml
+redis:
+  image: redis:7-alpine
+  restart: unless-stopped
+  ports:
+    - "6379:6379"
+```
+**Призначення:**
+- Кешування Django
+- Сесії користувачів
+- Черги завдань (Celery)
+
+---
+
+## 3️⃣ `.devcontainer/Dockerfile`
+
+### 📝 **Опис:**
+Створює образ контейнера для Django розробки.
+
+### 🔨 **Етапи збірки:**
+
+#### **Базовий образ:**
+```dockerfile
+FROM python:3.11-slim
+```
+- Python 3.11 slim версія (мінімальна)
+
+#### **Системні залежності:**
+```dockerfile
+RUN apt-get update && apt-get install -y \
+    postgresql-client \
+    build-essential \
+    curl \
+    git \
+    sudo \
+    && rm -rf /var/lib/apt/lists/*
+```
+**Встановлює:**
+- **postgresql-client** - для роботи з PostgreSQL
+- **build-essential** - компілятори для Python пакетів
+- **curl** - для завантаження файлів
+- **git** - система контролю версій
+- **sudo** - для підвищення привілеїв
+
+#### **Створення користувача:**
+```dockerfile
+ARG USERNAME=vscode
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
+
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
+    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
+    && chmod 0440 /etc/sudoers.d/$USERNAME
+```
+**Що робить:**
+- Створює користувача `vscode` з UID/GID 1000
+- Дає sudo права без пароля
+- Забезпечує правильні дозволи файлів
+
+#### **Python залежності:**
+```dockerfile
+COPY requirements/development.txt /tmp/
+RUN pip install --no-cache-dir -r /tmp/development.txt
+USER $USERNAME
+```
+- Копіює та встановлює development залежності
+- Переключається на non-root користувача
+
+---
+
+## 4️⃣ `.devcontainer/post-create.sh`
+
+### 📝 **Опис:**
+Скрипт ініціалізації, що виконується після створення контейнера.
+
+### ⚙️ **Кроки виконання:**
+
+#### **1. Встановлення залежностей:**
+```bash
+pip install -r requirements/development.txt
+```
+- Встановлює всі Python пакети для розробки
+
+#### **2. Очікування PostgreSQL:**
+```bash
+echo "Очікування готовності PostgreSQL..."
+while ! pg_isready -h db -p 5432 -U postgres; do
+  sleep 1
+done
+```
+- Чекає поки PostgreSQL повністю запуститься
+- Використовує `pg_isready` для перевірки
+
+#### **3. Застосування міграцій:**
+```bash
+python manage.py migrate
+```
+- Створює таблиці бази даних
+- Застосовує всі Django міграції
+
+#### **4. Створення суперюзера:**
+```bash
+echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('admin', 'admin@example.com', 'admin123') if not User.objects.filter(username='admin').exists() else None" | python manage.py shell
+```
+**Що робить:**
+- Створює суперюзера з credentials: admin/admin123
+- Перевіряє чи користувач вже існує
+- Використовує Django shell для виконання
+
+#### **5. Збір статичних файлів:**
+```bash
+python manage.py collectstatic --noinput
+```
+- Збирає CSS, JS, зображення
+- Готує для розробки
+
+#### **6. Завершення:**
+```bash
+echo "🚀 Розробницьке середовище готове!"
+```
+
+---
+
+## 🎯 **Результат конфігурації:**
+
+Після запуску Codespace ви отримаєте:
+
+✅ **Повністю налаштоване середовище** з Django, PostgreSQL, Redis  
+✅ **VS Code з розширеннями** для Python розробки  
+✅ **Автоматичний запуск** Django development server  
+✅ **Готову базу даних** з міграціями  
+✅ **Суперюзера** для адміністрування  
+✅ **Форвардинг портів** для доступу до додатка  
+✅ **Azure CLI** для деплою  
+
+## 🚀 **Використання:**
+
+1. Відкрийте репозиторій в GitHub
+2. Натисніть **Code** → **Create codespace**
+3. Дочекайтесь завершення ініціалізації
+4. Відкрийте форвардований порт 8000
+5. Почніть розробку!
+
+## ⚠️ **Важливі примітки:**
+
+- **Час ініціалізації:** 3-5 хвилин при першому запуску
+- **Credentials:** admin/admin123 (тільки для розробки!)
+- **База даних:** Очищується при видаленні Codespace
+- **Порти:** 8000 (Django), 5432 (PostgreSQL), 6379 (Redis)
+- **Persistent storage:** Тільки через Git commits
+
+Ця конфігурація забезпечує професійне середовище розробки, готове до використання за лічені хвилини! 🎉
+
+--------------------------------------------------------------------------------------------------------------
+
+
+
