@@ -246,3 +246,38 @@ AppServiceConsoleLogs
 
 **Простими словами:** Цей запит - це "пошук всього що стосується пам'яті в логах за добу" 🔍
 
+
+
+
+
+Ось максимально короткий аналогічний запрос:
+
+```kusto
+AppServiceConsoleLogs|where ResultDescription contains"memory"or ResultDescription contains"Memory"|project TimeGenerated,ResultDescription
+```
+
+**Або ще коротший варіант:**
+```kusto
+AppServiceConsoleLogs|where ResultDescription has"memory"|take 100
+```
+
+**Або найкоротший для швидкого пошуку:**
+```kusto
+AppServiceConsoleLogs|search"memory"
+```
+
+## 🎯 Порівняння довжини:
+
+| Варіант | Символів | Призначення |
+|---------|----------|-------------|
+| Оригінал | 232 | Повний аналіз |
+| Скорочений | 137 | Основні дані |
+| Короткий | 68 | Швидкий пошук |
+| Найкоротший | 35 | Експрес-пошук |
+
+**Рекомендація для швидкого пошуку:**
+```kusto
+AppServiceConsoleLogs|search"memory"
+```
+
+Цей запит знайде всі записи що містять "memory" (case-insensitive) і покаже всі колонки. Ідеально для швидкого пошуку! 🚀
