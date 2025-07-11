@@ -100,7 +100,7 @@ troubleshooting-kql-queries.md
 azure-operations-runbook.md
 ```
 
-**Найпрактичніший варіант:** `azure-log-analytics-queries.md` 🎯
+
 
 
 
