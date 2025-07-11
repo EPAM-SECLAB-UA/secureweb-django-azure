@@ -1,0 +1,96 @@
+name: Deploy Django to Azure with PostgreSQL (Memory Optimized)
+
+on:
+  push:
+    branches: [ main, feature/infrastructure-update ]
+  workflow_dispatch:
+
+env:
+  AZURE_WEBAPP_NAME: django-app-budget-1752082786
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 🚀 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🐍 Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: 📦 Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: 🧪 Run Django checks
+      run: |
+        python manage.py check --deploy
+      env:
+        SECRET_KEY: 'github-actions-test-key'
+        DEBUG: 'False'
+        DB_NAME: ${{ secrets.DB_NAME }}
+        DB_USER: ${{ secrets.DB_USER }}
+        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        DB_HOST: ${{ secrets.DB_HOST }}
+        
+    - name: 📝 Prepare startup script
+      run: |
+        # Make startup script executable
+        chmod +x startup-optimized.sh
+        # Optionally rename to startup.sh for consistency
+        cp startup-optimized.sh startup.sh
+        
+    - name: 🧹 Prepare deployment
+      run: |
+        find . -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+        find . -name "*.pyc" -delete
+        rm -rf .git .gitignore README.md docs/ images/ logs/ .env* *.log .vscode/ .devcontainer/
+        
+    - name: 🚀 Deploy to Azure Web App
+      uses: azure/webapps-deploy@v3
+      with:
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
+        package: '.'
+        
+    - name: ⚙️ Configure App Settings and Startup
+      uses: azure/CLI@v1
+      with:
+        inlineScript: |
+          # Set application settings
+          az webapp config appsettings set \
+            --resource-group django-app-budget-rg \
+            --name ${{ env.AZURE_WEBAPP_NAME }} \
+            --settings \
+              DJANGO_SETTINGS_MODULE="project_portfolio.settings" \
+              SECRET_KEY="${{ secrets.DJANGO_SECRET_KEY }}" \
+              DEBUG="False" \
+              DJANGO_ALLOWED_HOSTS="${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net,.azurewebsites.net,localhost" \
+              DB_NAME="${{ secrets.DB_NAME }}" \
+              DB_USER="${{ secrets.DB_USER }}" \
+              DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
+              DB_HOST="${{ secrets.DB_HOST }}" \
+              DB_PORT="5432" \
+              SCM_DO_BUILD_DURING_DEPLOYMENT="true" \
+              PYTHONPATH="/home/site/wwwroot" \
+              DJANGO_ADMIN_USER="admin" \
+              DJANGO_ADMIN_EMAIL="admin@company.com" \
+              DJANGO_ADMIN_PASSWORD="${{ secrets.DJANGO_ADMIN_PASSWORD }}"
+          
+          # Set memory-optimized startup command
+          echo "📝 Setting memory-optimized startup command..."
+          az webapp config set \
+            --resource-group django-app-budget-rg \
+            --name ${{ env.AZURE_WEBAPP_NAME }} \
+            --startup-file "bash startup-optimized.sh"
+          
+          echo "✅ Memory-optimized startup command configured"
+      env:
+        AZURE_CREDENTIALS: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
+        
+    # Rest of the steps remain the same...
