@@ -967,30 +967,30 @@ sudo journalctl -u monitoring-setup -f
 ### Рекомендований спосіб для вашого скрипта:
 ```bash
 # 1. Зробити скрипт виконуваним
-chmod +x setup_monitoring.sh
+chmod +x setup-monitoring.sh
 
 
 # 2. Запустити з логуванням
-nohup ./setup-monitoring.sh > setup_monitoring_$(date +%Y%m%d_%H%M%S).log 2>&1 &
+nohup ./setup-monitoring.sh > setup-monitoring_$(date +%Y%m%d_%H%M%S).log 2>&1 &
 
 
 # 3. Зберегти PID
-echo $! > setup_monitoring.pid
+echo $! > setup-monitoring.pid
 
 # 4. Моніторити прогрес
-tail -f setup_monitoring_*.log
+tail -f setup-monitoring_*.log
 ```
 
 ### Для швидкого налагодження:
 ```bash
 # Запуск з виводом в термінал та файл одночасно
-./monitoring_setup.sh 2>&1 | tee monitoring_setup.log
+./monitoring-setup.sh 2>&1 | tee monitoring_setup.log
 ```
 
 ### Ротація логів:
 ```bash
 # Обмежити розмір логів
-./monitoring_setup.sh > >(split -d -l 1000 - monitoring_setup.log.) 2>&1 &
+./monitoring-setup.sh > >(split -d -l 1000 - monitoring_setup.log.) 2>&1 &
 ```
 
 
