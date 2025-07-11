@@ -45,12 +45,44 @@ jobs:
         # Optionally rename to startup.sh for consistency
         cp startup-optimized.sh startup.sh
         
-    - name: 🧹 Prepare deployment
+    #- name: 🧹 Prepare deployment
+    # run: |
+    #    find . -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+    #    find . -name "*.pyc" -delete
+    #    rm -rf .git .gitignore README.md docs/ images/ logs/ .env* *.log .vscode/ .devcontainer/
+
+    - name: 🧹 Prepare deployment (Fixed)
       run: |
+        echo "🧹 Cleaning unnecessary files for deployment..."
+      
+        # Remove Python cache files
         find . -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
         find . -name "*.pyc" -delete
-        rm -rf .git .gitignore README.md docs/ images/ logs/ .env* *.log .vscode/ .devcontainer/
+        find . -name "*.pyo" -delete
         
+        # Remove development files (CAREFUL - keep Python essentials)
+        rm -rf .git/
+        rm -f .gitignore
+        rm -rf .vscode/
+        rm -rf .devcontainer/
+        rm -rf docs/
+        rm -rf images/
+        rm -rf logs/
+        rm -f *.log
+        rm -f .env*
+        
+        # KEEP these essential files for Oryx:
+        # - requirements.txt (CRITICAL)
+        # - manage.py (CRITICAL) 
+        # - *.py files (CRITICAL)
+        # - startup-optimized.sh (NEEDED)
+        
+        echo "✅ Cleaned deployment package"
+        echo "📋 Remaining Python files:"
+        ls -la *.py 2>/dev/null || echo "No .py files in root"
+        ls -la requirements.txt 2>/dev/null || echo "No requirements.txt found"
+        ls -la startup-optimized.sh 2>/dev/null || echo "No startup script found"
+          
     - name: 🚀 Deploy to Azure Web App
       uses: azure/webapps-deploy@v3
       with:
