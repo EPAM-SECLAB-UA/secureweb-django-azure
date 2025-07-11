@@ -60,6 +60,77 @@ TROUBLESHOOTING.md
 (якщо це єдиний troubleshooting документ у проекті)
 
 
+-------------------------------------------------------------------------------------
+
+## 🎯 План дій для виправлення application-level issues:
+
+### 🔴 **Проблема 1: Memory Issues (Critical)**
+
+**Швидке рішення:**
+```bash
+# Upgrade App Service Plan
+az appservice plan update \
+    --name django-app-budget-plan \
+    --resource-group django-app-budget-rg \
+    --sku B1  # $13/month, 1.75GB RAM
+```
+
+**Альтернатива (безкоштовна):**
+- Оптимізувати Django settings (connection pooling, cache limits)
+- Зменшити кількість Gunicorn workers до 1-2
+- Додати memory monitoring middleware
+
+### 🔍 **Проблема 2: Missing Health Endpoint**
+
+**Додати в Django:**
+```python
+# views.py
+def health_check(request):
+    return JsonResponse({
+        'status': 'healthy',
+        'timestamp': timezone.now().isoformat(),
+        'checks': {
+            'database': check_database(),
+            'memory': check_memory()
+        }
+    })
+
+# urls.py  
+path('health/', views.health_check, name='health'),
+```
+
+### ⚡ **Проблема 3: Worker Instability**
+
+**Покращити конфігурацію:**
+```python
+# gunicorn_config.py
+workers = 2  # Зменшити кількість
+max_requests = 1000  # Перезапуск для memory cleanup
+worker_memory_limit = 100 * 1024 * 1024  # 100MB limit
+```
+
+## 🚀 **Послідовність дій:**
+
+1. **Негайно (5 хвилин):**
+   - Додати health endpoint
+   - Deploy нову версію
+
+2. **Короткострокове (сьогодні):**
+   - Upgrade App Service Plan або оптимізувати код
+   - Додати memory monitoring
+
+3. **Середньострокове (цей тиждень):**
+   - Налаштувати custom metrics в Application Insights
+   - Створити KQL queries для моніторингу
+
+**Результат:** Стабільна робота без OOM kills та proper health monitoring! 📈
+
+Почнемо з health endpoint - це найшвидше та безкоштовне рішення?
+
+--------------------------------------------------------------------------------------
+
+
+
 # 🔧 Виправлення Application-Level Issues в Django App
 
 ## 🚨 Виявлені проблеми з логів
