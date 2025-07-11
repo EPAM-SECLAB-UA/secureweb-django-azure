@@ -26,7 +26,7 @@ admin_url = os.environ.get('DJANGO_ADMIN_URL', 'admin/')
 
 urlpatterns = [
     path(admin_url, admin.site.urls),  # Admin панель
-    path('', include('project_portfolio.urls')),  # Основні URLs
+    #path('', include('project_portfolio.urls')),  # Основні URLs
 ]
 
 # Статичні файли для development
