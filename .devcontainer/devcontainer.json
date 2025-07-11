@@ -1,49 +1,55 @@
 {
-  "image": "mcr.microsoft.com/devcontainers/universal:2",
-
-  "features": {
-    "ghcr.io/devcontainers/features/azure-cli:1": {
-      "version": "latest"
-    },
-    "ghcr.io/devcontainers/features/terraform:1": {
-      "version": "latest"
-    }
-  },
-    
-  "hostRequirements": {
-    "cpus": 4,
-    "memory": "4gb",
-    "storage": "64gb"
-  },
+  "name": "Django PostgreSQL Development",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "web",
+  "workspaceFolder": "/workspace",
   
-  "waitFor": "onCreateCommand",
-  "updateContentCommand": "pip install -r requirements.txt && python manage.py migrate",
-  "postCreateCommand": "cp .env.example .env",
-  "postAttachCommand": {
-    "server": "python manage.py runserver"
-  },
   "customizations": {
-    "codespaces": {
-      "openFiles": [
-        "project_portfolio/templates/index.html"
-      ]
-    },
     "vscode": {
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.linting.enabled": true,
+        "python.linting.pylintEnabled": true,
+        "python.formatting.provider": "black",
+        "python.linting.flake8Enabled": true,
+        "python.testing.pytestEnabled": true,
+        "files.exclude": {
+          "**/__pycache__": true,
+          "**/*.pyc": true
+        }
+      },
       "extensions": [
         "ms-python.python",
-        "hashicorp.terraform",
-        "ms-azuretools.vscode-azureterraform",
-        "ms-azuretools.vscode-azurecli",
+        "ms-python.flake8",
+        "ms-python.black-formatter",
+        "ms-toolsai.jupyter",
+        "mtxr.sqltools",
+        "mtxr.sqltools-driver-pg",
+        "ms-vscode.vscode-json",
+        "bradlc.vscode-tailwindcss",
+        "formulahendry.auto-rename-tag"
       ]
     }
   },
-  "terraform.languageServer.enable": true,
-  "terraform.validation.enableEnhancedValidation": true,  
+  
+  "forwardPorts": [8000, 5432],
   "portsAttributes": {
     "8000": {
-      "label": "Application",
-      "onAutoForward": "openPreview"
+      "label": "Django Development Server",
+      "onAutoForward": "notify"
+    },
+    "5432": {
+      "label": "PostgreSQL Database",
+      "onAutoForward": "silent"
     }
   },
-  "forwardPorts": [8000]
+  
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "postAttachCommand": "python manage.py runserver 0.0.0.0:8000",
+  
+  "remoteUser": "vscode",
+  "features": {
+    "ghcr.io/devcontainers/features/azure-cli:1": {},
+    "ghcr.io/devcontainers/features/git:1": {}
+  }
 }
