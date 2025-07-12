@@ -22,7 +22,9 @@ try:
     AZURE_AVAILABLE = True
 except ImportError:
     AZURE_AVAILABLE = False
-    logging.warning("Azure SDK not installed. Falling back to environment variables.")
+    # У Codespace не показуємо warning
+    if not os.environ.get('CODESPACES'):
+        logging.warning("Azure SDK not installed. Falling back to environment variables.")
 
 # Legacy support for decouple (можна видалити пізніше)
 try:
@@ -63,8 +65,10 @@ ENVIRONMENT = os.environ.get('ENVIRONMENT', 'dev')
 # Key Vault configuration
 KEY_VAULT_URL = os.environ.get('KEY_VAULT_URL', 'https://django-app-dev-kv.vault.azure.net/')
 
-logger.info(f"Runtime environment: {RUNTIME_ENVIRONMENT}")
-logger.info(f"Application environment: {ENVIRONMENT}")
+# Тільки логуємо якщо не в Codespace (щоб зменшити шум)
+if RUNTIME_ENVIRONMENT != 'codespace':
+    logger.info(f"Runtime environment: {RUNTIME_ENVIRONMENT}")
+    logger.info(f"Application environment: {ENVIRONMENT}")
 
 def get_azure_credential():
     """Отримує Azure credentials залежно від середовища"""
@@ -82,7 +86,7 @@ def get_azure_credential():
                 client_secret=client_secret
             )
         else:
-            logger.warning("Service Principal credentials not found in Codespace")
+            # У Codespace не логуємо warning при кожному виклику
             return None
     
     elif RUNTIME_ENVIRONMENT == 'azure_app_service':
@@ -96,7 +100,8 @@ def get_azure_credential():
         return DefaultAzureCredential()
     
     else:
-        logger.warning(f"No Azure authentication for environment: {RUNTIME_ENVIRONMENT}")
+        if RUNTIME_ENVIRONMENT != 'codespace':
+            logger.warning(f"No Azure authentication for environment: {RUNTIME_ENVIRONMENT}")
         return None
 
 @lru_cache(maxsize=128)
@@ -121,18 +126,21 @@ def get_secret(secret_name, default=None):
         for env_key in env_variations:
             env_value = os.environ.get(env_key)
             if env_value:
-                logger.debug(f"Using environment variable {env_key} for {secret_name}")
+                if RUNTIME_ENVIRONMENT != 'codespace':
+                    logger.debug(f"Using environment variable {env_key} for {secret_name}")
                 return env_value
     
     # Якщо Azure SDK недоступний
     if not AZURE_AVAILABLE:
-        logger.warning(f"Azure SDK unavailable, using default for {secret_name}")
+        if RUNTIME_ENVIRONMENT != 'codespace':
+            logger.warning(f"Azure SDK unavailable, using default for {secret_name}")
         return default
     
     # Спробуємо Key Vault
     credential = get_azure_credential()
     if not credential:
-        logger.warning(f"No Azure credentials, using default for {secret_name}")
+        if RUNTIME_ENVIRONMENT != 'codespace':
+            logger.warning(f"No Azure credentials, using default for {secret_name}")
         return default
     
     try:
@@ -142,7 +150,8 @@ def get_secret(secret_name, default=None):
         return secret.value
         
     except Exception as e:
-        logger.error(f"Error retrieving secret {secret_name} from Key Vault: {e}")
+        if RUNTIME_ENVIRONMENT != 'codespace':
+            logger.error(f"Error retrieving secret {secret_name} from Key Vault: {e}")
         return default
 
 # Legacy функція для сумісності
@@ -151,7 +160,8 @@ def get_secret_legacy(secret_name):
     try:
         return get_secret(secret_name)
     except Exception as e:
-        print(f"Помилка отримання секрету {secret_name}: {e}")
+        if RUNTIME_ENVIRONMENT != 'codespace':
+            print(f"Помилка отримання секрету {secret_name}: {e}")
         return None
 
 # =============================================================================
@@ -266,7 +276,10 @@ ROOT_URLCONF = 'project_portfolio.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'project_portfolio' / 'templates'],
+        'DIRS': [
+            BASE_DIR / 'templates',  # Папка templates в корені проекту
+            BASE_DIR / 'project_portfolio' / 'templates',  # Папка в додатку
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -285,15 +298,27 @@ WSGI_APPLICATION = 'project_portfolio.wsgi.application'
 # DATABASE CONFIGURATION
 # =============================================================================
 
+def test_postgres_connection(host, port):
+    """Тестує підключення до PostgreSQL"""
+    try:
+        import socket
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(2)  # 2 секунди timeout
+        result = sock.connect_ex((host, int(port)))
+        sock.close()
+        return result == 0
+    except:
+        return False
+
 def get_codespace_database_config():
-    """PostgreSQL конфігурація для Codespace"""
+    """PostgreSQL конфігурація для Codespace з тестуванням підключення"""
     codespace_configs = [
         {
             'host': os.environ.get('POSTGRES_HOST', 'localhost'),
             'port': os.environ.get('POSTGRES_PORT', '5432'),
             'name': os.environ.get('POSTGRES_DB', 'postgres'),
             'user': os.environ.get('POSTGRES_USER', 'postgres'),
-            'password': os.environ.get('POSTGRES_PASSWORD', 'postgres'),
+            'password': os.environ.get('POSTGRES_PASSWORD'),
         },
         {
             'host': 'db',
@@ -302,11 +327,18 @@ def get_codespace_database_config():
             'user': 'django_user',
             'password': 'django_password',
         },
+        {
+            'host': 'postgres',
+            'port': '5432',
+            'name': 'django_dev',
+            'user': 'django',
+            'password': 'password',
+        },
     ]
     
     for config in codespace_configs:
-        if config['password']:
-            logger.info(f"Using Codespace PostgreSQL: {config['host']}:{config['port']}")
+        if config['password'] and test_postgres_connection(config['host'], config['port']):
+            print(f"🐘 PostgreSQL detected: {config['host']}:{config['port']}")
             return {
                 'default': {
                     'ENGINE': 'django.db.backends.postgresql',
@@ -326,11 +358,20 @@ def get_codespace_database_config():
 def get_database_config():
     """Повна конфігурація бази даних"""
     
-    # Для Codespace
+    # Для Codespace - перевіряємо PostgreSQL спочатку
     if RUNTIME_ENVIRONMENT == 'codespace':
         codespace_db = get_codespace_database_config()
         if codespace_db:
             return codespace_db
+        
+        # Якщо PostgreSQL недоступний у Codespace, використовуємо SQLite
+        print("💾 Using SQLite in Codespace (PostgreSQL not available)")
+        return {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
+        }
     
     # Key Vault секрети
     db_password = get_secret('database-password') or get_secret('postgres-password')
@@ -359,30 +400,34 @@ def get_database_config():
         except ImportError:
             logger.warning("dj-database-url not installed")
     
-    # PostgreSQL конфігурація
+    # PostgreSQL конфігурація з тестуванням підключення
     if db_password and postgres_host:
-        logger.info("Using PostgreSQL configuration")
-        ssl_mode = 'require' if ENVIRONMENT in ['staging', 'prod', 'production'] else 'prefer'
-        
-        return {
-            'default': {
-                'ENGINE': 'django.db.backends.postgresql',
-                'NAME': postgres_database,
-                'USER': postgres_username,
-                'PASSWORD': db_password,
-                'HOST': postgres_host,
-                'PORT': postgres_port,
-                'OPTIONS': {
-                    'sslmode': ssl_mode,
-                    'connect_timeout': 60,
-                },
-                'CONN_MAX_AGE': 600,
-                'CONN_HEALTH_CHECKS': True,
+        if test_postgres_connection(postgres_host, postgres_port):
+            logger.info("Using PostgreSQL configuration")
+            ssl_mode = 'require' if ENVIRONMENT in ['staging', 'prod', 'production'] else 'prefer'
+            
+            return {
+                'default': {
+                    'ENGINE': 'django.db.backends.postgresql',
+                    'NAME': postgres_database,
+                    'USER': postgres_username,
+                    'PASSWORD': db_password,
+                    'HOST': postgres_host,
+                    'PORT': postgres_port,
+                    'OPTIONS': {
+                        'sslmode': ssl_mode,
+                        'connect_timeout': 60,
+                    },
+                    'CONN_MAX_AGE': 600,
+                    'CONN_HEALTH_CHECKS': True,
+                }
             }
-        }
+        else:
+            logger.warning(f"PostgreSQL not reachable at {postgres_host}:{postgres_port}, falling back to SQLite")
     
     # Fallback до SQLite
-    logger.warning("No database credentials found, using SQLite")
+    if RUNTIME_ENVIRONMENT != 'codespace':
+        logger.warning("No database credentials found, using SQLite")
     return {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -509,15 +554,22 @@ USE_TZ = True
 # STATIC & MEDIA FILES
 # =============================================================================
 
-STATICFILES_DIRS = [
+# Статичні файли - перевіряємо існування папок
+STATICFILES_DIRS = []
+static_dirs_to_check = [
+    BASE_DIR / 'static',
     BASE_DIR / 'project_portfolio' / 'static',
 ]
 
+for static_dir in static_dirs_to_check:
+    if static_dir.exists():
+        STATICFILES_DIRS.append(static_dir)
+
 STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'project_portfolio' / 'staticfiles'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = 'media/'
-MEDIA_ROOT = BASE_DIR / 'project_portfolio' / 'media'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Azure Storage configuration (якщо потрібно)
 azure_storage_account = get_secret('azure-storage-account-name')
@@ -574,21 +626,27 @@ LOGGING = {
 }
 
 # =============================================================================
-# FINAL LOGGING
+# FINAL LOGGING - Спрощено для Codespace
 # =============================================================================
 
-# Логування конфігурації
-logger.info(f"Database engine: {DATABASES['default']['ENGINE']}")
-logger.info(f"Database host: {DATABASES['default'].get('HOST', 'SQLite')}")
-logger.info(f"Runtime environment: {RUNTIME_ENVIRONMENT}")
-logger.info(f"Debug mode: {DEBUG}")
-logger.info(f"Allowed hosts: {len(ALLOWED_HOSTS)} hosts configured")
-logger.info(f"Cache backend: {CACHES['default']['BACKEND']}")
+# Виводимо інформацію про конфігурацію тільки один раз
+print(f"✅ Django settings loaded for {'Codespace' if RUNTIME_ENVIRONMENT == 'codespace' else RUNTIME_ENVIRONMENT}")
+print(f"🗄️ Database: {DATABASES['default']['ENGINE'].split('.')[-1].upper()}")
+if DATABASES['default']['ENGINE'] != 'django.db.backends.sqlite3':
+    print(f"🔗 DB Host: {DATABASES['default'].get('HOST', 'N/A')}")
+print(f"🔧 Debug mode: {DEBUG}")
+print(f"📧 Email: {'Console' if 'console' in EMAIL_BACKEND else 'SMTP'}")
+print(f"📁 Templates: {len(TEMPLATES[0]['DIRS'])} directories configured")
 
-# Спеціальне повідомлення для Codespace
-if RUNTIME_ENVIRONMENT == 'codespace':
-    logger.info("🚀 Running in GitHub Codespace environment")
-    logger.info("📝 Using development-friendly settings")
+# Тільки важливе логування для інших середовищ
+if RUNTIME_ENVIRONMENT != 'codespace':
+    logger.info(f"Database engine: {DATABASES['default']['ENGINE']}")
+    logger.info(f"Database host: {DATABASES['default'].get('HOST', 'SQLite')}")
+    logger.info(f"Runtime environment: {RUNTIME_ENVIRONMENT}")
+    logger.info(f"Debug mode: {DEBUG}")
+    logger.info(f"Allowed hosts: {len(ALLOWED_HOSTS)} hosts configured")
+    logger.info(f"Cache backend: {CACHES['default']['BACKEND']}")
+    
     if DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3':
         logger.info("💾 Using SQLite database")
     else:
@@ -598,6 +656,11 @@ if RUNTIME_ENVIRONMENT == 'codespace':
 if not SECRET_KEY or SECRET_KEY == 'dev-secret-key-change-in-production':
     if ENVIRONMENT in ['prod', 'production']:
         raise ValueError("SECRET_KEY must be set for production!")
-    else:
+    elif RUNTIME_ENVIRONMENT != 'codespace':
         logger.warning("Using default SECRET_KEY in development")
 
+# Фінальне повідомлення для Codespace
+if RUNTIME_ENVIRONMENT == 'codespace':
+    print("🚀 Codespace environment ready!")
+    if 'django_browser_reload' in INSTALLED_APPS:
+        print("📱 Browser auto-reload enabled")
