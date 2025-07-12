@@ -338,6 +338,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🚀 Швидкий старт
 
 ### Налаштування Azure Key Vault:
+
+```bash
+chmod +x scripts/setup-keyvault.sh
+```
+
 ```bash
 ./scripts/setup-keyvault.sh
 ```
