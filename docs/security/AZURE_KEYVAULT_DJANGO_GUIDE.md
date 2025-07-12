@@ -1,4 +1,437 @@
 
+
+
+# 🔐 Повний набір секретів Key Vault для Django додатка
+
+## 📋 Категорії секретів
+
+### 1. 🏗️ **Базові Django секрети**
+### 2. 🗄️ **База даних (PostgreSQL)**
+### 3. 📧 **Email та повідомлення**
+### 4. 🔌 **API інтеграції**
+### 5. 🛡️ **Безпека та автентифікація**
+### 6. ☁️ **Azure сервіси**
+### 7. 📊 **Моніторинг та логування**
+### 8. 💳 **Платежі та комерція**
+### 9. 🌐 **Соціальні мережі**
+### 10. 🔧 **DevOps та середовища**
+
+---
+
+## 🏗️ 1. Базові Django секрети
+
+```bash
+# Django Core
+az keyvault secret set --vault-name django-app-dev-kv --name "django-secret-key" --value "$(python3 -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')"
+
+# Debug режим для різних середовищ
+az keyvault secret set --vault-name django-app-dev-kv --name "django-debug-dev" --value "true"
+az keyvault secret set --vault-name django-app-dev-kv --name "django-debug-staging" --value "false"
+az keyvault secret set --vault-name django-app-dev-kv --name "django-debug-production" --value "false"
+
+# Allowed Hosts
+az keyvault secret set --vault-name django-app-dev-kv --name "django-allowed-hosts" --value "localhost,127.0.0.1,*.azurewebsites.net,yourdomain.com"
+```
+
+---
+
+## 🗄️ 2. База даних (PostgreSQL)
+
+```bash
+# PostgreSQL Connection Details
+az keyvault secret set --vault-name django-app-dev-kv --name "postgres-host" --value "django-app-dev-postgres.postgres.database.azure.com"
+az keyvault secret set --vault-name django-app-dev-kv --name "postgres-port" --value "5432"
+az keyvault secret set --vault-name django-app-dev-kv --name "postgres-database" --value "django_dev"
+az keyvault secret set --vault-name django-app-dev-kv --name "postgres-username" --value "dbadmin"
+az keyvault secret set --vault-name django-app-dev-kv --name "postgres-password" --value "$(openssl rand -base64 32)"
+
+# Connection String (готовий до використання)
+POSTGRES_PASSWORD=$(az keyvault secret show --vault-name django-app-dev-kv --name "postgres-password" --query value -o tsv)
+DATABASE_URL="postgresql://dbadmin:${POSTGRES_PASSWORD}@django-app-dev-postgres.postgres.database.azure.com:5432/django_dev?sslmode=require"
+az keyvault secret set --vault-name django-app-dev-kv --name "database-url" --value "$DATABASE_URL"
+
+# Backup Database Credentials
+az keyvault secret set --vault-name django-app-dev-kv --name "postgres-backup-username" --value "backup_user"
+az keyvault secret set --vault-name django-app-dev-kv --name "postgres-backup-password" --value "$(openssl rand -base64 32)"
+
+# Redis для кешування
+az keyvault secret set --vault-name django-app-dev-kv --name "redis-url" --value "rediss://django-app-dev-redis.redis.cache.windows.net:6380"
+az keyvault secret set --vault-name django-app-dev-kv --name "redis-password" --value "your-redis-access-key"
+```
+
+---
+
+## 📧 3. Email та повідомлення
+
+```bash
+# SMTP Settings
+az keyvault secret set --vault-name django-app-dev-kv --name "email-host" --value "smtp.gmail.com"
+az keyvault secret set --vault-name django-app-dev-kv --name "email-port" --value "587"
+az keyvault secret set --vault-name django-app-dev-kv --name "email-host-user" --value "your-app@gmail.com"
+az keyvault secret set --vault-name django-app-dev-kv --name "email-host-password" --value "your-app-password"
+az keyvault secret set --vault-name django-app-dev-kv --name "default-from-email" --value "Django App <noreply@yourapp.com>"
+
+# SendGrid Integration
+az keyvault secret set --vault-name django-app-dev-kv --name "sendgrid-api-key" --value "SG.your-sendgrid-api-key"
+az keyvault secret set --vault-name django-app-dev-kv --name "sendgrid-from-email" --value "noreply@yourapp.com"
+
+# Mailgun Integration
+az keyvault secret set --vault-name django-app-dev-kv --name "mailgun-api-key" --value "key-your-mailgun-key"
+az keyvault secret set --vault-name django-app-dev-kv --name "mailgun-domain" --value "mg.yourapp.com"
+
+# SMS/WhatsApp (Twilio)
+az keyvault secret set --vault-name django-app-dev-kv --name "twilio-account-sid" --value "ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+az keyvault secret set --vault-name django-app-dev-kv --name "twilio-auth-token" --value "your-twilio-auth-token"
+az keyvault secret set --vault-name django-app-dev-kv --name "twilio-phone-number" --value "+1234567890"
+```
+
+---
+
+## 🔌 4. API інтеграції
+
+```bash
+# OpenAI/ChatGPT
+az keyvault secret set --vault-name django-app-dev-kv --name "openai-api-key" --value "sk-your-openai-api-key"
+az keyvault secret set --vault-name django-app-dev-kv --name "openai-organization" --value "org-your-organization-id"
+
+# Google APIs
+az keyvault secret set --vault-name django-app-dev-kv --name "google-api-key" --value "AIzaSyYour-Google-API-Key"
+az keyvault secret set --vault-name django-app-dev-kv --name "google-maps-api-key" --value "AIzaSyYour-Google-Maps-Key"
+az keyvault secret set --vault-name django-app-dev-kv --name "google-analytics-id" --value "G-XXXXXXXXXX"
+
+# Weather APIs
+az keyvault secret set --vault-name django-app-dev-kv --name "openweather-api-key" --value "your-openweather-api-key"
+
+# Translation APIs
+az keyvault secret set --vault-name django-app-dev-kv --name "azure-translator-key" --value "your-translator-key"
+az keyvault secret set --vault-name django-app-dev-kv --name "azure-translator-region" --value "westeurope"
+
+# File Processing
+az keyvault secret set --vault-name django-app-dev-kv --name "cloudinary-url" --value "cloudinary://api_key:api_secret@cloud_name"
+```
+
+---
+
+## 🛡️ 5. Безпека та автентифікація
+
+```bash
+# JWT Tokens
+az keyvault secret set --vault-name django-app-dev-kv --name "jwt-secret-key" --value "$(openssl rand -base64 64)"
+az keyvault secret set --vault-name django-app-dev-kv --name "jwt-refresh-secret" --value "$(openssl rand -base64 64)"
+
+# OAuth2 Providers
+# Google OAuth
+az keyvault secret set --vault-name django-app-dev-kv --name "google-oauth-client-id" --value "your-google-client-id.apps.googleusercontent.com"
+az keyvault secret set --vault-name django-app-dev-kv --name "google-oauth-client-secret" --value "GOCSPX-your-google-client-secret"
+
+# Microsoft OAuth
+az keyvault secret set --vault-name django-app-dev-kv --name "microsoft-oauth-client-id" --value "your-microsoft-client-id"
+az keyvault secret set --vault-name django-app-dev-kv --name "microsoft-oauth-client-secret" --value "your-microsoft-client-secret"
+
+# Facebook OAuth
+az keyvault secret set --vault-name django-app-dev-kv --name "facebook-app-id" --value "your-facebook-app-id"
+az keyvault secret set --vault-name django-app-dev-kv --name "facebook-app-secret" --value "your-facebook-app-secret"
+
+# reCAPTCHA
+az keyvault secret set --vault-name django-app-dev-kv --name "recaptcha-public-key" --value "6LcYour-reCAPTCHA-Site-Key"
+az keyvault secret set --vault-name django-app-dev-kv --name "recaptcha-private-key" --value "6LcYour-reCAPTCHA-Secret-Key"
+
+# CSRF Token
+az keyvault secret set --vault-name django-app-dev-kv --name "csrf-cookie-secret" --value "$(openssl rand -hex 32)"
+```
+
+---
+
+## ☁️ 6. Azure сервіси
+
+```bash
+# Azure Storage
+az keyvault secret set --vault-name django-app-dev-kv --name "azure-storage-account-name" --value "djangoappdevstorage"
+STORAGE_KEY=$(az storage account keys list --account-name djangoappdevstorage --query "[0].value" -o tsv)
+az keyvault secret set --vault-name django-app-dev-kv --name "azure-storage-account-key" --value "$STORAGE_KEY"
+az keyvault secret set --vault-name django-app-dev-kv --name "azure-storage-container-media" --value "media"
+az keyvault secret set --vault-name django-app-dev-kv --name "azure-storage-container-static" --value "static"
+
+# Azure Blob Connection String
+CONNECTION_STRING=$(az storage account show-connection-string --name djangoappdevstorage --query connectionString -o tsv)
+az keyvault secret set --vault-name django-app-dev-kv --name "azure-storage-connection-string" --value "$CONNECTION_STRING"
+
+# Azure Service Bus (для черг)
+az keyvault secret set --vault-name django-app-dev-kv --name "azure-servicebus-connection-string" --value "Endpoint=sb://your-namespace.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=your-key"
+
+# Azure Cognitive Services
+az keyvault secret set --vault-name django-app-dev-kv --name "azure-cognitive-key" --value "your-cognitive-services-key"
+az keyvault secret set --vault-name django-app-dev-kv --name "azure-cognitive-endpoint" --value "https://your-resource.cognitiveservices.azure.com/"
+```
+
+---
+
+## 📊 7. Моніторинг та логування
+
+```bash
+# Application Insights
+az keyvault secret set --vault-name django-app-dev-kv --name "applicationinsights-connection-string" --value "InstrumentationKey=your-key;IngestionEndpoint=https://westeurope-5.in.applicationinsights.azure.com/"
+az keyvault secret set --vault-name django-app-dev-kv --name "applicationinsights-instrumentation-key" --value "your-instrumentation-key"
+
+# Sentry
+az keyvault secret set --vault-name django-app-dev-kv --name "sentry-dsn" --value "https://your-sentry-dsn@sentry.io/project-id"
+az keyvault secret set --vault-name django-app-dev-kv --name "sentry-environment" --value "development"
+
+# LogRocket
+az keyvault secret set --vault-name django-app-dev-kv --name "logrocket-app-id" --value "your-logrocket-app-id"
+
+# New Relic
+az keyvault secret set --vault-name django-app-dev-kv --name "newrelic-license-key" --value "your-newrelic-license-key"
+az keyvault secret set --vault-name django-app-dev-kv --name "newrelic-app-name" --value "Django App Dev"
+```
+
+---
+
+## 💳 8. Платежі та комерція
+
+```bash
+# Stripe
+az keyvault secret set --vault-name django-app-dev-kv --name "stripe-publishable-key" --value "pk_test_your-stripe-publishable-key"
+az keyvault secret set --vault-name django-app-dev-kv --name "stripe-secret-key" --value "sk_test_your-stripe-secret-key"
+az keyvault secret set --vault-name django-app-dev-kv --name "stripe-webhook-secret" --value "whsec_your-webhook-secret"
+
+# PayPal
+az keyvault secret set --vault-name django-app-dev-kv --name "paypal-client-id" --value "your-paypal-client-id"
+az keyvault secret set --vault-name django-app-dev-kv --name "paypal-client-secret" --value "your-paypal-client-secret"
+az keyvault secret set --vault-name django-app-dev-kv --name "paypal-webhook-id" --value "your-paypal-webhook-id"
+
+# LiqPay (для України)
+az keyvault secret set --vault-name django-app-dev-kv --name "liqpay-public-key" --value "your-liqpay-public-key"
+az keyvault secret set --vault-name django-app-dev-kv --name "liqpay-private-key" --value "your-liqpay-private-key"
+```
+
+---
+
+## 🌐 9. Соціальні мережі
+
+```bash
+# Telegram Bot
+az keyvault secret set --vault-name django-app-dev-kv --name "telegram-bot-token" --value "1234567890:ABCdefGHIjklMNOpqrSTUvwxYZ"
+az keyvault secret set --vault-name django-app-dev-kv --name "telegram-webhook-secret" --value "$(openssl rand -hex 32)"
+
+# Slack Integration
+az keyvault secret set --vault-name django-app-dev-kv --name "slack-bot-token" --value "xoxb-your-slack-bot-token"
+az keyvault secret set --vault-name django-app-dev-kv --name "slack-webhook-url" --value "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK"
+
+# Discord
+az keyvault secret set --vault-name django-app-dev-kv --name "discord-bot-token" --value "your-discord-bot-token"
+az keyvault secret set --vault-name django-app-dev-kv --name "discord-webhook-url" --value "https://discord.com/api/webhooks/your-webhook"
+
+# LinkedIn API
+az keyvault secret set --vault-name django-app-dev-kv --name "linkedin-client-id" --value "your-linkedin-client-id"
+az keyvault secret set --vault-name django-app-dev-kv --name "linkedin-client-secret" --value "your-linkedin-client-secret"
+```
+
+---
+
+## 🔧 10. DevOps та середовища
+
+```bash
+# Environment Indicators
+az keyvault secret set --vault-name django-app-dev-kv --name "environment-name" --value "development"
+az keyvault secret set --vault-name django-app-dev-kv --name "environment-color" --value "#28a745"  # Green for dev
+az keyvault secret set --vault-name django-app-dev-kv --name "app-version" --value "1.0.0"
+
+# API Rate Limiting
+az keyvault secret set --vault-name django-app-dev-kv --name "rate-limit-per-minute" --value "1000"
+az keyvault secret set --vault-name django-app-dev-kv --name "rate-limit-per-hour" --value "10000"
+
+# Session Configuration
+az keyvault secret set --vault-name django-app-dev-kv --name "session-cookie-age" --value "1209600"  # 2 weeks
+az keyvault secret set --vault-name django-app-dev-kv --name "session-cookie-name" --value "django_session_dev"
+
+# Backup and Sync
+az keyvault secret set --vault-name django-app-dev-kv --name "backup-encryption-key" --value "$(openssl rand -base64 32)"
+az keyvault secret set --vault-name django-app-dev-kv --name "sync-api-key" --value "$(openssl rand -hex 32)"
+
+# Health Check Secrets
+az keyvault secret set --vault-name django-app-dev-kv --name "health-check-token" --value "$(openssl rand -hex 16)"
+az keyvault secret set --vault-name django-app-dev-kv --name "admin-api-key" --value "$(openssl rand -base64 32)"
+```
+
+---
+
+## 🛠️ Скрипт для масового додавання секретів
+
+```bash
+#!/bin/bash
+# add_all_secrets.sh
+
+KEY_VAULT_NAME="django-app-dev-kv"
+
+echo "🔐 Додавання всіх секретів до Key Vault: $KEY_VAULT_NAME"
+
+# Функція для додавання секрету з перевіркою
+add_secret() {
+    local name="$1"
+    local value="$2"
+    local description="$3"
+    
+    echo "📝 Додавання: $name ($description)"
+    if az keyvault secret set \
+        --vault-name "$KEY_VAULT_NAME" \
+        --name "$name" \
+        --value "$value" \
+        --description "$description" \
+        --output none; then
+        echo "   ✅ Успішно додано: $name"
+    else
+        echo "   ❌ Помилка додавання: $name"
+    fi
+}
+
+# Генерація динамічних секретів
+DJANGO_SECRET=$(python3 -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')
+JWT_SECRET=$(openssl rand -base64 64)
+POSTGRES_PASSWORD=$(openssl rand -base64 32)
+BACKUP_KEY=$(openssl rand -base64 32)
+
+# Додавання базових секретів
+add_secret "django-secret-key" "$DJANGO_SECRET" "Django SECRET_KEY"
+add_secret "jwt-secret-key" "$JWT_SECRET" "JWT Secret Key"
+add_secret "postgres-password" "$POSTGRES_PASSWORD" "PostgreSQL Password"
+add_secret "backup-encryption-key" "$BACKUP_KEY" "Backup Encryption Key"
+
+# Додавання конфігураційних секретів
+add_secret "postgres-host" "django-app-dev-postgres.postgres.database.azure.com" "PostgreSQL Host"
+add_secret "postgres-username" "dbadmin" "PostgreSQL Username"
+add_secret "postgres-database" "django_dev" "PostgreSQL Database Name"
+add_secret "redis-url" "rediss://django-app-dev-redis.redis.cache.windows.net:6380" "Redis URL"
+
+# Email налаштування
+add_secret "email-host" "smtp.gmail.com" "Email Host"
+add_secret "email-port" "587" "Email Port"
+add_secret "default-from-email" "Django App <noreply@yourapp.com>" "Default From Email"
+
+# Environment
+add_secret "environment-name" "development" "Environment Name"
+add_secret "django-debug-dev" "true" "Django Debug for Dev"
+add_secret "allowed-hosts" "localhost,127.0.0.1,*.azurewebsites.net" "Django Allowed Hosts"
+
+echo "🎉 Всі базові секрети додано!"
+echo "📋 Не забудьте оновити реальними значеннями:"
+echo "   • Email credentials"
+echo "   • API keys"
+echo "   • OAuth credentials"
+echo "   • Payment provider keys"
+```
+
+---
+
+## 🐍 Django Settings Integration
+
+```python
+# utils/secrets_manager.py
+from typing import Dict, Any
+from utils.keyvault_client import get_secret
+
+class SecretsManager:
+    """Менеджер для отримання всіх секретів"""
+    
+    @staticmethod
+    def get_database_config() -> Dict[str, Any]:
+        """Отримання конфігурації бази даних"""
+        return {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': get_secret('postgres-database', 'django_dev'),
+            'USER': get_secret('postgres-username', 'postgres'),
+            'PASSWORD': get_secret('postgres-password', ''),
+            'HOST': get_secret('postgres-host', 'localhost'),
+            'PORT': get_secret('postgres-port', '5432'),
+            'OPTIONS': {
+                'sslmode': 'require',
+            },
+        }
+    
+    @staticmethod
+    def get_email_config() -> Dict[str, Any]:
+        """Отримання конфігурації email"""
+        return {
+            'EMAIL_BACKEND': 'django.core.mail.backends.smtp.EmailBackend',
+            'EMAIL_HOST': get_secret('email-host', 'localhost'),
+            'EMAIL_PORT': int(get_secret('email-port', '587')),
+            'EMAIL_USE_TLS': True,
+            'EMAIL_HOST_USER': get_secret('email-host-user', ''),
+            'EMAIL_HOST_PASSWORD': get_secret('email-host-password', ''),
+            'DEFAULT_FROM_EMAIL': get_secret('default-from-email', 'webmaster@localhost'),
+        }
+    
+    @staticmethod
+    def get_oauth_config() -> Dict[str, Any]:
+        """Отримання OAuth конфігурації"""
+        return {
+            'GOOGLE_OAUTH2_CLIENT_ID': get_secret('google-oauth-client-id', ''),
+            'GOOGLE_OAUTH2_CLIENT_SECRET': get_secret('google-oauth-client-secret', ''),
+            'MICROSOFT_AUTH_CLIENT_ID': get_secret('microsoft-oauth-client-id', ''),
+            'MICROSOFT_AUTH_CLIENT_SECRET': get_secret('microsoft-oauth-client-secret', ''),
+        }
+    
+    @staticmethod
+    def get_payment_config() -> Dict[str, Any]:
+        """Отримання конфігурації платежів"""
+        return {
+            'STRIPE_PUBLISHABLE_KEY': get_secret('stripe-publishable-key', ''),
+            'STRIPE_SECRET_KEY': get_secret('stripe-secret-key', ''),
+            'PAYPAL_CLIENT_ID': get_secret('paypal-client-id', ''),
+            'PAYPAL_CLIENT_SECRET': get_secret('paypal-client-secret', ''),
+        }
+
+# В settings.py:
+from utils.secrets_manager import SecretsManager
+
+# Базові налаштування
+SECRET_KEY = get_secret('django-secret-key')
+DEBUG = get_secret('django-debug-dev', 'false').lower() == 'true'
+ALLOWED_HOSTS = get_secret('allowed-hosts', 'localhost').split(',')
+
+# База даних
+DATABASES = {'default': SecretsManager.get_database_config()}
+
+# Email
+EMAIL_CONFIG = SecretsManager.get_email_config()
+globals().update(EMAIL_CONFIG)
+
+# OAuth
+OAUTH_CONFIG = SecretsManager.get_oauth_config()
+globals().update(OAUTH_CONFIG)
+
+# Платежі
+PAYMENT_CONFIG = SecretsManager.get_payment_config()
+globals().update(PAYMENT_CONFIG)
+```
+
+---
+
+## 🎯 Підсумок
+
+Тепер ваш Key Vault може містити **50+ секретів** для повноцінного enterprise Django додатка:
+
+- ✅ **База даних** - всі параметри підключення
+- ✅ **Email** - SMTP та сервіси розсилки  
+- ✅ **API ключі** - Google, OpenAI, Weather тощо
+- ✅ **OAuth** - Google, Microsoft, Facebook
+- ✅ **Платежі** - Stripe, PayPal, LiqPay
+- ✅ **Моніторинг** - Sentry, Application Insights
+- ✅ **Соціальні мережі** - Telegram, Slack, Discord
+- ✅ **Azure сервіси** - Storage, Service Bus, Cognitive
+
+**Це забезпечує максимальну безпеку та гнучкість розгортання!** 🚀
+
+
+
+
+
+
+
+
+
+
+-------------------------------------------------------
 Ось кілька варіантів назв для документації з Azure Key Vault:
 
 ## 🎯 **Рекомендовані варіанти:**
