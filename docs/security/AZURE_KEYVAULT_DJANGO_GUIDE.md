@@ -2952,3 +2952,143 @@ def track_keyvault_operation(operation_name):
    ```
 
 Тепер ваш Django проект має enterprise-рівень безпеки з Azure Key Vault! 🎉
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+
+Проблема в тому, що у файлі `kv_vars.py` значення `AZURE_CLIENT_ID` порожнє, оскільки Service Principal не було створено через недостатні права. Давайте виправимо це, використовуючи альтернативні методи автентифікації:Також створимо простішу версію для швидкого тестування:## 🔧 **Швидке рішення:**
+
+### **1. Спочатку протестуйте простим скриптом:**
+```bash
+# Встановіть пакети якщо ще не встановлені
+pip install azure-keyvault-secrets azure-identity
+
+# Запустіть простий тест
+python simple_kv_test.py
+```
+
+### **2. Якщо простий тест працює, замініть kv.py:**
+```bash
+# Замініть ваш kv.py виправленою версією з артефакту вище
+cp kv.py kv_old.py  # Backup
+# Скопіюйте новий код з артефакту в kv.py
+```
+
+### **3. Перевірте ваш kv_vars.py:**
+```bash
+cat kv_vars.py
+```
+
+Мабуть він виглядає так:
+```python
+AZURE_CLIENT_ID = ""  # Порожньо!
+AZURE_CLIENT_SECRET = ""  # Порожньо!
+AZURE_TENANT_ID = "3a7a2d8e-5083-4ef2-809c-3a88f18e0ef8"
+AZURE_KEY_VAULT_URL = "https://django-app-keyvault.vault.azure.net/"
+SECRET_NAME = "database-password"
+SECRET_VERSION = ""
+```
+
+### **4. Швидкий тест без kv_vars.py:**
+```bash
+python3 -c "
+from azure.keyvault.secrets import SecretClient
+from azure.identity import DefaultAzureCredential
+client = SecretClient('https://django-app-keyvault.vault.azure.net/', DefaultAzureCredential())
+print('Secret:', client.get_secret('database-password').value)
+"
+```
+
+## 🎯 **Причина помилки:**
+Ваш оригінальний `kv.py` намагається використовувати `ClientSecretCredential` з порожніми значеннями CLIENT_ID, що викликає помилку.
+
+**Використовуйте оновлені скрипти вище - вони автоматично вибирають правильний метод автентифікації!** 🚀
+
+
+
+
+```python
+
+# simple_kv_test.py - Простий тест Key Vault з Azure CLI автентифікацією
+from azure.keyvault.secrets import SecretClient
+from azure.identity import DefaultAzureCredential
+from azure.core.exceptions import ClientAuthenticationError, ResourceNotFoundError
+
+# Константи (замість kv_vars.py)
+KEY_VAULT_URL = "https://django-app-keyvault.vault.azure.net/"
+SECRET_NAME = "database-password"
+
+def test_keyvault_simple():
+    """Простий тест Key Vault"""
+    
+    print("🚀 Простий тест Azure Key Vault")
+    print(f"🔗 URL: {KEY_VAULT_URL}")
+    print(f"🔑 Секрет: {SECRET_NAME}")
+    print()
+    
+    try:
+        # Використання DefaultAzureCredential (працює з Azure CLI)
+        print("🔑 Автентифікація через Azure CLI...")
+        credential = DefaultAzureCredential()
+        
+        # Створення клієнта
+        client = SecretClient(vault_url=KEY_VAULT_URL, credential=credential)
+        print("✅ Клієнт створено")
+        
+        # Отримання секрету
+        print(f"🔍 Отримання секрету '{SECRET_NAME}'...")
+        secret = client.get_secret(SECRET_NAME)
+        
+        print("🎉 УСПІХ!")
+        print(f"📝 Секрет: {secret.value}")
+        print(f"🔢 Версія: {secret.properties.version}")
+        
+        return True
+        
+    except ClientAuthenticationError as e:
+        print(f"❌ Помилка автентифікації: {e}")
+        print("\n💡 Рішення:")
+        print("1. Запустіть: az login")
+        print("2. Перевірте права доступу до Key Vault")
+        return False
+        
+    except ResourceNotFoundError as e:
+        print(f"❌ Секрет не знайдено: {e}")
+        print("\n💡 Перевірте чи існує секрет:")
+        print(f"az keyvault secret show --vault-name django-app-keyvault --name {SECRET_NAME}")
+        return False
+        
+    except Exception as e:
+        print(f"❌ Загальна помилка: {e}")
+        print(f"📊 Тип помилки: {type(e).__name__}")
+        return False
+
+if __name__ == "__main__":
+    # Перевірка чи встановлені пакети
+    try:
+        import azure.keyvault.secrets
+        import azure.identity
+        print("✅ Необхідні пакети встановлені")
+    except ImportError as e:
+        print(f"❌ Відсутні пакети: {e}")
+        print("💡 Встановіть: pip install azure-keyvault-secrets azure-identity")
+        exit(1)
+    
+    # Запуск тесту
+    success = test_keyvault_simple()
+    
+    if success:
+        print("\n🎯 Наступні кроки:")
+        print("1. Оновіть kv_vars.py з правильними credentials")
+        print("2. Інтегруйте з Django settings")
+        print("3. Додайте більше секретів до Key Vault")
+    else:
+        print("\n🔧 Діагностика:")
+        print("1. az account show  # Перевірка входу")
+        print("2. az keyvault list  # Перевірка доступу")
+        print("3. az keyvault secret list --vault-name django-app-keyvault")
+
+```
+
