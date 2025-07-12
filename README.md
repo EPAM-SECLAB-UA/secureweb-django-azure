@@ -334,7 +334,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-```markdown
+
 ## 🚀 Швидкий старт
 
 ### Налаштування Azure Key Vault:
