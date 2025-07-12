@@ -124,6 +124,139 @@ BICEP_FOR_BEGINNERS.md
 
 ---------------------------------------------------------------------------------------------------------------------------------
 
+Проблема в тому, що скрипт намагається знайти файл `deployment/azure/keyvault.bicep`, який не існує. Давайте створимо потрібну структуру файлів для deployment:Тепер створимо необхідні Bicep файли:Тепер створимо виправлений deployment скрипт:Тепер створимо повну інфраструктуру Bicep файл:## 🔧 **Швидке виправлення для вашої ситуації:**
+
+### **1. Створіть структуру файлів:**
+```bash
+# Створення папок
+mkdir -p deployment/azure deployment/scripts logs
+
+# Перевірка поточного скрипта
+ls -la | grep deploy
+```
+
+### **2. Створіть Bicep файли:**
+```bash
+# Створіть файл deployment/azure/keyvault.bicep
+# Скопіюйте вміст з першого артефакту
+
+# Створіть файл deployment/scripts/deploy-with-secrets.sh  
+# Скопіюйте вміст з другого артефакту
+
+# Зробіть скрипт виконуваним
+chmod +x deployment/scripts/deploy-with-secrets.sh
+```
+
+### **3. Оновіть скрипт або створіть symlink:**
+```bash
+# Варіант А: Перемістіть існуючий скрипт
+if [ -f "./scripts/deploy-with-secrets.sh" ]; then
+    mv ./scripts/deploy-with-secrets.sh deployment/scripts/
+fi
+
+# Варіант Б: Створіть новий з артефакту
+# deployment/scripts/deploy-with-secrets.sh
+
+# Створіть зручний symlink
+ln -sf deployment/scripts/deploy-with-secrets.sh ./deploy-with-secrets.sh
+```
+
+### **4. Запустіть deployment:**
+```bash
+# З кореневої папки проекту
+./deploy-with-secrets.sh
+
+# Або безпосередньо
+./deployment/scripts/deploy-with-secrets.sh
+```
+
+## 📁 **Фінальна структура:**
+```
+django-project/
+├── deployment/
+│   ├── azure/
+│   │   ├── keyvault.bicep          ← Створіть цей файл
+│   │   └── main.bicep              ← Опціонально (повна інфра)
+│   └── scripts/
+│       └── deploy-with-secrets.sh  ← Перемістіть сюди
+├── scripts/
+│   └── setup-keyvault.sh          ← Залишається тут
+├── deploy-with-secrets.sh          ← Symlink або копія
+└── manage.py
+```
+
+**Створіть ці файли і скрипт запрацює!** 🚀
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+Відмінне питання! Давайте розглянемо чому BICEP є кращим вибором для Azure Infrastructure as Code:## 🎯 **Коротко про головні переваги Bicep:**
+
+### **1. 📝 Простота коду:**
+- **ARM:** 200 рядків JSON з купою дужок
+- **Bicep:** 50 рядків зрозумілого коду
+- **Результат:** 70% менше коду!
+
+### **2. 🧠 Розумний редактор:**
+- **IntelliSense** підказує що писати
+- **Валідація** ловить помилки одразу  
+- **Автодоповнення** економить час
+
+### **3. 🔄 Сумісність:**
+- Компілюється в ARM templates
+- Працює з усіма Azure інструментами
+- Не потребує нових процесів
+
+### **4. 🏗️ Модульність:**
+```bicep
+// Один раз написав модуль
+module keyVault 'modules/keyvault.bicep' = { ... }
+
+// Використовуєш скрізь
+module prodKeyVault './keyvault.bicep' = { ... }
+module devKeyVault './keyvault.bicep' = { ... }
+```
+
+### **5. 🚀 Швидкість розробки:**
+- **Менше синтаксису** → швидше писати
+- **Менше помилок** → менше debugging
+- **Кращий IntelliSense** → менше документації
+
+## 💡 **Для вашого Django проекту:**
+
+**Замість того щоб писати 50+ команд Azure CLI:**
+```bash
+az group create...
+az keyvault create...
+az webapp create...
+az postgres create...
+# ... ще 20 команд
+```
+
+**Ви пишете один Bicep файл:**
+```bicep
+// Вся інфраструктура в одному файлі
+module keyVault './keyvault.bicep' = { ... }
+module webapp './webapp.bicep' = { ... }
+module database './postgres.bicep' = { ... }
+```
+
+**І розгортаєте однією командою:**
+```bash
+az deployment group create --template-file main.bicep
+```
+
+**Результат:** Воістину Infrastructure as Code! 🎉
+
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
 # 🚀 Переваги Bicep для Azure Infrastructure as Code
 
 ## 🤔 Що таке Bicep?
