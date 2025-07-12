@@ -4,6 +4,464 @@
 
 
 
+
+# 🔐 Документація скрипта налаштування Azure Key Vault
+
+## Огляд
+
+Цей Bash скрипт автоматизує повне налаштування Azure Key Vault для Django застосунку, включаючи створення інфраструктури, налаштування прав доступу, створення Service Principal та конфігураційних файлів для розробки.
+
+## 🎯 Призначення
+
+- **Автоматичне створення** Azure Key Vault з оптимальними налаштуваннями
+- **Налаштування автентифікації** через Service Principal або Azure CLI
+- **Конфігурація прав доступу** (Access Policies або RBAC)
+- **Генерація конфігураційних файлів** для Django інтеграції
+- **Валідація налаштувань** через тестовий секрет
+
+## 📋 Вимоги
+
+### Обов'язкові
+- **Azure CLI** встановлений та автентифікований (`az login`)
+- **jq** для обробки JSON (автоматично встановлений з Azure CLI)
+- **Права у Azure subscription** для створення ресурсів
+
+### Рекомендовані
+- **Права Global Administrator** для створення Service Principal
+- **Contributor роль** на subscription рівні
+- **Доступ до Azure Active Directory**
+
+## 🔧 Конфігурація
+
+### Змінні за замовчуванням
+```bash
+RESOURCE_GROUP="django-app-rg"           # Група ресурсів
+KEY_VAULT_NAME="django-app-keyvault"     # Назва Key Vault
+APP_NAME="django-app-keyvault"           # Назва додатка для Service Principal
+```
+
+### Автоматично визначені змінні
+- `CURRENT_USER` - Email поточного користувача
+- `CURRENT_USER_OBJECT_ID` - Object ID користувача в Azure AD
+- `TENANT_ID` - ID тенанта Azure AD
+- `VAULT_URL` - URL створеного Key Vault
+
+## 🔄 Поетапний алгоритм роботи
+
+### **Крок 1/7: Перевірка Resource Group**
+```bash
+# Логіка перевірки
+if az group show --name django-app-rg; then
+    ├── Існує → Запит користувача про використання
+    └── Не існує → Створення нового
+else
+    ├── Створення: az group create --name django-app-rg --location westeurope
+    └── Перевірка результату
+```
+
+**Можливі сценарії:**
+- ✅ **Новий RG**: Автоматичне створення в `westeurope`
+- ⚠️ **Існуючий RG**: Інтерактивний вибір використання
+- ❌ **Помилка**: Зупинка з інструкціями
+
+### **Крок 2/7: Створення/перевірка Key Vault**
+```bash
+# Стратегія унікальності назв
+if Key Vault exists globally:
+    ├── Використати існуючий → Перевірка типу авторизації (RBAC/Access Policies)
+    ├── Створити новий → Додати timestamp: key-vault-1640995200
+    └── Скасувати → Вихід зі скрипта
+
+# Налаштування авторизації
+az keyvault create --enable-rbac-authorization false  # Access Policies за замовчуванням
+```
+
+**Особливості:**
+- **Глобальна унікальність**: Key Vault назви мають бути унікальними в Azure
+- **Timestamp suffix**: Автоматичне додавання для уникнення конфліктів
+- **RBAC detection**: Автоматичне виявлення типу авторизації існуючого KV
+
+### **Крок 2.1/7: Налаштування прав доступу**
+```bash
+# Dual-mode authorization support
+if USE_RBAC == true:
+    ├── RBAC Mode: Key Vault Secrets Officer role
+    └── Scope: /subscriptions/.../resourceGroups/.../providers/Microsoft.KeyVault/vaults/...
+else
+    ├── Access Policies Mode: secret permissions
+    └── Permissions: get, list, set, delete, backup, restore, recover
+```
+
+**Права що надаються:**
+- **RBAC**: `Key Vault Secrets Officer` (повні права на секрети)
+- **Access Policies**: Розширений набір дозволів для розробки
+
+### **Крок 3/7: Створення Service Principal**
+```bash
+# Intelligent Service Principal management
+if App Registration exists:
+    ├── Отримати існуючий CLIENT_ID
+    ├── Створити новий Client Secret (reset credentials)
+    └── Оновити display name з timestamp
+else
+    ├── Створити новий App Registration
+    ├── Створити Service Principal
+    ├── Згенерувати Client Secret
+    └── Обробити помилки прав доступу
+
+# Fallback strategy
+if Insufficient permissions:
+    ├── Повідомити про Azure CLI authentication
+    ├── Надати інструкції для альтернативних методів
+    └── Продовжити без Service Principal
+```
+
+**Обробка помилок:**
+- ✅ **Успіх**: Повна автентифікація через Service Principal
+- ⚠️ **Існуючий**: Оновлення credentials існуючого SP
+- ❌ **Недостатньо прав**: Fallback до Azure CLI
+
+### **Крок 4/7: Отримання URL Key Vault**
+```bash
+# URL extraction and validation
+VAULT_URL=$(az keyvault show --name $KEY_VAULT_NAME \
+    --resource-group $RESOURCE_GROUP \
+    --query properties.vaultUri -o tsv)
+
+# Format: https://key-vault-name.vault.azure.net/
+```
+
+### **Крок 5/7: Права для Service Principal**
+```bash
+# Service Principal permissions setup
+if SERVICE_PRINCIPAL_CREATED:
+    if RBAC_MODE:
+        ├── Role: Key Vault Secrets User (read-only для додатка)
+        └── Scope: Key Vault resource level
+    else:
+        ├── Access Policy: get, list permissions
+        └── Minimal required permissions for application
+```
+
+**Принцип найменших привілеїв:**
+- Користувач: повні права (розробка)
+- Service Principal: тільки читання (застосунок)
+
+### **Крок 6/7: Тестовий секрет**
+```bash
+# Validation through test secret
+├── Wait for permission propagation (5-15 seconds)
+├── Create test secret: "database-password" = "MySecretPassword123"
+├── Verify creation success
+└── Provide manual commands if failed
+
+# Permission propagation delays
+RBAC: 15 seconds (longer propagation time)
+Access Policies: 5 seconds (faster propagation)
+```
+
+### **Крок 7/7: Генерація конфігураційних файлів**
+```bash
+# kv_vars.py generation
+├── Azure AD credentials (if available)
+├── Key Vault URL and configuration
+├── Secret names and versions
+└── Development-ready template
+
+# .gitignore protection
+├── Check existing .gitignore
+├── Add kv_vars.py if not present
+└── Create .gitignore if doesn't exist
+```
+
+## 📁 Створювані файли
+
+### `kv_vars.py`
+```python
+# kv_vars.py - НІКОЛИ НЕ КОМІТЬСЯ У GIT!
+import os
+
+# Azure AD Authentication
+AZURE_CLIENT_ID = "12345678-1234-1234-1234-123456789012"
+AZURE_CLIENT_SECRET = "generated-secret-value"
+AZURE_TENANT_ID = "87654321-4321-4321-4321-210987654321"
+
+# Key Vault Configuration
+AZURE_KEY_VAULT_URL = "https://django-app-keyvault.vault.azure.net/"
+SECRET_NAME = "database-password"
+SECRET_VERSION = ""  # Остання версія
+```
+
+**Особливості файлу:**
+- ✅ Готовий для імпорту в Django
+- ✅ Містить всі необхідні змінні
+- ✅ Автоматично додається в `.gitignore`
+- ⚠️ Містить реальні секрети (не для commit)
+
+### `.gitignore` (оновлення)
+```bash
+# Автоматично додається:
+kv_vars.py
+```
+
+## 🚀 Приклади використання
+
+### Базовий запуск
+```bash
+# Зробити скрипт виконуваним
+chmod +x setup-keyvault.sh
+
+# Запустити з поточної директорії
+./setup-keyvault.sh
+```
+
+### Типовий успішний вивід
+```bash
+🚀 Налаштування Azure Key Vault конфігурації...
+ℹ️ Поточний користувач: user@company.com
+ℹ️ Object ID: 12345678-1234-1234-1234-123456789012
+
+ℹ️ Крок 1/7: Перевірка Resource Group...
+✅ Resource Group створено: django-app-rg
+
+ℹ️ Крок 2/7: Перевірка Key Vault...
+✅ Key Vault створено: django-app-keyvault
+ℹ️ Key Vault використовує Access Policies
+
+ℹ️ Крок 2.1/7: Налаштування прав доступу...
+✅ Access Policy налаштовано для користувача
+
+ℹ️ Крок 3/7: Створення Service Principal...
+✅ Додаток створено: abcd1234-5678-90ef-ghij-klmnopqrstuv
+✅ Service Principal створено
+✅ Client Secret створено
+
+ℹ️ Крок 4/7: Отримання URL Key Vault...
+✅ URL Key Vault: https://django-app-keyvault.vault.azure.net/
+
+ℹ️ Крок 5/7: Налаштування доступу для Service Principal...
+✅ Access Policy для Service Principal налаштовано
+
+ℹ️ Крок 6/7: Додавання тестового секрету...
+✅ Тестовий секрет 'database-password' додано
+
+ℹ️ Крок 7/7: Створення файлу конфігурації...
+✅ Файл kv_vars.py створено
+✅ kv_vars.py додано до .gitignore
+
+==================================================================
+✅ Конфігурація Azure Key Vault завершена!
+==================================================================
+
+📊 Створені ресурси:
+   • Resource Group: django-app-rg
+   • Key Vault: django-app-keyvault
+   • URL: https://django-app-keyvault.vault.azure.net/
+   • Service Principal: abcd1234-5678-90ef-ghij-klmnopqrstuv
+   • Authorization: Access Policies
+
+📁 Створені файли:
+   • kv_vars.py (з конфігурацією)
+   • .gitignore (оновлено)
+```
+
+## ⚠️ Сценарії помилок та рішення
+
+### 1. **Відсутня автентифікація Azure CLI**
+```bash
+❌ Помилка: Ви не залогінені в Azure CLI. Запустіть: az login
+
+# Рішення:
+az login
+az account set --subscription "your-subscription-id"  # Якщо потрібно
+```
+
+### 2. **Key Vault назва вже зайнята**
+```bash
+⚠️ Key Vault вже існує: django-app-keyvault
+Використати існуючий Key Vault? (y/n): n
+⚠️ Спробуйте унікальну назву: django-app-keyvault-1640995200
+Створити Key Vault з назвою django-app-keyvault-1640995200? (y/n): y
+
+# Автоматичне рішення через timestamp
+```
+
+### 3. **Недостатні права для Service Principal**
+```bash
+⚠️ Недостатньо прав для створення Service Principal
+⚠️ Використовуйте Azure CLI authentication для розробки
+
+🔄 Альтернативи для розробки:
+1. Azure CLI Authentication:
+   from azure.identity import AzureCliCredential
+   credential = AzureCliCredential()
+
+2. Змінні середовища:
+   export AZURE_CLIENT_ID="your-client-id"
+   export AZURE_CLIENT_SECRET="your-client-secret"
+   export AZURE_TENANT_ID="tenant-id"
+```
+
+### 4. **Затримка поширення прав**
+```bash
+⚠️ Не вдалося додати тестовий секрет
+ℹ️ Спробуйте вручну через кілька хвилин:
+az keyvault secret set --vault-name django-app-keyvault \
+    --name 'database-password' --value 'YourPassword'
+
+# Рішення: почекати 1-5 хвилин
+```
+
+## 🔒 Режими авторизації
+
+### Access Policies (за замовчуванням)
+```bash
+# Переваги:
+✅ Швидше поширення прав (секунди)
+✅ Простіше налаштування
+✅ Підтримка legacy authentication
+
+# Налаштування:
+az keyvault set-policy --name KEY_VAULT \
+    --object-id USER_ID \
+    --secret-permissions get list set delete backup restore recover
+```
+
+### RBAC (виявляється автоматично)
+```bash
+# Переваги:
+✅ Інтеграція з Azure AD roles
+✅ Централізоване управління правами
+✅ Audit trails
+
+# Налаштування:
+az role assignment create \
+    --assignee USER_ID \
+    --role "Key Vault Secrets Officer" \
+    --scope VAULT_SCOPE
+```
+
+## 🧪 Валідація та тестування
+
+### Автоматична перевірка
+Скрипт автоматично тестує конфігурацію через:
+1. **Створення тестового секрету** `database-password`
+2. **Перевірку успішності операції**
+3. **Надання команд для ручного тестування**
+
+### Ручне тестування після запуску
+```bash
+# Тестування через Azure CLI
+az keyvault secret show --vault-name django-app-keyvault \
+    --name database-password --query value -o tsv
+
+# Тестування через Python
+python3 -c "
+from azure.keyvault.secrets import SecretClient
+from azure.identity import DefaultAzureCredential
+client = SecretClient('VAULT_URL', DefaultAzureCredential())
+print('Secret:', client.get_secret('database-password').value)
+"
+
+# Тестування з кастомним файлом
+python3 -c "
+import sys; sys.path.append('.')
+from kv_vars import *
+from azure.keyvault.secrets import SecretClient
+from azure.identity import ClientSecretCredential
+credential = ClientSecretCredential(AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET)
+client = SecretClient(AZURE_KEY_VAULT_URL, credential)
+print('Secret from kv_vars:', client.get_secret(SECRET_NAME).value)
+"
+```
+
+## 📊 Результати роботи
+
+### Azure ресурси
+- ✅ **Resource Group**: `django-app-rg` в `westeurope`
+- ✅ **Key Vault**: унікальна назва з Access Policies або RBAC
+- ✅ **App Registration**: для Service Principal автентифікації
+- ✅ **Service Principal**: з мінімальними правами читання
+- ✅ **Role Assignments**: налаштовані права доступу
+
+### Локальні файли
+- ✅ **kv_vars.py**: готова конфігурація для Django
+- ✅ **.gitignore**: захист від випадкового commit
+- ✅ **Тестовий секрет**: validation конфігурації
+
+### Готовність до розробки
+- ✅ **Автентифікація**: Service Principal + Azure CLI fallback
+- ✅ **Інтеграція**: готово для Django settings
+- ✅ **Безпека**: мінімальні необхідні права
+- ✅ **Тестування**: validation через тестовий секрет
+
+## 🔄 Інтеграція з Django
+
+### Швидкий старт
+```python
+# settings.py
+import sys
+sys.path.append('.')  # Для доступу до kv_vars.py
+
+try:
+    from kv_vars import *
+    from azure.keyvault.secrets import SecretClient
+    from azure.identity import ClientSecretCredential, DefaultAzureCredential
+    
+    # Спроба Service Principal, потім Azure CLI
+    try:
+        if AZURE_CLIENT_ID and AZURE_CLIENT_SECRET:
+            credential = ClientSecretCredential(
+                AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET
+            )
+        else:
+            credential = DefaultAzureCredential()
+        
+        client = SecretClient(AZURE_KEY_VAULT_URL, credential)
+        DATABASE_PASSWORD = client.get_secret(SECRET_NAME).value
+        
+    except Exception as e:
+        print(f"Key Vault error: {e}")
+        DATABASE_PASSWORD = 'fallback-password'
+        
+except ImportError:
+    DATABASE_PASSWORD = 'local-dev-password'
+
+# Використання в DATABASES
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'PASSWORD': DATABASE_PASSWORD,
+        # ... інші налаштування
+    }
+}
+```
+
+## 🎯 Переваги скрипта
+
+### Автоматизація
+- ✅ **Повна автоматизація** - від створення до тестування
+- ✅ **Інтелектуальна обробка** існуючих ресурсів
+- ✅ **Інтерактивні запити** для конфліктів
+
+### Безпека
+- ✅ **Принцип найменших привілеїв**
+- ✅ **Автоматичний .gitignore** захист
+- ✅ **Dual-mode authorization** підтримка
+
+### Зручність
+- ✅ **Кольоровий вивід** для кращого UX
+- ✅ **Детальні інструкції** при помилках
+- ✅ **Готові команди** для тестування
+
+### Надійність
+- ✅ **Fallback механізми** для автентифікації
+- ✅ **Валідація кожного кроку**
+- ✅ **Graceful degradation** при помилках
+
+
+
+
 ```bash
 #!/bin/bash
 
