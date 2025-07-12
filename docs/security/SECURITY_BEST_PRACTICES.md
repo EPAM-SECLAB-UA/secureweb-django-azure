@@ -501,4 +501,428 @@ rotate_secret('database-password', new_password)
 ### Наступна лекція: 
 **"Managed Identity та автоматизація доступу до Key Vault"** 🚀
 
+-------------------------------------------------------------
+
+
+Ось детальний гайд де отримати кожне з цих значень:## 🎯 **Короткий підсумок де взяти кожне значення:**
+
+### **1. AZURE_TENANT_ID:**
+- 🌐 **Azure Portal:** Azure Active Directory → Overview → Tenant ID
+- 💻 **CLI:** `az account show --query tenantId -o tsv`
+
+### **2. AZURE_CLIENT_ID + AZURE_CLIENT_SECRET:**
+- 🌐 **Portal:** Azure AD → App registrations → New registration → Overview (Client ID) + Certificates & secrets (Secret)
+- 💻 **CLI:** `az ad sp create-for-rbac --name "app-name"` (виведе обидва значення)
+
+### **3. AZURE_KEY_VAULT_URL:**
+- 🌐 **Portal:** Key vaults → Create → Overview → Vault URI
+- 💻 **CLI:** `az keyvault show --name vault-name --query properties.vaultUri`
+
+### **4. SECRET_NAME + SECRET_VERSION:**
+- 🌐 **Portal:** Key Vault → Secrets → Generate/Import (задаєте назву)
+- 💻 **CLI:** `az keyvault secret set --vault-name vault --name "secret-name" --value "value"`
+
+## ⚡ **Швидкий старт за 5 хвилин:**
+
+```bash
+# 1. Створення всього через CLI
+az ad sp create-for-rbac --name "django-keyvault-app"
+az keyvault create --name "my-unique-vault-123" --resource-group "my-rg"
+az keyvault secret set --vault-name "my-unique-vault-123" --name "test-secret" --value "hello"
+
+# 2. Отримання URL
+az keyvault show --name "my-unique-vault-123" --query properties.vaultUri
+```
+
+**Головне:** Запам'ятайте AZURE_CLIENT_SECRET одразу - він більше не показується! 🔒
+
+-----------------------------------------------------------------------------------------------
+
+
+# 🔍 Де отримати Azure Key Vault credentials - покроковий гайд
+
+## 📋 Значення які потрібно отримати:
+
+```python
+# kv_vars.py
+AZURE_CLIENT_ID = "12345678-1234-1234-1234-123456789abc"      # Application ID
+AZURE_CLIENT_SECRET = "abcdef123456"                          # Key/Token  
+AZURE_TENANT_ID = "87654321-4321-4321-4321-210987654321"     # Tenant ID
+AZURE_KEY_VAULT_URL = "https://my-app-keyvault.vault.azure.net/"
+SECRET_NAME = "database-password"
+SECRET_VERSION = "1.0"
+```
+
+---
+
+## 🏢 1. AZURE_TENANT_ID - Ідентифікатор орендаря
+
+### Через Azure Portal:
+1. Увійдіть в [Azure Portal](https://portal.azure.com)
+2. Натисніть на **Azure Active Directory** (або знайдіть через пошук)
+3. У лівому меню виберіть **Overview**
+4. Знайдіть **Tenant ID** - це ваш AZURE_TENANT_ID
+
+### Через Azure CLI:
+```bash
+# Показати інформацію про поточний tenant
+az account show --query tenantId -o tsv
+
+# Альтернативний спосіб
+az account tenant list --query "[0].tenantId" -o tsv
+```
+
+### 📍 Що це таке:
+**Tenant ID** - унікальний ідентифікатор вашої Azure Active Directory організації. Всі користувачі та додатки належать до цього tenant.
+
+---
+
+## 🔐 2. AZURE_CLIENT_ID + AZURE_CLIENT_SECRET - Service Principal
+
+Ці два значення отримуються при створенні **Service Principal** (додатка).
+
+### Крок 1: Створення App Registration
+
+#### Через Azure Portal:
+1. Перейдіть в **Azure Active Directory**
+2. Виберіть **App registrations** в лівому меню
+3. Натисніть **+ New registration**
+4. Заповніть форму:
+   ```
+   Name: django-app-keyvault
+   Supported account types: Accounts in this organizational directory only
+   Redirect URI: (залиште порожнім)
+   ```
+5. Натисніть **Register**
+
+#### Через Azure CLI:
+```bash
+# Створення Service Principal
+az ad sp create-for-rbac \
+    --name "django-app-keyvault" \
+    --role "Key Vault Secrets User" \
+    --scopes "/subscriptions/YOUR_SUBSCRIPTION_ID"
+
+# Результат:
+{
+  "appId": "12345678-1234-1234-1234-123456789abc",      # ← AZURE_CLIENT_ID
+  "password": "abcdef123456",                           # ← AZURE_CLIENT_SECRET
+  "tenant": "87654321-4321-4321-4321-210987654321"     # ← AZURE_TENANT_ID
+}
+```
+
+### Крок 2: Отримання AZURE_CLIENT_ID
+
+#### Через Azure Portal:
+1. Після створення App Registration
+2. На сторінці **Overview** знайдіть **Application (client) ID**
+3. Це ваш **AZURE_CLIENT_ID**
+
+#### Через Azure CLI:
+```bash
+# Показати всі Service Principals
+az ad sp list --display-name "django-app-keyvault" --query "[0].appId" -o tsv
+```
+
+### Крок 3: Створення AZURE_CLIENT_SECRET
+
+#### Через Azure Portal:
+1. В App Registration перейдіть в **Certificates & secrets**
+2. Виберіть вкладку **Client secrets**
+3. Натисніть **+ New client secret**
+4. Заповніть:
+   ```
+   Description: Django App Key Vault Access
+   Expires: 24 months (рекомендується)
+   ```
+5. Натисніть **Add**
+6. **🚨 ВАЖЛИВО:** Скопіюйте **Value** одразу - він більше не буде показаний!
+
+#### Через Azure CLI:
+```bash
+# Створення client secret
+az ad app credential reset \
+    --id YOUR_APP_ID \
+    --display-name "Django Key Vault Secret"
+
+# Результат містить password - це ваш AZURE_CLIENT_SECRET
+```
+
+---
+
+## 🔑 3. AZURE_KEY_VAULT_URL - URL Key Vault
+
+### Крок 1: Створення Key Vault
+
+#### Через Azure Portal:
+1. Перейдіть в **Key vaults** (або знайдіть через пошук)
+2. Натисніть **+ Create**
+3. Заповніть форму:
+   ```
+   Resource group: django-app-rg
+   Key vault name: django-app-keyvault (має бути унікальним)
+   Region: West Europe
+   Pricing tier: Standard
+   ```
+4. Натисніть **Review + create** → **Create**
+
+#### Через Azure CLI:
+```bash
+# Створення Resource Group
+az group create --name django-app-rg --location westeurope
+
+# Створення Key Vault
+az keyvault create \
+    --name django-app-keyvault \
+    --resource-group django-app-rg \
+    --location westeurope
+```
+
+### Крок 2: Отримання URL
+
+#### Через Azure Portal:
+1. Відкрийте ваш Key Vault
+2. На сторінці **Overview** знайдіть **Vault URI**
+3. Це ваш **AZURE_KEY_VAULT_URL**
+   ```
+   https://django-app-keyvault.vault.azure.net/
+   ```
+
+#### Через Azure CLI:
+```bash
+# Отримання URL Key Vault
+az keyvault show \
+    --name django-app-keyvault \
+    --resource-group django-app-rg \
+    --query properties.vaultUri -o tsv
+```
+
+---
+
+## 🔐 4. Налаштування доступу Service Principal до Key Vault
+
+### Через Azure Portal:
+1. Відкрийте ваш Key Vault
+2. Перейдіть в **Access policies**
+3. Натисніть **+ Create**
+4. Виберіть permissions:
+   ```
+   Secret permissions: Get, List
+   ```
+5. В **Principal** знайдіть ваш Service Principal за назвою
+6. Натисніть **Review + create** → **Create**
+
+### Через Azure CLI:
+```bash
+# Отримання Object ID Service Principal
+OBJECT_ID=$(az ad sp show --id YOUR_CLIENT_ID --query id -o tsv)
+
+# Надання доступу до Key Vault
+az keyvault set-policy \
+    --name django-app-keyvault \
+    --object-id $OBJECT_ID \
+    --secret-permissions get list
+```
+
+---
+
+## 📝 5. SECRET_NAME + SECRET_VERSION - Назва та версія секрету
+
+### Крок 1: Додавання секрету
+
+#### Через Azure Portal:
+1. Відкрийте Key Vault
+2. Перейдіть в **Secrets**
+3. Натисніть **+ Generate/Import**
+4. Заповніть:
+   ```
+   Upload options: Manual
+   Name: database-password          ← SECRET_NAME
+   Value: MySecretPassword123
+   ```
+5. Натисніть **Create**
+
+#### Через Azure CLI:
+```bash
+# Додавання секрету
+az keyvault secret set \
+    --vault-name django-app-keyvault \
+    --name "database-password" \
+    --value "MySecretPassword123"
+```
+
+### Крок 2: Отримання версії (опціонально)
+
+#### Через Azure Portal:
+1. Відкрийте секрет в Key Vault
+2. Натисніть на поточну версію
+3. Скопіюйте **Version** з URL або деталей
+
+#### Через Azure CLI:
+```bash
+# Показати всі версії секрету
+az keyvault secret list-versions \
+    --vault-name django-app-keyvault \
+    --name database-password \
+    --query "[0].id"
+
+# Результат: https://vault.vault.azure.net/secrets/database-password/abc123def456
+# Версія: abc123def456
+```
+
+### 📝 Про SECRET_VERSION:
+- Якщо **не вказувати версію** - буде отримана остання версія
+- Якщо **вказати версію** - буде отримана конкретна версія
+- **Рекомендація:** Не вказувати для простоти (завжди остання версія)
+
+---
+
+## 🔍 Повний приклад отримання всіх значень через Azure CLI
+
+```bash
+#!/bin/bash
+
+# Змінні
+RESOURCE_GROUP="django-app-rg"
+KEY_VAULT_NAME="django-app-keyvault"
+APP_NAME="django-app-keyvault"
+
+echo "🚀 Створення повної конфігурації Azure Key Vault..."
+
+# 1. Створення Resource Group
+az group create --name $RESOURCE_GROUP --location westeurope
+
+# 2. Створення Key Vault
+az keyvault create \
+    --name $KEY_VAULT_NAME \
+    --resource-group $RESOURCE_GROUP \
+    --location westeurope
+
+# 3. Створення Service Principal
+SP_RESULT=$(az ad sp create-for-rbac --name $APP_NAME --skip-assignment)
+
+# 4. Отримання значень
+CLIENT_ID=$(echo $SP_RESULT | jq -r '.appId')
+CLIENT_SECRET=$(echo $SP_RESULT | jq -r '.password')  
+TENANT_ID=$(echo $SP_RESULT | jq -r '.tenant')
+VAULT_URL=$(az keyvault show --name $KEY_VAULT_NAME --resource-group $RESOURCE_GROUP --query properties.vaultUri -o tsv)
+
+# 5. Налаштування доступу
+OBJECT_ID=$(az ad sp show --id $CLIENT_ID --query id -o tsv)
+az keyvault set-policy \
+    --name $KEY_VAULT_NAME \
+    --object-id $OBJECT_ID \
+    --secret-permissions get list
+
+# 6. Додавання тестового секрету
+az keyvault secret set \
+    --vault-name $KEY_VAULT_NAME \
+    --name "database-password" \
+    --value "MySecretPassword123"
+
+# 7. Виведення результатів
+echo "✅ Конфігурація створена!"
+echo ""
+echo "📝 Додайте ці значення у ваш kv_vars.py:"
+echo ""
+echo "AZURE_CLIENT_ID = \"$CLIENT_ID\""
+echo "AZURE_CLIENT_SECRET = \"$CLIENT_SECRET\""
+echo "AZURE_TENANT_ID = \"$TENANT_ID\""
+echo "AZURE_KEY_VAULT_URL = \"$VAULT_URL\""
+echo "SECRET_NAME = \"database-password\""
+echo "SECRET_VERSION = \"\"  # Остання версія"
+echo ""
+echo "🔒 ВАЖЛИВО: Не коміть CLIENT_SECRET у Git!"
+```
+
+---
+
+## 🔒 Безпека та рекомендації
+
+### ❌ Чого НЕ робити:
+```bash
+# НЕ коміть у Git
+git add kv_vars.py  # ❌ НЕБЕЗПЕЧНО!
+
+# НЕ показуйте у логах
+print(f"Secret: {AZURE_CLIENT_SECRET}")  # ❌ НЕБЕЗПЕЧНО!
+
+# НЕ зберігайте у plain text файлах
+echo "secret=abc123" > secrets.txt  # ❌ НЕБЕЗПЕЧНО!
+```
+
+### ✅ Що робити ПРАВИЛЬНО:
+```bash
+# Додайте у .gitignore
+echo "kv_vars.py" >> .gitignore
+echo "*.secret" >> .gitignore
+echo ".env" >> .gitignore
+
+# Використовуйте змінні середовища
+export AZURE_CLIENT_SECRET="abc123"
+
+# Використовуйте .env файли (не коміт у Git)
+echo "AZURE_CLIENT_SECRET=abc123" > .env
+```
+
+### 🔄 Ротація секретів:
+```bash
+# Регулярно міняйте Client Secret (кожні 6-12 місяців)
+az ad app credential reset --id YOUR_APP_ID
+
+# Видаляйте старі секрети
+az ad app credential delete --id YOUR_APP_ID --key-id OLD_KEY_ID
+```
+
+---
+
+## 🎯 Швидкий чеклист
+
+- [ ] **AZURE_TENANT_ID** - з Azure AD → Overview
+- [ ] **AZURE_CLIENT_ID** - з App Registration → Overview  
+- [ ] **AZURE_CLIENT_SECRET** - з App Registration → Certificates & secrets
+- [ ] **AZURE_KEY_VAULT_URL** - з Key Vault → Overview → Vault URI
+- [ ] **SECRET_NAME** - назва секрету в Key Vault
+- [ ] **SECRET_VERSION** - версія секрету (опціонально)
+- [ ] **Права доступу** - Service Principal має доступ до Key Vault
+- [ ] **.gitignore** - kv_vars.py додано в .gitignore
+- [ ] **Тестування** - перевірено отримання секрету
+
+---
+
+## 🆘 Troubleshooting
+
+### Помилка: "Subscription not found"
+```bash
+# Перевірте активну підписку
+az account show
+
+# Встановіть правильну підписку
+az account set --subscription "YOUR_SUBSCRIPTION_ID"
+```
+
+### Помилка: "Access denied to Key Vault"
+```bash
+# Перевірте права доступу
+az keyvault show --name YOUR_VAULT_NAME --resource-group YOUR_RG
+
+# Додайте права доступу
+az keyvault set-policy --name YOUR_VAULT_NAME --object-id YOUR_OBJECT_ID --secret-permissions get list
+```
+
+### Помилка: "Key Vault name not available"
+```bash
+# Key Vault назви мають бути глобально унікальними
+# Додайте унікальний суфікс
+KEY_VAULT_NAME="django-app-kv-$(date +%s)"
+```
+
+Тепер у вас є всі необхідні значення для роботи з Azure Key Vault! 🎉
+
+------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
 ------------------------------------------------------------------------------------------------
