@@ -347,7 +347,7 @@ SECRET_KEY = get_secret('django-secret-key')
 
 
 
-``bash
+```bash
 
 #!/bin/bash
 # deployment/scripts/deploy-with-secrets.sh - Виправлена версія з Django SECRET_KEY
