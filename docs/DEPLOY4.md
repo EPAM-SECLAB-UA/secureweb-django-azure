@@ -1,6 +1,7 @@
 
 ```bash
 az login --tenant 3a7a2d8e-5083-4ef2-809c-3a88f18e0ef8
+postgresql://djangoadmin:wPxKOODi1aYDjMdIAa1!@django-app-budget-db-1752082786.postgres.database.azure.com/flexibleserverdb?sslmode=require
 ```
 
 # Бюджетна версія Azure Infrastructure Script (~$20-25/місяць)
