@@ -1057,3 +1057,513 @@ if RUNTIME_ENVIRONMENT == 'codespace':
 
 
 ```
+
+
+
+Відмінне питання! Давайте детально розберемо, коли і як використовується PostgreSQL в цих налаштуваннях:
+
+## 🐘 **Коли використовується PostgreSQL**
+
+### **1. У GitHub Codespace:**
+PostgreSQL використовується **ТІЛЬКИ якщо**:
+
+```python
+# Всі ці умови мають виконуватися:
+1. ✅ Змінна середовища POSTGRES_PASSWORD встановлена
+2. ✅ PostgreSQL сервер доступний на хості (localhost/db/postgres)
+3. ✅ Тест підключення успішний (test_postgres_connection() повертає True)
+```
+
+**Конфігурації що перевіряються в Codespace:**
+```python
+codespace_configs = [
+    # Конфігурація 1: Environment variables
+    {
+        'host': os.environ.get('POSTGRES_HOST', 'localhost'),
+        'password': os.environ.get('POSTGRES_PASSWORD'),  # ОБОВ'ЯЗКОВО!
+        'user': os.environ.get('POSTGRES_USER', 'postgres'),
+        'port': os.environ.get('POSTGRES_PORT', '5432'),
+    },
+    # Конфігурація 2: Docker Compose
+    {
+        'host': 'db',
+        'password': 'django_password',  # Hardcoded
+        'user': 'django_user',
+        'port': '5432',
+    },
+    # Конфігурація 3: Standard PostgreSQL
+    {
+        'host': 'postgres', 
+        'password': 'password',  # Hardcoded
+        'user': 'django',
+        'port': '5432',
+    }
+]
+```
+
+### **2. В Azure App Service:**
+PostgreSQL використовується якщо:
+```python
+# Пріоритет секретів:
+1. ✅ DATABASE_URL з Key Vault (найвищий пріоритет)
+2. ✅ Окремі postgres-* секрети з Key Vault
+3. ✅ Environment variables (DB_PASSWORD, DB_HOST, etc.)
+4. ❌ Fallback до SQLite якщо нічого не знайдено
+```
+
+### **3. В локальному середовищі:**
+PostgreSQL використовується якщо:
+```python
+# Перевірка в порядку пріоритету:
+1. DATABASE_URL environment variable
+2. DB_PASSWORD + DB_HOST environment variables  
+3. Azure Key Vault секрети (якщо Azure CLI налаштований)
+4. Fallback до SQLite
+```
+
+## 🔍 **Практичні сценарії використання:**
+
+### **Сценарій 1: Codespace з Docker PostgreSQL**
+```bash
+# Створіть .devcontainer/docker-compose.yml:
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: project_portfolio
+      POSTGRES_USER: django_user  
+      POSTGRES_PASSWORD: django_password
+    ports:
+      - "5432:5432"
+
+# Результат: PostgreSQL буде використаний
+```
+
+### **Сценарій 2: Codespace з environment variables**
+```bash
+# У .devcontainer/devcontainer.json:
+{
+  "containerEnv": {
+    "POSTGRES_HOST": "localhost",
+    "POSTGRES_PASSWORD": "mypassword",
+    "POSTGRES_USER": "django",
+    "POSTGRES_DB": "django_app"
+  }
+}
+
+# Потім запустіть PostgreSQL в Codespace:
+sudo apt-get update
+sudo apt-get install postgresql postgresql-contrib
+sudo service postgresql start
+
+# Результат: PostgreSQL буде використаний
+```
+
+### **Сценарій 3: Azure App Service з Key Vault**
+```bash
+# Key Vault секрети:
+database-url = "postgresql://user:pass@host:5432/db?sslmode=require"
+# АБО
+postgres-host = "myapp-postgres.postgres.database.azure.com"
+postgres-password = "securepassword"
+postgres-username = "dbadmin"
+
+# Результат: PostgreSQL буде використаний
+```
+
+### **Сценарій 4: Локальна розробка**
+```bash
+# Environment variables:
+export DB_HOST="localhost"
+export DB_PASSWORD="localpassword"  
+export DB_USER="postgres"
+export DB_NAME="django_local"
+
+# Запустіть локальний PostgreSQL
+brew install postgresql  # macOS
+brew services start postgresql
+
+# Результат: PostgreSQL буде використаний
+```
+
+## ❌ **Коли PostgreSQL НЕ використовується:**
+
+### **В Codespace використовується SQLite якщо:**
+- ❌ `POSTGRES_PASSWORD` не встановлена
+- ❌ PostgreSQL сервер не запущений або недоступний
+- ❌ Тест підключення не вдається (timeout 2 секунди)
+
+### **Приклад поточної ситуації (ваш Codespace):**
+```bash
+💾 Using SQLite in Codespace (PostgreSQL not available)
+
+# Це означає що:
+- os.environ.get('POSTGRES_PASSWORD') is None
+- test_postgres_connection('localhost', '5432') == False  
+- test_postgres_connection('db', '5432') == False
+- test_postgres_connection('postgres', '5432') == False
+```
+
+## 🚀 **Як увімкнути PostgreSQL в Codespace:**
+
+### **Варіант 1: Docker Compose (рекомендовано)**
+```bash
+# Створіть .devcontainer/docker-compose.yml
+mkdir -p .devcontainer
+
+cat > .devcontainer/docker-compose.yml << 'EOF'
+version: '3.8'
+services:
+  app:
+    build: .
+    volumes:
+      - ..:/workspaces:cached
+    command: sleep infinity
+    
+  db:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: project_portfolio
+      POSTGRES_USER: django_user
+      POSTGRES_PASSWORD: django_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+EOF
+
+# Створіть .devcontainer/devcontainer.json
+cat > .devcontainer/devcontainer.json << 'EOF'
+{
+  "name": "Django PostgreSQL",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces",
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-python.python"]
+    }
+  }
+}
+EOF
+
+# Перезапустіть Codespace
+```
+
+### **Варіант 2: Environment Variables**
+```bash
+# У терміналі Codespace:
+export POSTGRES_HOST="localhost"
+export POSTGRES_PASSWORD="mypassword"
+export POSTGRES_USER="django"
+export POSTGRES_DB="django_app"
+
+# Встановіть і запустіть PostgreSQL
+sudo apt-get update
+sudo apt-get install -y postgresql postgresql-contrib
+sudo service postgresql start
+
+# Створіть базу та користувача
+sudo -u postgres createuser django
+sudo -u postgres createdb django_app
+sudo -u postgres psql -c "ALTER USER django PASSWORD 'mypassword';"
+sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE django_app TO django;"
+
+# Перезапустіть Django
+python manage.py runserver 0.0.0.0:8000
+```
+
+## 🔍 **Перевірка поточної конфігурації:**
+
+```bash
+# Перевірте які змінні встановлені:
+echo "POSTGRES_HOST: $POSTGRES_HOST"
+echo "POSTGRES_PASSWORD: $POSTGRES_PASSWORD"  
+echo "POSTGRES_USER: $POSTGRES_USER"
+
+# Перевірте чи PostgreSQL запущений:
+sudo service postgresql status
+
+# Тест підключення:
+python -c "
+import socket
+try:
+    sock = socket.create_connection(('localhost', 5432), 2)
+    print('✅ PostgreSQL available')
+    sock.close()
+except:
+    print('❌ PostgreSQL not available')
+"
+```
+
+**Зараз у вашому Codespace PostgreSQL не використовується, тому що немає налаштованого PostgreSQL сервера або environment variables.** 
+
+Хочете налаштувати PostgreSQL? 🐘
+
+
+Відмінно! Давайте налаштуємо PostgreSQL у вашому GitHub Codespace. Я покажу найпростіший спосіб:
+
+## 🐘 **Спосіб 1: Швидке налаштування PostgreSQL**
+
+### **1. Встановіть PostgreSQL в Codespace:**
+```bash
+# Оновіть пакети
+sudo apt-get update
+
+# Встановіть PostgreSQL
+sudo apt-get install -y postgresql postgresql-contrib
+
+# Запустіть PostgreSQL сервіс
+sudo service postgresql start
+
+# Перевірте статус
+sudo service postgresql status
+```
+
+### **2. Створіть базу даних та користувача:**
+```bash
+# Перейдіть до postgres користувача та створіть DB
+sudo -u postgres createuser --interactive --pwprompt django
+
+# Введіть пароль: django_password
+# Shall the new role be a superuser? (y/n) y
+
+# Створіть базу даних
+sudo -u postgres createdb -O django project_portfolio
+
+# Або через psql:
+sudo -u postgres psql << EOF
+CREATE USER django WITH PASSWORD 'django_password';
+CREATE DATABASE project_portfolio OWNER django;
+GRANT ALL PRIVILEGES ON DATABASE project_portfolio TO django;
+\q
+EOF
+```
+
+### **3. Встановіть змінні середовища:**
+```bash
+# Додайте у ваш термінал (або .bashrc):
+export POSTGRES_HOST="localhost"
+export POSTGRES_PASSWORD="django_password"
+export POSTGRES_USER="django"
+export POSTGRES_DB="project_portfolio"
+export POSTGRES_PORT="5432"
+
+# Перевірте змінні:
+echo "Host: $POSTGRES_HOST"
+echo "Password: $POSTGRES_PASSWORD"
+echo "User: $POSTGRES_USER"
+echo "DB: $POSTGRES_DB"
+```
+
+### **4. Встановіть PostgreSQL драйвер для Python:**
+```bash
+# Встановіть psycopg2
+pip install psycopg2-binary
+
+# Або додайте в requirements.txt:
+echo "psycopg2-binary>=2.9.0" >> requirements.txt
+pip install -r requirements.txt
+```
+
+### **5. Перезапустіть Django:**
+```bash
+# Зупиніть поточний сервер (Ctrl+C)
+# Потім запустіть знову:
+python manage.py runserver 0.0.0.0:8000
+```
+
+## 🚀 **Спосіб 2: Автоматизований скрипт**
+
+Створіть скрипт для швидкого налаштування:
+
+```bash
+# Створіть скрипт
+cat > setup-postgres.sh << 'EOF'
+#!/bin/bash
+set -e
+
+echo "🐘 Налаштування PostgreSQL для Django..."
+
+# Встановлення PostgreSQL
+echo "📦 Встановлення PostgreSQL..."
+sudo apt-get update -q
+sudo apt-get install -y postgresql postgresql-contrib
+
+# Запуск сервісу
+echo "🚀 Запуск PostgreSQL..."
+sudo service postgresql start
+
+# Створення користувача та бази даних
+echo "👤 Створення користувача django..."
+sudo -u postgres psql << PSQL
+CREATE USER django WITH PASSWORD 'django_password' SUPERUSER;
+CREATE DATABASE project_portfolio OWNER django;
+GRANT ALL PRIVILEGES ON DATABASE project_portfolio TO django;
+\q
+PSQL
+
+# Встановлення Python драйвера
+echo "🐍 Встановлення psycopg2..."
+pip install psycopg2-binary
+
+# Встановлення змінних середовища
+echo "⚙️ Налаштування змінних середовища..."
+cat >> ~/.bashrc << ENV
+export POSTGRES_HOST="localhost"
+export POSTGRES_PASSWORD="django_password"  
+export POSTGRES_USER="django"
+export POSTGRES_DB="project_portfolio"
+export POSTGRES_PORT="5432"
+ENV
+
+# Експорт для поточної сесії
+export POSTGRES_HOST="localhost"
+export POSTGRES_PASSWORD="django_password"
+export POSTGRES_USER="django" 
+export POSTGRES_DB="project_portfolio"
+export POSTGRES_PORT="5432"
+
+echo "✅ PostgreSQL налаштовано!"
+echo "🔄 Перезапустіть Django сервер:"
+echo "   python manage.py runserver 0.0.0.0:8000"
+
+# Тест підключення
+echo "🧪 Тестування підключення..."
+python -c "
+import psycopg2
+try:
+    conn = psycopg2.connect(
+        host='localhost',
+        database='project_portfolio', 
+        user='django',
+        password='django_password'
+    )
+    print('✅ PostgreSQL підключення успішне!')
+    conn.close()
+except Exception as e:
+    print(f'❌ Помилка підключення: {e}')
+"
+EOF
+
+# Зробіть скрипт виконуваним
+chmod +x setup-postgres.sh
+
+# Запустіть скрипт
+./setup-postgres.sh
+```
+
+## 🔄 **Спосіб 3: Docker Compose (для майбутніх Codespace)**
+
+Створіть конфігурацію для автоматичного PostgreSQL:
+
+```bash
+# Створіть папку для devcontainer
+mkdir -p .devcontainer
+
+# Створіть docker-compose.yml
+cat > .devcontainer/docker-compose.yml << 'EOF'
+version: '3.8'
+services:
+  app:
+    image: mcr.microsoft.com/devcontainers/python:3.12
+    volumes:
+      - ../..:/workspaces:cached
+    command: sleep infinity
+    depends_on:
+      - db
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PASSWORD: django_password
+      POSTGRES_USER: django
+      POSTGRES_DB: project_portfolio
+      POSTGRES_PORT: 5432
+
+  db:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: project_portfolio
+      POSTGRES_USER: django
+      POSTGRES_PASSWORD: django_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:
+EOF
+
+# Створіть devcontainer.json
+cat > .devcontainer/devcontainer.json << 'EOF'
+{
+  "name": "Django with PostgreSQL",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.black-formatter"
+      ]
+    }
+  },
+  "postCreateCommand": "pip install -r requirements.txt && python manage.py migrate",
+  "forwardPorts": [8000, 5432]
+}
+EOF
+
+echo "📁 Devcontainer створено! Перезапустіть Codespace для використання PostgreSQL."
+```
+
+## ✅ **Перевірка успішного налаштування:**
+
+```bash
+# 1. Перевірте що PostgreSQL запущений
+sudo service postgresql status
+
+# 2. Перевірте підключення
+python -c "
+import socket
+try:
+    socket.create_connection(('localhost', 5432), 2)
+    print('✅ PostgreSQL доступний')
+except:
+    print('❌ PostgreSQL недоступний')
+"
+
+# 3. Перевірте змінні середовища
+env | grep POSTGRES
+
+# 4. Тест Django підключення
+python manage.py check --database default
+
+# 5. Запустіть міграції
+python manage.py migrate
+
+# 6. Перезапустіть сервер
+python manage.py runserver 0.0.0.0:8000
+```
+
+## 🎯 **Результат:**
+
+Після налаштування ви побачите:
+```bash
+🐘 PostgreSQL detected: localhost:5432
+✅ Django settings loaded for Codespace
+🗄️ Database: POSTGRESQL
+🔗 DB Host: localhost
+🔧 Debug mode: True
+📧 Email: Console
+📁 Templates: 2 directories configured
+🚀 Codespace environment ready!
+```
+
+Який спосіб ви хочете використати? Рекомендую **Спосіб 2 (автоматизований скрипт)** для швидкого результату! 🚀
